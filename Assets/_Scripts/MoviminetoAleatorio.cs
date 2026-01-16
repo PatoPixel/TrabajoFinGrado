@@ -6,12 +6,14 @@ public class MovimientoAleatorio : MonoBehaviour
     [SerializeField] private float velocidad = 2f;
     [SerializeField] private float tiempoEntreCambios = 2f;
     [SerializeField] private float velocidadRotacion = 5f; 
-    [SerializeField] private float cooldownChoque = 0.5f; 
+    [SerializeField] private float cooldownChoque = 0.5f;
+    [SerializeField] private float giroMaximoPorSegundo = 180f; // grados/seg
 
+    private Vector2 direccionObjetivo;
     private float tiempoSiguienteChoque;
     private Rigidbody2D miCuerpoFisico;
-    private Vector2 direccionMovimiento;
     private float tiempoRestante;
+
 
     void Start()
     {
@@ -30,27 +32,37 @@ public class MovimientoAleatorio : MonoBehaviour
 
     void FixedUpdate()
     {
-        // 1. MOVER
-        miCuerpoFisico.linearVelocity = direccionMovimiento * velocidad;
+        // ROTACIÓN SUAVE
+        float anguloObjetivo = Mathf.Atan2(
+            direccionObjetivo.y,
+            direccionObjetivo.x
+        ) * Mathf.Rad2Deg;
 
-        // 2. GIRAR (NUEVO)
-        if (miCuerpoFisico.linearVelocity.magnitude > 0.1f)
-        {
-            float angulo = Mathf.Atan2(miCuerpoFisico.linearVelocity.y, miCuerpoFisico.linearVelocity.x) * Mathf.Rad2Deg;
+        float anguloActual = transform.eulerAngles.z;
+        float diferencia = Mathf.Abs(
+    Mathf.DeltaAngle(anguloActual, anguloObjetivo)
+);
+        float maxGiro = giroMaximoPorSegundo * Time.fixedDeltaTime;
 
-            // Al mirar a la derecha, el ajuste es 0
-            float ajusteGrados = 0;
+        float anguloNuevo = Mathf.MoveTowardsAngle(
+            anguloActual,
+            anguloObjetivo,
+            maxGiro
+        );
 
-            Quaternion rotacionObjetivo = Quaternion.AngleAxis(angulo + ajusteGrados, Vector3.forward);
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotacionObjetivo, velocidadRotacion * Time.fixedDeltaTime);
-        }
+        transform.rotation = Quaternion.Euler(0, 0, anguloNuevo);
+        float factorVelocidad = Mathf.InverseLerp(180f, 0f, diferencia);
+        // MOVIMIENTO: SIEMPRE HACIA DONDE MIRA
+        miCuerpoFisico.linearVelocity = (Vector2)transform.right * velocidad * factorVelocidad;
     }
 
     void CambiarDireccion()
     {
-        direccionMovimiento = Random.insideUnitCircle.normalized;
+        direccionObjetivo = Random.insideUnitCircle.normalized;
         tiempoRestante = tiempoEntreCambios;
     }
+
+
 
     // Esta función se activa cuando la bacteria choca físicamente con algo sólido
     private void OnCollisionEnter2D(Collision2D colision)
@@ -66,4 +78,5 @@ public class MovimientoAleatorio : MonoBehaviour
             tiempoSiguienteChoque = Time.time + cooldownChoque;
         }
     }
+
 } // Esta es la última llave del script
