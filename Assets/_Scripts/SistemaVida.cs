@@ -9,6 +9,8 @@ public class SistemaVida : MonoBehaviour
     [Header("Monitor (No tocar)")]
     [SerializeField] private float energiaActual; // Para ver en el inspector cuánta vida le queda
 
+    public float EnergiaActual { get => energiaActual; set => energiaActual = value; }
+
     void Start()
     {
         // Al nacer, empezamos con la batería a tope
