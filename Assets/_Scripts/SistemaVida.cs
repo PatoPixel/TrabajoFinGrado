@@ -4,7 +4,11 @@ public class SistemaVida : MonoBehaviour
 {
     [Header("Configuración de Energía")]
     [SerializeField] private float energiaMaxima = 100f;
+    //Stat de resistencia a membrana positiva (no usado en este script, pero puede ser útil para futuras mecánicas)
+    //[SerializeField] private float membranaPositiva = 10;
+    
     [SerializeField] private float consumoPorSegundo = 5f; // Cuánta hambre le entra por segundo
+
 
     [Header("Monitor (No tocar)")]
     [SerializeField] private float energiaActual; // Para ver en el inspector cuánta vida le queda
