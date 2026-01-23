@@ -24,7 +24,10 @@ public class SensorBacteria : MonoBehaviour
 
         Collider2D[] collider2Ds = Physics2D.OverlapCircleAll(transform.position, radioDeteccion, capaComida);
 
-        if (collider2Ds != null)
+        Collider2D comidaMasCercanaCollider = Physics2D.OverlapCircle(transform.position, radioDeteccion, capaComida);
+
+        
+        if (comidaMasCercanaCollider != null)
         {
 
             foreach (Collider2D comida in collider2Ds)
@@ -49,7 +52,6 @@ public class SensorBacteria : MonoBehaviour
         }
         else
         {
-            // No hay nada cerca :(
             comidaMasCercana = null;
         }
     }

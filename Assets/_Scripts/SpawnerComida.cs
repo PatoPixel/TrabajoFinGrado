@@ -4,7 +4,7 @@ public class SpawnerComida : MonoBehaviour
 {
     [Header("Configuración")]
     public GameObject prefabComida; // Aquí arrastraremos el Prefab del nutriente
-    public float tiempoEntreComida = 3f; // Segundos entre cada aparición
+    public float tiempoEntreComida = 0.5f; // Segundos entre cada aparición
     public Vector2 areaGeneracion = new Vector2(8f, 4f); // Tamaño de tu placa de petri
 
     private float cronometro;

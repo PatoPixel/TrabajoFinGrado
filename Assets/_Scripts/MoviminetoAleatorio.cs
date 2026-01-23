@@ -5,7 +5,8 @@ public class MovimientoAleatorio : MonoBehaviour
     public enum EstadoBacteria
     {
         Vagando,
-        Persiguiendo
+        Persiguiendo,
+        Reproduciendo
     }
     [Header("Configuraci�n")]
     [SerializeField] private float velocidad = 2f;
@@ -21,6 +22,7 @@ public class MovimientoAleatorio : MonoBehaviour
     private SistemaVida sistemaVida;
     private EstadoBacteria estadoActual;
 
+    public float Velocidad { get => velocidad; set => velocidad = value; }
 
     void Start()
     {
@@ -40,6 +42,9 @@ public class MovimientoAleatorio : MonoBehaviour
                 break;
             case EstadoBacteria.Persiguiendo:
                 LogicaPerseguir();
+                break;
+            case EstadoBacteria.Reproduciendo:
+                LogicaReproducirse();
                 break;
         }
     }    
@@ -118,14 +123,26 @@ public class MovimientoAleatorio : MonoBehaviour
         {
             CambiarDireccion();
         }
-        if (sistemaVida.EnergiaActual <= 80 && misOjos.comidaMasCercana != null)
+        if(sistemaVida.EnergiaActual >= 90)
+        {
+            estadoActual = EstadoBacteria.Reproduciendo;
+            return;
+        }
+        if (sistemaVida.EnergiaActual <= 60 && misOjos.comidaMasCercana != null)
         {
             estadoActual = EstadoBacteria.Persiguiendo;
+            return;
         }
+
     }
 
     private void LogicaPerseguir()
     {
+        if (sistemaVida.EnergiaActual >= 90)
+        {
+            estadoActual = EstadoBacteria.Reproduciendo;
+            return;
+        }
         if (misOjos.comidaMasCercana == null)
         {
             estadoActual = EstadoBacteria.Vagando;
@@ -147,6 +164,11 @@ public class MovimientoAleatorio : MonoBehaviour
         Debug.DrawLine(transform.position, misOjos.comidaMasCercana.position, Color.yellow);
 
         
+    }
+    private void LogicaReproducirse()
+    {
+        sistemaVida.Reproducir(20);
+        estadoActual = EstadoBacteria.Vagando;
     }
 
 } // Esta es la última llave del script
