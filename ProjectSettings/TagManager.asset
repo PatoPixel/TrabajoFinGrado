@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Comida
+  - Bacteria
   layers:
   - Default
   - TransparentFX

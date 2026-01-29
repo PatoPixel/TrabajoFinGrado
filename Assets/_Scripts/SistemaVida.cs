@@ -3,38 +3,51 @@ using UnityEngine;
 
 public class SistemaVida : MonoBehaviour
 {
-    [Header("Configuración de Energía")]
-    [SerializeField] private float energiaMaxima = 100f;
-    [SerializeField] private float consumoPorSegundo = 2.5f;
-
-    [Header("Genética")]
-    [SerializeField, Range(0f, 0.5f)] private float rangoMutacion = 0.1f; // 10% de variación
-
+    public DatosGeneticos misStats;
     private bool reproduciendose = false;
 
     [Header("Monitor")]
     [SerializeField] private float energiaActual;
     public float EnergiaActual { get => energiaActual; set => energiaActual = value; }
 
-    // Referencias a mis propios componentes para leer mis stats actuales
-    private MovimientoAleatorio miMovimiento;
-    private SensorBacteria miSensor;
-
     void Start()
     {
-        // Cacheamos los componentes
-        miMovimiento = GetComponent<MovimientoAleatorio>();
-        miSensor = GetComponent<SensorBacteria>();
-
-        if (energiaActual <= 0)
+        // 1. Si los stats están a 0, inicializamos con valores base
+        if (misStats.idLinaje == 0)
         {
-            energiaActual = energiaMaxima * 0.5f;
-        }
-    }
+            AsignarStatsBase();
 
+            // Ahora usamos la propiedad Instance que es más inteligente
+            if (GestorLinajes.Instance != null)
+            {
+                misStats.idLinaje = GestorLinajes.Instance.ObtenerNuevoId();
+                misStats.generaciones = 1;
+                gameObject.name = $"Linaje_{misStats.idLinaje}_Fundadora";
+                Debug.Log($"<color=cyan>ID asignado correctamente a {gameObject.name}</color>");
+            }
+            else
+            {
+                // Este es el último recurso si el objeto NO existe en la escena
+                Debug.LogError("CRÍTICO: El objeto GestorLinajes no existe en la jerarquía. ¡Créalos!");
+            }
+        }
+        // 2. IMPORTANTE: Sincronizar energía y componentes
+        energiaActual = misStats.energiaMax * 0.7f; // Nacen con un 70% de energía
+    }
+    private void AsignarStatsBase()
+    {
+        misStats.generaciones = 1;
+        misStats.velocidad = 3.5f;
+        misStats.radioVision = 5f;
+        misStats.energiaMax = 100f;
+        misStats.consumo = 1.5f;
+        misStats.tamano = 1f;
+        misStats.rangoMutacion = 0.15f;
+        misStats.vidaUtil = 60f;        
+    }
     void Update()
     {
-        energiaActual -= consumoPorSegundo * Time.deltaTime;
+        energiaActual -= misStats.consumo * Time.deltaTime;
 
         if (energiaActual <= 0)
         {
@@ -45,7 +58,7 @@ public class SistemaVida : MonoBehaviour
     public void Alimentar(float cantidad)
     {
         energiaActual += cantidad;
-        energiaActual = Mathf.Clamp(energiaActual, 0, energiaMaxima);
+        energiaActual = Mathf.Clamp(energiaActual, 0, misStats.energiaMax);
         reproduciendose = false;
     }
 
@@ -55,63 +68,52 @@ public class SistemaVida : MonoBehaviour
 
         if (!reproduciendose)
         {
-            // 1. Instanciamos al hijo
             GameObject hijo = Instantiate(gameObject, transform.position, Quaternion.identity);
 
-            // 2. Obtenemos TODOS los componentes del hijo que queremos mutar
             SistemaVida vidaHijo = hijo.GetComponent<SistemaVida>();
-            MovimientoAleatorio movHijo = hijo.GetComponent<MovimientoAleatorio>();
-            SensorBacteria sensorHijo = hijo.GetComponent<SensorBacteria>();
 
-            // 3. Obtenemos los valores actuales del PADRE (nosotros)
-            float velPadre = miMovimiento.Velocidad;
-            float visionPadre = miSensor.radioDeteccion;
-            string nombrePadre = gameObject.name; // Ej: "Bacteria_Gen_5"
-            string[] partesNombre = nombrePadre.Split('_');
-
-            // 4. Ejecutamos la mutación en el hijo pasándole todos los datos del padre
             if (vidaHijo != null)
             {
-
-                vidaHijo.Mutar(energiaMaxima, consumoPorSegundo, velPadre, visionPadre, partesNombre[0], int.Parse(partesNombre[1]), rangoMutacion, movHijo, sensorHijo);
+                vidaHijo.InicializarHijo(misStats);
             }
-
             reproduciendose = true;
         }
     }
 
-    // --- FUNCIÓN DE MUTACIÓN EXPANDIDA ---
-    public void Mutar(float maxPadre, float consumoPadre, float velPadre, float visionPadre,String nombrePadre, int generacion, float variacion,
-                      MovimientoAleatorio scriptMovimiento, SensorBacteria scriptSensor)
+    public void InicializarHijo(DatosGeneticos genesPadre)
     {
-        // A. Cálculamos factores aleatorios (ej: entre 0.9 y 1.1)
-        float genVida = UnityEngine.Random.Range(1f - variacion, 1f + variacion);
-        float genConsumo = UnityEngine.Random.Range(1f - variacion, 1f + variacion);
-        float genVelocidad = UnityEngine.Random.Range(1f - variacion, 1f + variacion);
-        float genVision = UnityEngine.Random.Range(1f - variacion, 1f + variacion);
+        // 1. Generamos el nuevo paquete de ADN
+        this.misStats = MutarGenes(genesPadre);
+        this.energiaActual = misStats.energiaMax * 0.5f;
+        this.reproduciendose = true;
 
-        // B. Aplicamos mutaciones a ESTE script (SistemaVida)
-        this.energiaMaxima = maxPadre * genVida;
-        this.consumoPorSegundo = consumoPadre * genConsumo;
+        // 2. Aplicamos cambios físicos y visuales
+        transform.localScale = Vector3.one * misStats.tamano;
+        gameObject.name = $"Linaje_{misStats.idLinaje}_Gen_{misStats.generaciones}";
 
-        // C. Aplicamos mutaciones a los OTROS scripts del hijo
-        if (scriptMovimiento != null)
+        Invoke("ResetReproduccion", 5f);
+    }
+    private void ResetReproduccion() => reproduciendose = false;
+    private DatosGeneticos MutarGenes(DatosGeneticos padre)
+    {
+        float var = padre.rangoMutacion;
+
+        // Creamos el nuevo struct con los datos mutados
+        DatosGeneticos hijo = new DatosGeneticos
         {
-            scriptMovimiento.Velocidad = velPadre * genVelocidad;
-        }
+            idLinaje = padre.idLinaje, // Mantenemos familia
+            generaciones = padre.generaciones + 1, // Subimos generación
 
-        if (scriptSensor != null)
-        {
-            scriptSensor.radioDeteccion = visionPadre * genVision;
-        }
+            velocidad = padre.velocidad * UnityEngine.Random.Range(1 - var, 1 + var),
+            energiaMax = padre.energiaMax * UnityEngine.Random.Range(1 - var, 1 + var),
+            consumo = padre.consumo * UnityEngine.Random.Range(1 - var, 1 + var),
+            tamano = padre.tamano * UnityEngine.Random.Range(1 - var, 1 + var),
+            radioVision = padre.radioVision * UnityEngine.Random.Range(1 - var, 1 + var),
 
-        // D. Configuración inicial del nacimiento
-        this.reproduciendose = false;
-        this.energiaActual = this.energiaMaxima * 0.5f;
-        this.gameObject.name = nombrePadre + "_" + (generacion + 1);
+            rangoMutacion = padre.rangoMutacion // Se mantiene o podría mutar también
+        };
 
-        // Debug para ver qué pasó
-        Debug.Log($"Nació hijo mutante: Vel {scriptMovimiento.Velocidad} (Padre: {velPadre}) | Visión {scriptSensor.radioDeteccion}");
+        return hijo;
     }
 
     private void Morir()

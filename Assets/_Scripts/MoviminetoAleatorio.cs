@@ -1,18 +1,23 @@
 using UnityEngine;
 
 public class MovimientoAleatorio : MonoBehaviour
-{    
+{
     public enum EstadoBacteria
     {
         Vagando,
         Persiguiendo,
         Reproduciendo
     }
-    [Header("Configuraci�n")]
-    [SerializeField] private float velocidad = 2f;
+
+    [Header("Configuración de Movimiento")]
     [SerializeField] private float tiempoEntreCambios = 2f;
     [SerializeField] private float cooldownChoque = 0.5f;
-    [SerializeField] private float giroMaximoPorSegundo = 180f; // grados/seg
+    [SerializeField] private float giroMaximoPorSegundo = 180f;
+    [SerializeField] private float suavizadoVelocidad = 2f;
+
+    [Header("Fuerzas Biológicas")]
+    [SerializeField] private float fuerzaRepulsion = 2f;
+    [SerializeField] private float fuerzaSeparacion = 1f;
 
     private Vector2 direccionObjetivo;
     private float tiempoSiguienteChoque;
@@ -21,8 +26,6 @@ public class MovimientoAleatorio : MonoBehaviour
     private SensorBacteria misOjos;
     private SistemaVida sistemaVida;
     private EstadoBacteria estadoActual;
-
-    public float Velocidad { get => velocidad; set => velocidad = value; }
 
     void Start()
     {
@@ -35,7 +38,7 @@ public class MovimientoAleatorio : MonoBehaviour
 
     void Update()
     {
-       switch(estadoActual)
+        switch (estadoActual)
         {
             case EstadoBacteria.Vagando:
                 LogicaVagar();
@@ -47,31 +50,22 @@ public class MovimientoAleatorio : MonoBehaviour
                 LogicaReproducirse();
                 break;
         }
-    }    
+    }
+
     void FixedUpdate()
     {
-        // ROTACIÓN SUAVE
-        float anguloObjetivo = Mathf.Atan2(
-            direccionObjetivo.y,
-            direccionObjetivo.x
-        ) * Mathf.Rad2Deg;
-
+        float anguloObjetivo = Mathf.Atan2(direccionObjetivo.y, direccionObjetivo.x) * Mathf.Rad2Deg;
         float anguloActual = transform.eulerAngles.z;
-        float diferencia = Mathf.Abs(
-    Mathf.DeltaAngle(anguloActual, anguloObjetivo)
-);
+        float diferencia = Mathf.Abs(Mathf.DeltaAngle(anguloActual, anguloObjetivo));
         float maxGiro = giroMaximoPorSegundo * Time.fixedDeltaTime;
 
-        float anguloNuevo = Mathf.MoveTowardsAngle(
-            anguloActual,
-            anguloObjetivo,
-            maxGiro
-        );
-
+        float anguloNuevo = Mathf.MoveTowardsAngle(anguloActual, anguloObjetivo, maxGiro);
         transform.rotation = Quaternion.Euler(0, 0, anguloNuevo);
+
         float factorVelocidad = Mathf.InverseLerp(180f, 0f, diferencia);
-        // MOVIMIENTO: SIEMPRE HACIA DONDE MIRA
-        miCuerpoFisico.linearVelocity = (Vector2)transform.right * velocidad * factorVelocidad;
+        Vector2 velocidadDeseada = (Vector2)transform.right * sistemaVida.misStats.velocidad * factorVelocidad;
+
+        miCuerpoFisico.linearVelocity = Vector2.Lerp(miCuerpoFisico.linearVelocity, velocidadDeseada, Time.fixedDeltaTime * suavizadoVelocidad);
     }
 
     void CambiarDireccion()
@@ -80,95 +74,102 @@ public class MovimientoAleatorio : MonoBehaviour
         tiempoRestante = tiempoEntreCambios;
     }
 
-
-
-    // Esta función se activa cuando la bacteria choca físicamente con algo sólido
+    // --- LÓGICA DE CHOQUE EVOLUCIONADA ---
     private void OnCollisionEnter2D(Collision2D colision)
     {
-        // Verificamos el cooldown para no calcular esto 50 veces por segundo si vibra
-        if (Time.time > tiempoSiguienteChoque)
+        if (colision.gameObject.CompareTag("Bacteria"))
         {
-            // 1. OBTENER LA NORMAL
-            // El "ContactPoint" es el punto exacto donde chocamos. 
-            // La "normal" es la dirección hacia afuera de la pared.
-            Vector2 normalPared = colision.contacts[0].normal;
+            SistemaVida otraVida = colision.gameObject.GetComponent<SistemaVida>();
+            if (otraVida == null) return;
 
-            // 2. CÁLCULO VECTORIAL
-            // Reflejamos nuestra dirección actual sobre la normal de la pared.
-            // Esto nos da la dirección exacta de salida.
-            direccionObjetivo = Vector2.Reflect(direccionObjetivo, normalPared).normalized;
-
-            // 3. GESTIÓN DE ESTADO
-            // Si estábamos obsesionados persiguiendo comida y nos chocamos (quizás la comida está tras un muro),
-            // forzamos a la bacteria a "despejarse" y vagar un rato.
-            if (estadoActual == EstadoBacteria.Persiguiendo)
+            // 1. RECONOCIMIENTO DE FAMILIA (Rigor científico: Firma química/ID)
+            if (otraVida.misStats.idLinaje == this.sistemaVida.misStats.idLinaje)
             {
-                estadoActual = EstadoBacteria.Vagando;
+                // Si es familia, ignoramos el choque físico brusco para evitar el efecto Pinball
+                // Se deslizarán gracias al OnTriggerStay.
+                return;
             }
 
-            // Reiniciamos tiempos
-            tiempoRestante = tiempoEntreCambios; // Mantenemos esta nueva dirección un rato
-            tiempoSiguienteChoque = Time.time + cooldownChoque;
+            // 2. DEPREDACIÓN (El grande se come al chico)
+            // Si soy un 20% más grande que la otra, la devoro
+            if (this.sistemaVida.misStats.tamano > otraVida.misStats.tamano * 1.2f)
+            {
+                this.sistemaVida.Alimentar(otraVida.EnergiaActual + 10f);
+                otraVida.SendMessage("Morir"); // Enviamos señal de muerte a la otra
+                return;
+            }
 
-            // Debug visual para entender el rebote
-            Debug.DrawRay(colision.contacts[0].point, normalPared, Color.green, 1f);
-            Debug.DrawRay(colision.contacts[0].point, direccionObjetivo, Color.cyan, 1f);
+            // 3. REACCIÓN DE EVITACIÓN (Solo con extraños de tamaño similar)
+            if (Time.time > tiempoSiguienteChoque)
+            {
+                ReaccionarSusto(colision.transform.position);
+            }
         }
+        else // CHOQUE CON PAREDES
+        {
+            Vector2 normalPared = colision.contacts[0].normal;
+            direccionObjetivo = Vector2.Reflect(direccionObjetivo, normalPared).normalized;
+            if (estadoActual == EstadoBacteria.Persiguiendo) estadoActual = EstadoBacteria.Vagando;
+            tiempoSiguienteChoque = Time.time + cooldownChoque;
+        }
+    }
+
+    private void ReaccionarSusto(Vector3 posicionAmenaza)
+    {
+        Vector2 direccionHuida = (transform.position - posicionAmenaza).normalized;
+        direccionObjetivo = Quaternion.Euler(0, 0, Random.Range(-45, 45)) * direccionHuida;
+        miCuerpoFisico.AddForce(direccionHuida * fuerzaRepulsion, ForceMode2D.Impulse);
+        sistemaVida.EnergiaActual -= 0.5f;
+        tiempoSiguienteChoque = Time.time + cooldownChoque;
+    }
+
+    private void OnTriggerStay2D(Collider2D otro)
+    {
+        if (otro.CompareTag("Bacteria"))
+        {
+            SistemaVida otraVida = otro.GetComponent<SistemaVida>();
+            if (otraVida != null && otraVida.misStats.idLinaje == this.sistemaVida.misStats.idLinaje)
+            {
+                // Fuerza de separación muy débil para familia (se permiten solapar más)
+                AplicarSeparacion(otro.transform.position, fuerzaSeparacion * 0.5f);
+            }
+            else
+            {
+                // Fuerza de separación normal para extraños (Quimiotaxis negativa)
+                AplicarSeparacion(otro.transform.position, fuerzaSeparacion);
+            }
+        }
+    }
+
+    private void AplicarSeparacion(Vector3 posicionOtro, float intensidadBase)
+    {
+        Vector2 direccionEmpuje = transform.position - posicionOtro;
+        float intensidad = intensidadBase / (direccionEmpuje.magnitude + 0.1f);
+        miCuerpoFisico.AddForce(direccionEmpuje.normalized * intensidad);
     }
 
     private void LogicaVagar()
     {
         tiempoRestante -= Time.deltaTime;
-        if (tiempoRestante <= 0)
-        {
-            CambiarDireccion();
-        }
-        if(sistemaVida.EnergiaActual >= 90)
-        {
-            estadoActual = EstadoBacteria.Reproduciendo;
-            return;
-        }
-        if (sistemaVida.EnergiaActual <= 60 && misOjos.comidaMasCercana != null)
-        {
-            estadoActual = EstadoBacteria.Persiguiendo;
-            return;
-        }
+        if (tiempoRestante <= 0) CambiarDireccion();
 
+        if (sistemaVida.EnergiaActual >= 90) estadoActual = EstadoBacteria.Reproduciendo;
+        else if (sistemaVida.EnergiaActual <= 80 && misOjos.objetivoMasCercano != null) estadoActual = EstadoBacteria.Persiguiendo;
     }
 
     private void LogicaPerseguir()
     {
-        if (sistemaVida.EnergiaActual >= 90)
-        {
-            estadoActual = EstadoBacteria.Reproduciendo;
-            return;
-        }
-        if (misOjos.comidaMasCercana == null)
-        {
-            estadoActual = EstadoBacteria.Vagando;
-            return; // "return" aquí hace que la función se acabe YA. No sigue leyendo abajo.
-        }
-        
-        // 1. Calculamos el vector hacia la comida (Destino - Origen)
-        Vector2 direccionAComida = misOjos.comidaMasCercana.position - transform.position;
+        if (sistemaVida.EnergiaActual >= 90) { estadoActual = EstadoBacteria.Reproduciendo; return; }
+        if (misOjos.objetivoMasCercano == null) { estadoActual = EstadoBacteria.Vagando; return; }
 
-        // 2. Normalizamos para tener solo la dirección
+        Vector2 direccionAComida = misOjos.objetivoMasCercano.position - transform.position;
         direccionObjetivo = direccionAComida.normalized;
-
-        // 3. Hack importante:
-        // Mantenemos el "tiempoRestante" alto para que NO se active el "CambiarDireccion()" aleatorio
-        // mientras estemos persiguiendo comida.
         tiempoRestante = tiempoEntreCambios;
-
-        // Opcional: Dibujar línea amarilla para ver que está "pensando" en ir allí
-        Debug.DrawLine(transform.position, misOjos.comidaMasCercana.position, Color.yellow);
-
-        
     }
+
     private void LogicaReproducirse()
     {
-        sistemaVida.Reproducir(20);
+        sistemaVida.Reproducir(50);
         estadoActual = EstadoBacteria.Vagando;
     }
-
-} // Esta es la última llave del script
+}

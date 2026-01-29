@@ -130,13 +130,14 @@ GameObject:
   - component: {fileID: 413103011}
   - component: {fileID: 413103010}
   - component: {fileID: 413103009}
+  - component: {fileID: 413103014}
   - component: {fileID: 413103008}
   - component: {fileID: 413103013}
-  - component: {fileID: 413103014}
   - component: {fileID: 413103015}
+  - component: {fileID: 413103016}
   m_Layer: 0
   m_Name: Izan_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -153,10 +154,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &413103009
 Rigidbody2D:
   serializedVersion: 5
@@ -269,9 +272,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!70 &413103014
 CapsuleCollider2D:
@@ -322,11 +333,46 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
+--- !u!58 &413103016
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 413103007}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &415898654
 GameObject:
   m_ObjectHideFlags: 0
@@ -422,9 +468,10 @@ GameObject:
   - component: {fileID: 430124587}
   - component: {fileID: 430124586}
   - component: {fileID: 430124585}
+  - component: {fileID: 430124592}
   m_Layer: 0
   m_Name: Hosco_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -441,11 +488,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &430124586
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -495,9 +541,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &430124588
 MonoBehaviour:
@@ -511,10 +565,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &430124589
 Rigidbody2D:
   serializedVersion: 5
@@ -615,6 +671,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &430124592
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 430124584}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &478964059
 GameObject:
   m_ObjectHideFlags: 0
@@ -630,9 +722,10 @@ GameObject:
   - component: {fileID: 478964062}
   - component: {fileID: 478964061}
   - component: {fileID: 478964060}
+  - component: {fileID: 478964067}
   m_Layer: 0
   m_Name: Martin_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -649,11 +742,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &478964061
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -703,9 +795,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &478964063
 MonoBehaviour:
@@ -719,10 +819,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &478964064
 Rigidbody2D:
   serializedVersion: 5
@@ -823,6 +925,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &478964067
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 478964059}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -1059,9 +1197,10 @@ GameObject:
   - component: {fileID: 663387278}
   - component: {fileID: 663387277}
   - component: {fileID: 663387276}
+  - component: {fileID: 663387283}
   m_Layer: 0
   m_Name: Ramon_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1078,11 +1217,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &663387277
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -1132,9 +1270,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &663387279
 MonoBehaviour:
@@ -1148,10 +1294,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &663387280
 Rigidbody2D:
   serializedVersion: 5
@@ -1252,6 +1400,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &663387283
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 663387275}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &762076357
 GameObject:
   m_ObjectHideFlags: 0
@@ -1267,9 +1451,10 @@ GameObject:
   - component: {fileID: 762076360}
   - component: {fileID: 762076359}
   - component: {fileID: 762076358}
+  - component: {fileID: 762076365}
   m_Layer: 0
   m_Name: Walker_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1286,11 +1471,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &762076359
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -1340,9 +1524,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &762076361
 MonoBehaviour:
@@ -1356,10 +1548,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &762076362
 Rigidbody2D:
   serializedVersion: 5
@@ -1460,6 +1654,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &762076365
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 762076357}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &772312533
 GameObject:
   m_ObjectHideFlags: 0
@@ -1475,9 +1705,10 @@ GameObject:
   - component: {fileID: 772312536}
   - component: {fileID: 772312535}
   - component: {fileID: 772312534}
+  - component: {fileID: 772312541}
   m_Layer: 0
   m_Name: Estevez_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1494,11 +1725,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &772312535
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -1548,9 +1778,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &772312537
 MonoBehaviour:
@@ -1564,10 +1802,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &772312538
 Rigidbody2D:
   serializedVersion: 5
@@ -1668,6 +1908,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &772312541
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 772312533}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &856497713
 GameObject:
   m_ObjectHideFlags: 0
@@ -1683,9 +1959,10 @@ GameObject:
   - component: {fileID: 856497716}
   - component: {fileID: 856497715}
   - component: {fileID: 856497714}
+  - component: {fileID: 856497721}
   m_Layer: 0
   m_Name: Jose_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1702,11 +1979,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &856497715
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -1756,9 +2032,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &856497717
 MonoBehaviour:
@@ -1772,10 +2056,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &856497718
 Rigidbody2D:
   serializedVersion: 5
@@ -1876,6 +2162,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &856497721
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 856497713}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &956771675
 GameObject:
   m_ObjectHideFlags: 0
@@ -1891,9 +2213,10 @@ GameObject:
   - component: {fileID: 956771678}
   - component: {fileID: 956771677}
   - component: {fileID: 956771676}
+  - component: {fileID: 956771683}
   m_Layer: 0
   m_Name: Jaime_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1910,11 +2233,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &956771677
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -1964,9 +2286,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &956771679
 MonoBehaviour:
@@ -1980,10 +2310,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &956771680
 Rigidbody2D:
   serializedVersion: 5
@@ -2084,6 +2416,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &956771683
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 956771675}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &961228052
 GameObject:
   m_ObjectHideFlags: 0
@@ -2099,9 +2467,10 @@ GameObject:
   - component: {fileID: 961228055}
   - component: {fileID: 961228054}
   - component: {fileID: 961228053}
+  - component: {fileID: 961228060}
   m_Layer: 0
   m_Name: Ale_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2118,11 +2487,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &961228054
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -2172,9 +2540,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &961228056
 MonoBehaviour:
@@ -2188,10 +2564,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &961228057
 Rigidbody2D:
   serializedVersion: 5
@@ -2292,6 +2670,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &961228060
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 961228052}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &961910327
 GameObject:
   m_ObjectHideFlags: 0
@@ -2307,9 +2721,10 @@ GameObject:
   - component: {fileID: 961910330}
   - component: {fileID: 961910329}
   - component: {fileID: 961910328}
+  - component: {fileID: 961910335}
   m_Layer: 0
   m_Name: Gentil_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2326,11 +2741,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &961910329
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -2380,9 +2794,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &961910331
 MonoBehaviour:
@@ -2396,10 +2818,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &961910332
 Rigidbody2D:
   serializedVersion: 5
@@ -2500,6 +2924,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &961910335
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 961910327}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &1183416364
 GameObject:
   m_ObjectHideFlags: 0
@@ -2515,9 +2975,10 @@ GameObject:
   - component: {fileID: 1183416367}
   - component: {fileID: 1183416366}
   - component: {fileID: 1183416365}
+  - component: {fileID: 1183416372}
   m_Layer: 0
   m_Name: David_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2534,11 +2995,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &1183416366
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -2588,9 +3048,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &1183416368
 MonoBehaviour:
@@ -2604,10 +3072,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &1183416369
 Rigidbody2D:
   serializedVersion: 5
@@ -2708,6 +3178,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &1183416372
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1183416364}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &1237088010
 GameObject:
   m_ObjectHideFlags: 0
@@ -2723,9 +3229,10 @@ GameObject:
   - component: {fileID: 1237088013}
   - component: {fileID: 1237088012}
   - component: {fileID: 1237088011}
+  - component: {fileID: 1237088018}
   m_Layer: 0
   m_Name: Peralta_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2742,11 +3249,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &1237088012
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -2796,9 +3302,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &1237088014
 MonoBehaviour:
@@ -2812,10 +3326,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &1237088015
 Rigidbody2D:
   serializedVersion: 5
@@ -2916,6 +3432,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &1237088018
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1237088010}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &1289052360
 GameObject:
   m_ObjectHideFlags: 0
@@ -2931,9 +3483,10 @@ GameObject:
   - component: {fileID: 1289052363}
   - component: {fileID: 1289052362}
   - component: {fileID: 1289052361}
+  - component: {fileID: 1289052368}
   m_Layer: 0
   m_Name: Santi_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2950,11 +3503,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &1289052362
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -3004,9 +3556,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &1289052364
 MonoBehaviour:
@@ -3020,10 +3580,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &1289052365
 Rigidbody2D:
   serializedVersion: 5
@@ -3124,6 +3686,86 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &1289052368
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1289052360}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
+--- !u!1 &1317726405
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1317726407}
+  - component: {fileID: 1317726406}
+  m_Layer: 0
+  m_Name: GestorLinajes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1317726406
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317726405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 444bd929194cf0a46b6d99f31260096e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GestorLinajes
+--- !u!4 &1317726407
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317726405}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.9826, y: -4.18899, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1440061765
 GameObject:
   m_ObjectHideFlags: 0
@@ -3186,9 +3828,10 @@ GameObject:
   - component: {fileID: 1457969736}
   - component: {fileID: 1457969735}
   - component: {fileID: 1457969734}
+  - component: {fileID: 1457969741}
   m_Layer: 0
   m_Name: Marco_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3205,11 +3848,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &1457969735
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -3259,9 +3901,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &1457969737
 MonoBehaviour:
@@ -3275,10 +3925,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &1457969738
 Rigidbody2D:
   serializedVersion: 5
@@ -3379,6 +4031,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &1457969741
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1457969733}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &1491855195
 GameObject:
   m_ObjectHideFlags: 0
@@ -3394,9 +4082,10 @@ GameObject:
   - component: {fileID: 1491855198}
   - component: {fileID: 1491855197}
   - component: {fileID: 1491855196}
+  - component: {fileID: 1491855203}
   m_Layer: 0
   m_Name: Irene_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3413,11 +4102,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &1491855197
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -3467,9 +4155,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &1491855199
 MonoBehaviour:
@@ -3483,10 +4179,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &1491855200
 Rigidbody2D:
   serializedVersion: 5
@@ -3587,6 +4285,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &1491855203
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491855195}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &1493261216
 GameObject:
   m_ObjectHideFlags: 0
@@ -3602,9 +4336,10 @@ GameObject:
   - component: {fileID: 1493261219}
   - component: {fileID: 1493261218}
   - component: {fileID: 1493261217}
+  - component: {fileID: 1493261224}
   m_Layer: 0
   m_Name: Chente_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3621,11 +4356,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &1493261218
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -3675,9 +4409,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &1493261220
 MonoBehaviour:
@@ -3691,10 +4433,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &1493261221
 Rigidbody2D:
   serializedVersion: 5
@@ -3795,6 +4539,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &1493261224
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1493261216}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &1549954790
 GameObject:
   m_ObjectHideFlags: 0
@@ -3937,9 +4717,10 @@ GameObject:
   - component: {fileID: 1811049624}
   - component: {fileID: 1811049623}
   - component: {fileID: 1811049622}
+  - component: {fileID: 1811049629}
   m_Layer: 0
   m_Name: Pablo_1
-  m_TagString: Untagged
+  m_TagString: Bacteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3956,11 +4737,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 150b5285484a94c4ab0a0dd4de192b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
-  radioDeteccion: 2
-  capaComida:
+  capasObjetivo:
     serializedVersion: 2
-    m_Bits: 64
-  comidaMasCercana: {fileID: 0}
+    m_Bits: 0
+  objetivoMasCercano: {fileID: 0}
 --- !u!70 &1811049623
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -4010,9 +4790,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d19c34217bc54e8eb6190dfdc4a43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaVida
-  energiaMaxima: 100
-  consumoPorSegundo: 5
-  rangoMutacion: 0.1
+  misStats:
+    idLinaje: 0
+    generaciones: 0
+    velocidad: 0
+    radioVision: 0
+    energiaMax: 0
+    consumo: 0
+    tamano: 0
+    EficienciaAlimentacion: 0
+    vidaUtil: 0
+    rangoMutacion: 0
   energiaActual: 50
 --- !u!114 &1811049625
 MonoBehaviour:
@@ -4026,10 +4814,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18924c7014d366a4ab8d51ee092163c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimientoAleatorio
-  velocidad: 2
   tiempoEntreCambios: 2
   cooldownChoque: 0.5
   giroMaximoPorSegundo: 180
+  suavizadoVelocidad: 5
+  fuerzaRepulsion: 5
+  fuerzaSeparacion: 2
 --- !u!50 &1811049626
 Rigidbody2D:
   serializedVersion: 5
@@ -4130,6 +4920,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &1811049629
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1811049621}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.1112542, y: 0}
+  m_Radius: 0.42
 --- !u!1 &1954712589
 GameObject:
   m_ObjectHideFlags: 0
@@ -4284,3 +5110,4 @@ SceneRoots:
   - {fileID: 1549954793}
   - {fileID: 1440061767}
   - {fileID: 415898656}
+  - {fileID: 1317726407}

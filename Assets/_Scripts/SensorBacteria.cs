@@ -3,64 +3,73 @@ using UnityEngine;
 public class SensorBacteria : MonoBehaviour
 {
     [Header("Configuración del Radar")]
-    public float radioDeteccion = 5f; // Cuán lejos ve
-    public LayerMask capaComida;      // FILTRO: ¿Qué es comida?
+    public LayerMask capasObjetivo; // Selecciona "Comida" Y "Bacteria" en el Inspector
 
-    // Variable para guardar la comida que hemos encontrado (si hay alguna)
-    public Transform comidaMasCercana; 
+    public Transform objetivoMasCercano;
+    private SistemaVida sistemaVida;
+
+    private void Start()
+    {
+        sistemaVida = GetComponent<SistemaVida>();
+    }
 
     void Update()
     {
-        // En cada frame, buscamos si hay algo rico cerca
-        BuscarComida();
+        BuscarObjetivo();
     }
 
-    void BuscarComida()
+    void BuscarObjetivo()
     {
-        // 1. LANZAR EL RADAR
-        // Physics2D.OverlapCircle devuelve UN collider si encuentra algo en esa capa.
-        // (Nota: Si quisieras encontrar TODAS las comidas cercanas, usarías OverlapCircleAll)
+        // 1. Escaneamos todo en el radio de visión
+        Collider2D[] detectados = Physics2D.OverlapCircleAll(transform.position, sistemaVida.misStats.radioVision, capasObjetivo);
 
+        float distanciaMinima = Mathf.Infinity;
+        Transform candidatoOpcional = null;
 
-        Collider2D[] collider2Ds = Physics2D.OverlapCircleAll(transform.position, radioDeteccion, capaComida);
-
-        Collider2D comidaMasCercanaCollider = Physics2D.OverlapCircle(transform.position, radioDeteccion, capaComida);
-
-        
-        if (comidaMasCercanaCollider != null)
+        foreach (Collider2D col in detectados)
         {
+            // A. Ignorarnos a nosotros mismos
+            if (col.gameObject == gameObject) continue;
 
-            foreach (Collider2D comida in collider2Ds)
+            // B. Si es una bacteria, aplicar filtros de depredación
+            if (col.CompareTag("Bacteria"))
             {
-                if (comidaMasCercana == null)
-                {
-                    comidaMasCercana = comida.transform;
-                }
-                else
-                {
-                    float distanciaComidaActual = Vector2.Distance(transform.position, comida.transform.position);
-                    float distanciaComidaMasCercana = Vector2.Distance(transform.position, comidaMasCercana.position);
-                    if (distanciaComidaActual < distanciaComidaMasCercana)
-                    {
-                        comidaMasCercana = comida.transform;
-                    }
-                }
+                SistemaVida vidaEncontrada = col.GetComponent<SistemaVida>();
+
+                // Ignorar si es de mi familia
+                if (vidaEncontrada.misStats.idLinaje == sistemaVida.misStats.idLinaje) continue;
+
+                // Ignorar si es más grande que yo (no soy tonto, no la cazo)
+                if (vidaEncontrada.misStats.tamano >= sistemaVida.misStats.tamano) continue;
             }
 
-            // DIBUJO DE DEBUG (Opcional): Dibuja una línea roja hacia la comida
-            Debug.DrawLine(transform.position, comidaMasCercana.position, Color.red);
+            // C. Cálculo de distancia para encontrar al más cercano
+            float distancia = Vector2.Distance(transform.position, col.transform.position);
+            if (distancia < distanciaMinima)
+            {
+                distanciaMinima = distancia;
+                candidatoOpcional = col.transform;
+            }
         }
-        else
+
+        // 2. Asignamos el resultado
+        objetivoMasCercano = candidatoOpcional;
+
+        // 3. Debug Visual
+        if (objetivoMasCercano != null)
         {
-            comidaMasCercana = null;
+            Color colorDebug = objetivoMasCercano.CompareTag("Bacteria") ? Color.magenta : Color.red;
+            Debug.DrawLine(transform.position, objetivoMasCercano.position, colorDebug);
         }
     }
 
-    // VITAL: Dibujar el rango en el editor para saber qué estamos haciendo
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
-        // Dibuja un círculo hueco representando el rango de visión
-        Gizmos.DrawWireSphere(transform.position, radioDeteccion);
+        if (sistemaVida == null) sistemaVida = GetComponent<SistemaVida>();
+        if (sistemaVida != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position, sistemaVida.misStats.radioVision);
+        }
     }
 }
