@@ -119,6 +119,52 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &410671364
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 410671366}
+  - component: {fileID: 410671365}
+  m_Layer: 0
+  m_Name: ControladorVelocidad
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &410671365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 410671364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b603a2928d30ae8449833f7452523f19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ControladorTiempo
+  velocidadNormal: 1
+  velocidadRapida: 5
+--- !u!4 &410671366
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 410671364}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.16465, y: -0.29749, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &413103007
 GameObject:
   m_ObjectHideFlags: 0
@@ -135,7 +181,7 @@ GameObject:
   - component: {fileID: 413103013}
   - component: {fileID: 413103015}
   - component: {fileID: 413103016}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Izan_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -335,7 +381,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!58 &413103016
 CircleCollider2D:
@@ -469,7 +515,7 @@ GameObject:
   - component: {fileID: 430124586}
   - component: {fileID: 430124585}
   - component: {fileID: 430124592}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Hosco_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -490,7 +536,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &430124586
 CapsuleCollider2D:
@@ -723,7 +769,7 @@ GameObject:
   - component: {fileID: 478964061}
   - component: {fileID: 478964060}
   - component: {fileID: 478964067}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Martin_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -744,7 +790,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &478964061
 CapsuleCollider2D:
@@ -1198,7 +1244,7 @@ GameObject:
   - component: {fileID: 663387277}
   - component: {fileID: 663387276}
   - component: {fileID: 663387283}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ramon_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -1219,7 +1265,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &663387277
 CapsuleCollider2D:
@@ -1452,7 +1498,7 @@ GameObject:
   - component: {fileID: 762076359}
   - component: {fileID: 762076358}
   - component: {fileID: 762076365}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Walker_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -1473,7 +1519,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &762076359
 CapsuleCollider2D:
@@ -1706,7 +1752,7 @@ GameObject:
   - component: {fileID: 772312535}
   - component: {fileID: 772312534}
   - component: {fileID: 772312541}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Estevez_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -1727,7 +1773,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &772312535
 CapsuleCollider2D:
@@ -1960,7 +2006,7 @@ GameObject:
   - component: {fileID: 856497715}
   - component: {fileID: 856497714}
   - component: {fileID: 856497721}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Jose_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -1981,7 +2027,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &856497715
 CapsuleCollider2D:
@@ -2214,7 +2260,7 @@ GameObject:
   - component: {fileID: 956771677}
   - component: {fileID: 956771676}
   - component: {fileID: 956771683}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Jaime_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -2235,7 +2281,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &956771677
 CapsuleCollider2D:
@@ -2468,7 +2514,7 @@ GameObject:
   - component: {fileID: 961228054}
   - component: {fileID: 961228053}
   - component: {fileID: 961228060}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ale_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -2489,7 +2535,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &961228054
 CapsuleCollider2D:
@@ -2722,7 +2768,7 @@ GameObject:
   - component: {fileID: 961910329}
   - component: {fileID: 961910328}
   - component: {fileID: 961910335}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Gentil_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -2743,7 +2789,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &961910329
 CapsuleCollider2D:
@@ -2976,7 +3022,7 @@ GameObject:
   - component: {fileID: 1183416366}
   - component: {fileID: 1183416365}
   - component: {fileID: 1183416372}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: David_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -2997,7 +3043,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &1183416366
 CapsuleCollider2D:
@@ -3230,7 +3276,7 @@ GameObject:
   - component: {fileID: 1237088012}
   - component: {fileID: 1237088011}
   - component: {fileID: 1237088018}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Peralta_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -3251,7 +3297,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &1237088012
 CapsuleCollider2D:
@@ -3484,7 +3530,7 @@ GameObject:
   - component: {fileID: 1289052362}
   - component: {fileID: 1289052361}
   - component: {fileID: 1289052368}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Santi_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -3505,7 +3551,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &1289052362
 CapsuleCollider2D:
@@ -3796,7 +3842,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpawnerComida
   prefabComida: {fileID: 1954712589}
-  tiempoEntreComida: 0.1
+  tiempoEntreComida: 0
   areaGeneracion: {x: 20, y: 20}
 --- !u!4 &1440061767
 Transform:
@@ -3806,8 +3852,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1440061765}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10, y: 16.02694, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 10, y: 16.026937, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3829,7 +3875,7 @@ GameObject:
   - component: {fileID: 1457969735}
   - component: {fileID: 1457969734}
   - component: {fileID: 1457969741}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Marco_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -3850,7 +3896,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &1457969735
 CapsuleCollider2D:
@@ -4083,7 +4129,7 @@ GameObject:
   - component: {fileID: 1491855197}
   - component: {fileID: 1491855196}
   - component: {fileID: 1491855203}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Irene_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -4104,7 +4150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &1491855197
 CapsuleCollider2D:
@@ -4337,7 +4383,7 @@ GameObject:
   - component: {fileID: 1493261218}
   - component: {fileID: 1493261217}
   - component: {fileID: 1493261224}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Chente_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -4358,7 +4404,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &1493261218
 CapsuleCollider2D:
@@ -4718,7 +4764,7 @@ GameObject:
   - component: {fileID: 1811049623}
   - component: {fileID: 1811049622}
   - component: {fileID: 1811049629}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pablo_1
   m_TagString: Bacteria
   m_Icon: {fileID: 0}
@@ -4739,7 +4785,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SensorBacteria
   capasObjetivo:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   objetivoMasCercano: {fileID: 0}
 --- !u!70 &1811049623
 CapsuleCollider2D:
@@ -5108,6 +5154,7 @@ SceneRoots:
   - {fileID: 1289052367}
   - {fileID: 1954712592}
   - {fileID: 1549954793}
-  - {fileID: 1440061767}
   - {fileID: 415898656}
   - {fileID: 1317726407}
+  - {fileID: 1440061767}
+  - {fileID: 410671366}

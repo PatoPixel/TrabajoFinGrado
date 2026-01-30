@@ -40,7 +40,7 @@ public class SensorBacteria : MonoBehaviour
                 if (vidaEncontrada.misStats.idLinaje == sistemaVida.misStats.idLinaje) continue;
 
                 // Ignorar si es más grande que yo (no soy tonto, no la cazo)
-                if (vidaEncontrada.misStats.tamano >= sistemaVida.misStats.tamano) continue;
+                if (vidaEncontrada.misStats.tamano * 1.2f >= sistemaVida.misStats.tamano) continue;
             }
 
             // C. Cálculo de distancia para encontrar al más cercano

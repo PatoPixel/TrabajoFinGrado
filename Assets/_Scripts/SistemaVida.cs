@@ -37,13 +37,13 @@ public class SistemaVida : MonoBehaviour
     private void AsignarStatsBase()
     {
         misStats.generaciones = 1;
-        misStats.velocidad = 3.5f;
-        misStats.radioVision = 5f;
+        misStats.velocidad = 2f;
+        misStats.radioVision = 2f;
         misStats.energiaMax = 100f;
-        misStats.consumo = 1.5f;
         misStats.tamano = 1f;
         misStats.rangoMutacion = 0.15f;
-        misStats.vidaUtil = 60f;        
+        misStats.vidaUtil = 60f;  
+        misStats.consumo = ((float) Math.Pow(misStats.tamano, 3f) + (float) Math.Pow(misStats.velocidad, 2) + misStats.radioVision)/4;
     }
     void Update()
     {
@@ -106,9 +106,11 @@ public class SistemaVida : MonoBehaviour
 
             velocidad = padre.velocidad * UnityEngine.Random.Range(1 - var, 1 + var),
             energiaMax = padre.energiaMax * UnityEngine.Random.Range(1 - var, 1 + var),
-            consumo = padre.consumo * UnityEngine.Random.Range(1 - var, 1 + var),
-            tamano = padre.tamano * UnityEngine.Random.Range(1 - var, 1 + var),
+            
+            tamano = padre.tamano * UnityEngine.Random.Range(1 - var/2, 1 + var/2),
             radioVision = padre.radioVision * UnityEngine.Random.Range(1 - var, 1 + var),
+            
+            consumo = ((float)Math.Pow(misStats.tamano, 3f) + (float)Math.Pow(misStats.velocidad, 2) + misStats.radioVision) / 4,
 
             rangoMutacion = padre.rangoMutacion // Se mantiene o podría mutar también
         };

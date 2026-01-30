@@ -16,7 +16,7 @@ public class MovimientoAleatorio : MonoBehaviour
     [SerializeField] private float suavizadoVelocidad = 2f;
 
     [Header("Fuerzas Biológicas")]
-    [SerializeField] private float fuerzaRepulsion = 2f;
+    [SerializeField] private float fuerzaRepulsion = 0.5f;
     [SerializeField] private float fuerzaSeparacion = 1f;
 
     private Vector2 direccionObjetivo;
@@ -119,7 +119,7 @@ public class MovimientoAleatorio : MonoBehaviour
         Vector2 direccionHuida = (transform.position - posicionAmenaza).normalized;
         direccionObjetivo = Quaternion.Euler(0, 0, Random.Range(-45, 45)) * direccionHuida;
         miCuerpoFisico.AddForce(direccionHuida * fuerzaRepulsion, ForceMode2D.Impulse);
-        sistemaVida.EnergiaActual -= 0.5f;
+        sistemaVida.EnergiaActual -= 2.5f;
         tiempoSiguienteChoque = Time.time + cooldownChoque;
     }
 
@@ -153,13 +153,13 @@ public class MovimientoAleatorio : MonoBehaviour
         tiempoRestante -= Time.deltaTime;
         if (tiempoRestante <= 0) CambiarDireccion();
 
-        if (sistemaVida.EnergiaActual >= 90) estadoActual = EstadoBacteria.Reproduciendo;
-        else if (sistemaVida.EnergiaActual <= 80 && misOjos.objetivoMasCercano != null) estadoActual = EstadoBacteria.Persiguiendo;
+        if (sistemaVida.EnergiaActual >= sistemaVida.misStats.energiaMax * 0.9f) estadoActual = EstadoBacteria.Reproduciendo;
+        else if (sistemaVida.EnergiaActual <= sistemaVida.misStats.energiaMax * 0.8f && misOjos.objetivoMasCercano != null) estadoActual = EstadoBacteria.Persiguiendo;
     }
 
     private void LogicaPerseguir()
     {
-        if (sistemaVida.EnergiaActual >= 90) { estadoActual = EstadoBacteria.Reproduciendo; return; }
+        if (sistemaVida.EnergiaActual >= sistemaVida.misStats.energiaMax * 0.9f) { estadoActual = EstadoBacteria.Reproduciendo; return; }
         if (misOjos.objetivoMasCercano == null) { estadoActual = EstadoBacteria.Vagando; return; }
 
         Vector2 direccionAComida = misOjos.objetivoMasCercano.position - transform.position;
