@@ -7,11 +7,17 @@ public class SistemaVida : MonoBehaviour
     private bool reproduciendose = false;
 
     [Header("Monitor")]
+    [SerializeField] private string nombreDePila;
     [SerializeField] private float energiaActual;
+    [SerializeField] private float edadActual;
     public float EnergiaActual { get => energiaActual; set => energiaActual = value; }
 
     void Start()
     {
+        if (string.IsNullOrEmpty(nombreDePila))
+        {
+            nombreDePila = gameObject.name;
+        }
         // 1. Si los stats están a 0, inicializamos con valores base
         if (misStats.idLinaje == 0)
         {
@@ -22,36 +28,47 @@ public class SistemaVida : MonoBehaviour
             {
                 misStats.idLinaje = GestorLinajes.Instance.ObtenerNuevoId();
                 misStats.generaciones = 1;
-                gameObject.name = $"Linaje_{misStats.idLinaje}_Fundadora";
-                Debug.Log($"<color=cyan>ID asignado correctamente a {gameObject.name}</color>");
+
             }
             else
             {
                 // Este es el último recurso si el objeto NO existe en la escena
-                Debug.LogError("CRÍTICO: El objeto GestorLinajes no existe en la jerarquía. ¡Créalos!");
+                Debug.LogError("CRÍTICO: El objeto GestorLinajes no existe en la jerarquía.");
             }
         }
         // 2. IMPORTANTE: Sincronizar energía y componentes
         energiaActual = misStats.energiaMax * 0.7f; // Nacen con un 70% de energía
+
     }
-    private void AsignarStatsBase()
+    public void AsignarStatsBase()
     {
         misStats.generaciones = 1;
         misStats.velocidad = 2f;
         misStats.radioVision = 2f;
         misStats.energiaMax = 100f;
         misStats.tamano = 1f;
-        misStats.rangoMutacion = 0.15f;
+        misStats.rangoMutacion = 0.10f;
         misStats.vidaUtil = 60f;  
         misStats.consumo = ((float) Math.Pow(misStats.tamano, 3f) + (float) Math.Pow(misStats.velocidad, 2) + misStats.radioVision)/4;
+        if (misStats.colorLinaje.a == 0)
+        {
+            misStats.colorLinaje = GetComponent<SpriteRenderer>().color;
+        }
+
     }
     void Update()
     {
         energiaActual -= misStats.consumo * Time.deltaTime;
 
+        edadActual += Time.deltaTime;
         if (energiaActual <= 0)
         {
             Morir();
+        }
+        if (edadActual > misStats.vidaUtil)
+        {
+            // Ejecutamos el azar solo una vez por segundo, no por frame, para optimizar
+            if (CheckMuerteNatural()) Morir();
         }
     }
 
@@ -68,7 +85,7 @@ public class SistemaVida : MonoBehaviour
 
         if (!reproduciendose)
         {
-            GameObject hijo = Instantiate(gameObject, transform.position, Quaternion.identity);
+            GameObject hijo = BacteriasMuertas.Instance.GetBacteria(transform.position);
 
             SistemaVida vidaHijo = hijo.GetComponent<SistemaVida>();
 
@@ -86,11 +103,17 @@ public class SistemaVida : MonoBehaviour
         this.misStats = MutarGenes(genesPadre);
         this.energiaActual = misStats.energiaMax * 0.5f;
         this.reproduciendose = true;
-
-        // 2. Aplicamos cambios físicos y visuales
         transform.localScale = Vector3.one * misStats.tamano;
-        gameObject.name = $"Linaje_{misStats.idLinaje}_Gen_{misStats.generaciones}";
 
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            sr.color = misStats.colorLinaje;
+        }
+        // 2. Aplicamos cambios físicos y visuales
+        string nombreBase = GestorLinajes.Instance.GetNombrePorId(misStats.idLinaje);
+        gameObject.name = $"{nombreBase} (Gen {misStats.generaciones})";
+        edadActual = 0;
         Invoke("ResetReproduccion", 5f);
     }
     private void ResetReproduccion() => reproduciendose = false;
@@ -98,30 +121,32 @@ public class SistemaVida : MonoBehaviour
     {
         float var = padre.rangoMutacion;
 
-        // Creamos el nuevo struct con los datos mutados
-        DatosGeneticos hijo = new DatosGeneticos
+        // 1. Calculamos primero los valores mutados de forma local
+        float nVelocidad = padre.velocidad * UnityEngine.Random.Range(1 - var, 1 + var);
+        float nTamano = padre.tamano * UnityEngine.Random.Range(1 - var / 2, 1 + var / 2);
+        float nRadio = padre.radioVision * UnityEngine.Random.Range(1 - var, 1 + var);
+        float nVidaUtil = padre.vidaUtil * UnityEngine.Random.Range(1 - var, 1 + var);
+        // 2. Calculamos el consumo usando los NUEVOS valores locales
+        // Así evitamos usar 'misStats' del padre por error
+        float nConsumo = DatosGeneticos.CalcularGasto(nTamano, nVelocidad, nRadio);
+
+        // 3. Empaquetamos en el nuevo struct
+        return new DatosGeneticos
         {
-            idLinaje = padre.idLinaje, // Mantenemos familia
-            generaciones = padre.generaciones + 1, // Subimos generación
-
-            velocidad = padre.velocidad * UnityEngine.Random.Range(1 - var, 1 + var),
+            idLinaje = padre.idLinaje,
+            generaciones = padre.generaciones + 1,
+            velocidad = nVelocidad,
+            tamano = nTamano,
+            radioVision = nRadio,
+            consumo = nConsumo, // Asignación limpia
+            vidaUtil = nVidaUtil,
             energiaMax = padre.energiaMax * UnityEngine.Random.Range(1 - var, 1 + var),
-            
-            tamano = padre.tamano * UnityEngine.Random.Range(1 - var/2, 1 + var/2),
-            radioVision = padre.radioVision * UnityEngine.Random.Range(1 - var, 1 + var),
-            
-            consumo = ((float)Math.Pow(misStats.tamano, 3f) + (float)Math.Pow(misStats.velocidad, 2) + misStats.radioVision) / 4,
-
-            rangoMutacion = padre.rangoMutacion // Se mantiene o podría mutar también
+            rangoMutacion = padre.rangoMutacion,
+            colorLinaje = padre.colorLinaje
         };
-
-        return hijo;
     }
 
-    private void Morir()
-    {
-        Destroy(gameObject);
-    }
+
 
     private void OnTriggerEnter2D(Collider2D otroObjeto)
     {
@@ -130,5 +155,36 @@ public class SistemaVida : MonoBehaviour
             Alimentar(40f);
             Destroy(otroObjeto.gameObject);
         }
+    }
+
+    private bool CheckMuerteNatural()
+    {
+        // Calculamos qué tan "viejo" es respecto a su límite (ej: 1.2 es un 20% extra)
+        float factorExceso = edadActual / misStats.vidaUtil;
+
+        // Probabilidad base que sube con el tiempo
+        float probabilidad = (factorExceso - 1) * 0.1f; // Ajusta el 0.1f a tu gusto
+
+        return UnityEngine.Random.value < (probabilidad * Time.deltaTime);
+    }
+
+
+
+    public void Morir()
+    {
+        CancelInvoke(); // Detenemos cualquier proceso pendiente (como la reproducción)
+        gameObject.SetActive(false);
+        BacteriasMuertas.Instance.bacteriasMuertas.Push(gameObject);
+    }
+    public void OnEnable()
+    {
+        if (!GestorLinajes.RegistroVida.ContainsKey(gameObject.GetInstanceID()))
+        {
+            GestorLinajes.RegistroVida[gameObject.GetInstanceID()] = this;
+        }
+    }
+    public void OnDisable()
+    {
+        GestorLinajes.RegistroVida.Remove(gameObject.GetInstanceID());
     }
 }

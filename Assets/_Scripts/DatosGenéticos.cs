@@ -13,7 +13,8 @@ public struct DatosGeneticos
     public float EficienciaAlimentacion;
     public float vidaUtil;
     public float rangoMutacion;
-    public DatosGeneticos(int idLinaje, int generaciones, float velocidad, float radioVision, float energiaMax, float consumo, float tamano, float eficienciaAlimentacion, float vidaUtil, float rangoMutacion)
+    public Color colorLinaje;
+    public DatosGeneticos(int idLinaje, int generaciones, float velocidad, float radioVision, float energiaMax, float consumo, float tamano, float eficienciaAlimentacion, float vidaUtil, float rangoMutacion, Color color)
     {
         this.idLinaje = idLinaje;
         this.generaciones = generaciones;
@@ -25,5 +26,11 @@ public struct DatosGeneticos
         this.EficienciaAlimentacion = eficienciaAlimentacion;
         this.vidaUtil = vidaUtil;
         this.rangoMutacion = rangoMutacion;
+        this.colorLinaje = color;
+    }
+    public static float CalcularGasto(float t, float v, float r)
+    {
+        // Elevamos al cubo (t*t*t) para penalizar el tamaño masivamente
+        return ((t * t * t) + (v * v) + r) * 0.25f;
     }
 }

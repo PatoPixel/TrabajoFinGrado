@@ -6,7 +6,7 @@ public class MovimientoAleatorio : MonoBehaviour
     {
         Vagando,
         Persiguiendo,
-        Reproduciendo
+        Reproduciendo,
     }
 
     [Header("Configuración de Movimiento")]
@@ -16,7 +16,6 @@ public class MovimientoAleatorio : MonoBehaviour
     [SerializeField] private float suavizadoVelocidad = 2f;
 
     [Header("Fuerzas Biológicas")]
-    [SerializeField] private float fuerzaRepulsion = 0.5f;
     [SerializeField] private float fuerzaSeparacion = 1f;
 
     private Vector2 direccionObjetivo;
@@ -29,9 +28,16 @@ public class MovimientoAleatorio : MonoBehaviour
 
     void Start()
     {
+        if(GetComponent<SistemaVida>() == null)
+        {
+            enabled = false;
+        } else
+        {
+            sistemaVida = GetComponent<SistemaVida>();
+        }
         miCuerpoFisico = GetComponent<Rigidbody2D>();
         misOjos = GetComponent<SensorBacteria>();
-        sistemaVida = GetComponent<SistemaVida>();
+        
         estadoActual = EstadoBacteria.Vagando;
         CambiarDireccion();
     }
@@ -57,14 +63,14 @@ public class MovimientoAleatorio : MonoBehaviour
         float anguloObjetivo = Mathf.Atan2(direccionObjetivo.y, direccionObjetivo.x) * Mathf.Rad2Deg;
         float anguloActual = transform.eulerAngles.z;
         float diferencia = Mathf.Abs(Mathf.DeltaAngle(anguloActual, anguloObjetivo));
-        float maxGiro = giroMaximoPorSegundo * Time.fixedDeltaTime;
 
-        float anguloNuevo = Mathf.MoveTowardsAngle(anguloActual, anguloObjetivo, maxGiro);
-        transform.rotation = Quaternion.Euler(0, 0, anguloNuevo);
+        float maxGiro = giroMaximoPorSegundo * Time.fixedDeltaTime;
+        float anguloNuevo = Mathf.MoveTowardsAngle(anguloActual, anguloObjetivo, maxGiro); 
+        miCuerpoFisico.MoveRotation(anguloNuevo);
 
         float factorVelocidad = Mathf.InverseLerp(180f, 0f, diferencia);
-        Vector2 velocidadDeseada = (Vector2)transform.right * sistemaVida.misStats.velocidad * factorVelocidad;
 
+        Vector2 velocidadDeseada = (Vector2)transform.right * sistemaVida.misStats.velocidad * factorVelocidad;
         miCuerpoFisico.linearVelocity = Vector2.Lerp(miCuerpoFisico.linearVelocity, velocidadDeseada, Time.fixedDeltaTime * suavizadoVelocidad);
     }
 
@@ -95,7 +101,7 @@ public class MovimientoAleatorio : MonoBehaviour
             if (this.sistemaVida.misStats.tamano > otraVida.misStats.tamano * 1.2f)
             {
                 this.sistemaVida.Alimentar(otraVida.EnergiaActual + 10f);
-                otraVida.SendMessage("Morir"); // Enviamos señal de muerte a la otra
+                otraVida.Morir();
                 return;
             }
 
@@ -117,8 +123,11 @@ public class MovimientoAleatorio : MonoBehaviour
     private void ReaccionarSusto(Vector3 posicionAmenaza)
     {
         Vector2 direccionHuida = (transform.position - posicionAmenaza).normalized;
-        direccionObjetivo = Quaternion.Euler(0, 0, Random.Range(-45, 45)) * direccionHuida;
-        miCuerpoFisico.AddForce(direccionHuida * fuerzaRepulsion, ForceMode2D.Impulse);
+        direccionObjetivo = direccionHuida; // Simplemente cambia el rumbo
+
+        // En lugar de AddForce, frenamos un poco la velocidad actual para que gire mejor
+        miCuerpoFisico.linearVelocity *= 0.5f;
+
         sistemaVida.EnergiaActual -= 2.5f;
         tiempoSiguienteChoque = Time.time + cooldownChoque;
     }

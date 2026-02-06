@@ -7,6 +7,7 @@ public class SensorBacteria : MonoBehaviour
 
     public Transform objetivoMasCercano;
     private SistemaVida sistemaVida;
+    private float contadorBusqueda = 0.2f;
 
     private void Start()
     {
@@ -15,7 +16,12 @@ public class SensorBacteria : MonoBehaviour
 
     void Update()
     {
-        BuscarObjetivo();
+        contadorBusqueda -= Time.deltaTime;
+        if (contadorBusqueda <= 0)
+        {
+            BuscarObjetivo();
+            contadorBusqueda = 0.2f; // Reiniciamos el contador para la próxima búsqueda
+        }
     }
 
     void BuscarObjetivo()
@@ -30,21 +36,23 @@ public class SensorBacteria : MonoBehaviour
         {
             // A. Ignorarnos a nosotros mismos
             if (col.gameObject == gameObject) continue;
-
-            // B. Si es una bacteria, aplicar filtros de depredación
-            if (col.CompareTag("Bacteria"))
+          
+            int idDelDetectado = col.gameObject.GetInstanceID();
+            if(GestorLinajes.RegistroVida.TryGetValue(idDelDetectado, out SistemaVida vidaEncontrada))
             {
-                SistemaVida vidaEncontrada = col.GetComponent<SistemaVida>();
+                // Ignorar si no tiene stats (por seguridad, aunque no debería pasar)
+                if (vidaEncontrada == null) continue;
 
                 // Ignorar si es de mi familia
                 if (vidaEncontrada.misStats.idLinaje == sistemaVida.misStats.idLinaje) continue;
-
+                
                 // Ignorar si es más grande que yo (no soy tonto, no la cazo)
                 if (vidaEncontrada.misStats.tamano * 1.2f >= sistemaVida.misStats.tamano) continue;
             }
+            
 
             // C. Cálculo de distancia para encontrar al más cercano
-            float distancia = Vector2.Distance(transform.position, col.transform.position);
+            float distancia = (transform.position - col.transform.position).sqrMagnitude;
             if (distancia < distanciaMinima)
             {
                 distanciaMinima = distancia;
