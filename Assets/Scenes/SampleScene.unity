@@ -384,7 +384,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!58 &413103016
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -459,7 +460,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &430124586
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -715,7 +717,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &478964061
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -1192,7 +1195,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &663387277
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -1448,7 +1452,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &762076359
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -1704,7 +1709,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &772312535
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -1997,7 +2003,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &856497715
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -2253,7 +2260,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &956771677
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -2509,7 +2517,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &961228054
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -2765,7 +2774,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &961910329
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -3021,7 +3031,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &1183416366
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -3277,7 +3288,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &1237088012
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -3533,7 +3545,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &1289052362
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -3898,7 +3911,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &1457969735
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -4154,7 +4168,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &1491855197
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -4410,7 +4425,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &1493261218
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -4757,7 +4773,8 @@ MonoBehaviour:
   capasObjetivo:
     serializedVersion: 2
     m_Bits: 64
-  objetivoMasCercano: {fileID: 0}
+  comidaCercana: {fileID: 0}
+  AmenazaCercana: {fileID: 0}
 --- !u!70 &1811049623
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

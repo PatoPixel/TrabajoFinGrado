@@ -11,7 +11,7 @@ public class SistemaVida : MonoBehaviour
     [SerializeField] private float energiaActual;
     [SerializeField] private float edadActual;
     public float EnergiaActual { get => energiaActual; set => energiaActual = value; }
-
+    public float MultiplicadorActividad { get; set; } = 1f;
     void Start()
     {
         if (string.IsNullOrEmpty(nombreDePila))
@@ -58,7 +58,7 @@ public class SistemaVida : MonoBehaviour
     }
     void Update()
     {
-        energiaActual -= misStats.consumo * Time.deltaTime;
+        energiaActual -= misStats.consumo * MultiplicadorActividad * Time.deltaTime;
 
         edadActual += Time.deltaTime;
         if (energiaActual <= 0)

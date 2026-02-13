@@ -3,15 +3,23 @@ using UnityEngine;
 public class SensorBacteria : MonoBehaviour
 {
     [Header("Configuración del Radar")]
-    public LayerMask capasObjetivo; // Selecciona "Comida" Y "Bacteria" en el Inspector
+    public LayerMask capasObjetivo;
 
-    public Transform objetivoMasCercano;
+    public Transform comidaCercana;
+    public Transform AmenazaCercana;
     private SistemaVida sistemaVida;
     private float contadorBusqueda = 0.2f;
+
+    private static Collider2D[] resultadosBuffer = new Collider2D[16];
+    private ContactFilter2D filtro;
 
     private void Start()
     {
         sistemaVida = GetComponent<SistemaVida>();
+        
+        filtro.SetLayerMask(capasObjetivo);
+        filtro.useLayerMask = true;
+        filtro.useTriggers = true;
     }
 
     void Update()
@@ -20,38 +28,56 @@ public class SensorBacteria : MonoBehaviour
         if (contadorBusqueda <= 0)
         {
             BuscarObjetivo();
-            contadorBusqueda = 0.2f; // Reiniciamos el contador para la próxima búsqueda
+            contadorBusqueda = Random.Range(0.1f,0.3f);
         }
     }
 
     void BuscarObjetivo()
     {
         // 1. Escaneamos todo en el radio de visión
-        Collider2D[] detectados = Physics2D.OverlapCircleAll(transform.position, sistemaVida.misStats.radioVision, capasObjetivo);
+        int cantidadDetectada = Physics2D.OverlapCircle(
+                transform.position,
+                sistemaVida.misStats.radioVision,
+                filtro,
+                resultadosBuffer
+            );
 
         float distanciaMinima = Mathf.Infinity;
         Transform candidatoOpcional = null;
-
-        foreach (Collider2D col in detectados)
+        AmenazaCercana = null;
+        comidaCercana = null;
+        for (int i = 0; i < cantidadDetectada; i++)
         {
-            // A. Ignorarnos a nosotros mismos
+            
+            Collider2D col = resultadosBuffer[i];
+            // Ignorarnos a nosotros mismos
             if (col.gameObject == gameObject) continue;
           
             int idDelDetectado = col.gameObject.GetInstanceID();
-            if(GestorLinajes.RegistroVida.TryGetValue(idDelDetectado, out SistemaVida vidaEncontrada))
+            if (GestorLinajes.RegistroVida.TryGetValue(idDelDetectado, out SistemaVida vidaEncontrada))
             {
+
                 // Ignorar si no tiene stats (por seguridad, aunque no debería pasar)
                 if (vidaEncontrada == null) continue;
 
                 // Ignorar si es de mi familia
                 if (vidaEncontrada.misStats.idLinaje == sistemaVida.misStats.idLinaje) continue;
-                
-                // Ignorar si es más grande que yo (no soy tonto, no la cazo)
-                if (vidaEncontrada.misStats.tamano * 1.2f >= sistemaVida.misStats.tamano) continue;
-            }
-            
+                // Si el otro es un 20% más grande que yo huyo
+                if (vidaEncontrada.misStats.tamano > sistemaVida.misStats.tamano * 1.2f)
+                {
+                    // PRIORIDAD MÁXIMA: Guardamos la amenaza y abortamos búsqueda
+                    AmenazaCercana = col.transform;
+                    break;
+                }
 
-            // C. Cálculo de distancia para encontrar al más cercano
+                //Si no es 20% mas pequeño que yo lo ignoro
+                if (sistemaVida.misStats.tamano <= vidaEncontrada.misStats.tamano * 1.2f) continue;
+
+
+
+                }
+
+            // Cálculo de distancia para encontrar al más cercano
             float distancia = (transform.position - col.transform.position).sqrMagnitude;
             if (distancia < distanciaMinima)
             {
@@ -61,13 +87,18 @@ public class SensorBacteria : MonoBehaviour
         }
 
         // 2. Asignamos el resultado
-        objetivoMasCercano = candidatoOpcional;
+        comidaCercana = candidatoOpcional;
 
         // 3. Debug Visual
-        if (objetivoMasCercano != null)
+        if (comidaCercana != null)
         {
-            Color colorDebug = objetivoMasCercano.CompareTag("Bacteria") ? Color.magenta : Color.red;
-            Debug.DrawLine(transform.position, objetivoMasCercano.position, colorDebug);
+            Color colorDebug = comidaCercana.CompareTag("Bacteria") ? Color.magenta : Color.yellow;
+            Debug.DrawLine(transform.position, comidaCercana.position, colorDebug);
+        }
+
+        if(AmenazaCercana != null)
+        {
+            Debug.DrawLine(transform.position, AmenazaCercana.position, Color.red);
         }
     }
 
