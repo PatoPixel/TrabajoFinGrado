@@ -25,8 +25,6 @@ public class GraficaEvolucion : MonoBehaviour
         lineTamano.positionCount = puntosADibujar;
         int indiceInicio = historial.Count - puntosADibujar;
 
-        // Pon esto para ver la magia en la consola:
-        Debug.Log($"<color=orange>[Gráfica] Leyendo historial desde el índice {indiceInicio} hasta {historial.Count - 1}</color>");
         // 2. Llenamos los puntos recorriendo el historial
         for (int i = 0; i < puntosADibujar; i++)
         {
