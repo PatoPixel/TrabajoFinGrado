@@ -20,7 +20,7 @@ public class EvolutionTracker : MonoBehaviour
     public int familiaSeleccionada = 1; // Por defecto vemos la 1
     private Dictionary<int, List<SpeciesSnapshot>> historialEspecies = new Dictionary<int, List<SpeciesSnapshot>>();
 
-    [SerializeField] private GraficaEvolucion graficaUI;
+    public List<GraficaIndividual> todasLasGraficas = new List<GraficaIndividual>();
     [SerializeField] private float intervaloMuestreo = 2f;
     private float timer;
 
@@ -76,19 +76,39 @@ public class EvolutionTracker : MonoBehaviour
 
         historialEspecies[speciesId].Add(nuevoSnapshot);
 
-        if (speciesId == familiaSeleccionada && graficaUI != null)
+        if (speciesId == familiaSeleccionada && todasLasGraficas != null)
         {
-            graficaUI.ActualizarGrafica(historialEspecies[speciesId]);
+            // Avisamos a todos los paneles a la vez
+            foreach (GraficaIndividual panel in todasLasGraficas)
+            {
+                panel.ActualizarGrafica(historialEspecies[speciesId]);
+            }
         }
     }
     public void CambiarFamiliaSeleccionada(int nuevoId)
     {
         familiaSeleccionada = nuevoId;
 
-        // Si ya tenemos datos de esa familia en el historial, actualizamos la gráfica al instante
-        if (historialEspecies.ContainsKey(nuevoId) && graficaUI != null)
+        // Nos aseguramos de que la lista de gráficas esté inicializada
+        if (todasLasGraficas != null)
         {
-            graficaUI.ActualizarGrafica(historialEspecies[nuevoId]);
+            // Si ya tenemos datos de esa familia, actualizamos todas las gráficas al instante
+            if (historialEspecies.ContainsKey(nuevoId))
+            {
+                foreach (GraficaIndividual panel in todasLasGraficas)
+                {
+                    panel.ActualizarGrafica(historialEspecies[nuevoId]);
+                }
+            }
+            else
+            {
+                // Si es una familia nueva y aún no hay datos, limpiamos las gráficas por si había otra seleccionada antes
+                foreach (GraficaIndividual panel in todasLasGraficas)
+                {
+                    panel.Limpiar();
+                }
+            }
         }
     }
+
 }

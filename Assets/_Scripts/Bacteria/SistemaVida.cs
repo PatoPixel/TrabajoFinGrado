@@ -48,7 +48,7 @@ public class SistemaVida : MonoBehaviour
         misStats.energiaMax = 100f;
         misStats.tamano = 1f;
         misStats.rangoMutacion = 0.10f;
-        misStats.vidaUtil = 60f;  
+        misStats.vidaUtil = 1000f / (((float)Math.Pow(misStats.tamano, 3f) + (float)Math.Pow(misStats.velocidad, 2) + misStats.radioVision) / 4);
         misStats.consumo = ((float) Math.Pow(misStats.tamano, 3f) + (float) Math.Pow(misStats.velocidad, 2) + misStats.radioVision)/4;
         if (misStats.colorLinaje.a == 0)
         {
@@ -125,7 +125,6 @@ public class SistemaVida : MonoBehaviour
         float nVelocidad = padre.velocidad * UnityEngine.Random.Range(1 - var, 1 + var);
         float nTamano = padre.tamano * UnityEngine.Random.Range(1 - var / 2, 1 + var / 2);
         float nRadio = padre.radioVision * UnityEngine.Random.Range(1 - var, 1 + var);
-        float nVidaUtil = padre.vidaUtil * UnityEngine.Random.Range(1 - var, 1 + var);
         // 2. Calculamos el consumo usando los NUEVOS valores locales
         // Así evitamos usar 'misStats' del padre por error
         float nConsumo = DatosGeneticos.CalcularGasto(nTamano, nVelocidad, nRadio);
@@ -138,9 +137,9 @@ public class SistemaVida : MonoBehaviour
             velocidad = nVelocidad,
             tamano = nTamano,
             radioVision = nRadio,
-            consumo = nConsumo, // Asignación limpia
-            vidaUtil = nVidaUtil,
-            energiaMax = padre.energiaMax * UnityEngine.Random.Range(1 - var, 1 + var),
+            consumo = nConsumo,
+            vidaUtil = (nTamano*nTamano*100)/nConsumo,
+            energiaMax = nTamano*100,
             rangoMutacion = padre.rangoMutacion,
             colorLinaje = padre.colorLinaje
         };
