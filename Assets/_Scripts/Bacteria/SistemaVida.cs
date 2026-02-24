@@ -48,7 +48,7 @@ public class SistemaVida : MonoBehaviour
         misStats.energiaMax = 100f;
         misStats.tamano = 1f;
         misStats.rangoMutacion = 0.10f;
-        misStats.vidaUtil = 1000f / (((float)Math.Pow(misStats.tamano, 3f) + (float)Math.Pow(misStats.velocidad, 2) + misStats.radioVision) / 4);
+        misStats.vidaUtil = 100f / (((float)Math.Pow(misStats.tamano, 3f) + (float)Math.Pow(misStats.velocidad, 2) + misStats.radioVision) / 4);
         misStats.consumo = ((float) Math.Pow(misStats.tamano, 3f) + (float) Math.Pow(misStats.velocidad, 2) + misStats.radioVision)/4;
         if (misStats.colorLinaje.a == 0)
         {

@@ -1,31 +1,37 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public struct SpeciesSnapshot
+public struct EspeciesSnapshot
 {
-    public float avgSpeed;
+    public float avgVel;
     public float avgVision;
-    public float avgSize;
+    public float avgTamano;
+    public float avgEnergia;
+    public float avgConsumo;
+    public float avgVidaUtil;
+
 }
-public struct Accumulator
+public struct Acumulador
 {
-    public float sumSpeed;
+    public float sumVel;
     public float sumVision;
-    public float sumSize;
+    public float sumTamano;
+    public float sumEnergia;
+    public float sumConsumo;
+    public float sumVidaUtil;
     public int count;
-    public void Reset() { sumSpeed = sumVision = sumSize = 0; count = 0; }
+    public void Reset() { sumVel = sumVision = sumTamano =  sumEnergia = sumConsumo = sumVidaUtil = 0; count = 0; }
 }
 public class EvolutionTracker : MonoBehaviour
 {
     public int familiaSeleccionada = 1; // Por defecto vemos la 1
-    private Dictionary<int, List<SpeciesSnapshot>> historialEspecies = new Dictionary<int, List<SpeciesSnapshot>>();
+    private Dictionary<int, List<EspeciesSnapshot>> historialEspecies = new Dictionary<int, List<EspeciesSnapshot>>();
 
     public List<GraficaIndividual> todasLasGraficas = new List<GraficaIndividual>();
     [SerializeField] private float intervaloMuestreo = 2f;
     private float timer;
 
-    // Array fijo de acumuladores para evitar crear memoria nueva (Senior style)
-    private Accumulator[] batchAccumulators = new Accumulator[100];
+    private Acumulador[] acumulador = new Acumulador[100];
 
     void Update()
     {
@@ -39,39 +45,46 @@ public class EvolutionTracker : MonoBehaviour
 
     void PerformSnapshot()
     {
-        for (int i = 0; i < batchAccumulators.Length; i++) batchAccumulators[i].Reset();
+        for (int i = 0; i < acumulador.Length; i++) acumulador[i].Reset();
 
         // Accedemos al RegistroVida que ya tienes en GestorLinajes
         foreach (var par in GestorLinajes.RegistroVida)
         {
             // Usamos el id de linaje para saber en qué cajón sumar
-            int id = par.Value.misStats.idLinaje % batchAccumulators.Length;
+            int id = par.Value.misStats.idLinaje % acumulador.Length;
 
-            batchAccumulators[id].sumSpeed += par.Value.misStats.velocidad;
-            batchAccumulators[id].sumVision += par.Value.misStats.radioVision;
-            batchAccumulators[id].sumSize += par.Value.misStats.tamano;
-            batchAccumulators[id].count++;
+            acumulador[id].sumVel += par.Value.misStats.velocidad;
+            acumulador[id].sumVision += par.Value.misStats.radioVision;
+            acumulador[id].sumTamano += par.Value.misStats.tamano;
+            acumulador[id].sumEnergia += par.Value.misStats.energiaMax;
+            acumulador[id].sumConsumo += par.Value.misStats.consumo;
+            acumulador[id].sumVidaUtil += par.Value.misStats.vidaUtil;
+            acumulador[id].count++;
         }
 
-        for (int i = 0; i < batchAccumulators.Length; i++)
+        for (int i = 0; i < acumulador.Length; i++)
         {
-            if (batchAccumulators[i].count > 0)
+            if (acumulador[i].count > 0)
             {
-                GuardarEnHistorial(i, batchAccumulators[i]);
+                GuardarEnHistorial(i, acumulador[i]);
             }
         }
     }
 
-    void GuardarEnHistorial(int speciesId, Accumulator acc)
+    void GuardarEnHistorial(int speciesId, Acumulador acc)
     {
         if (!historialEspecies.ContainsKey(speciesId))
-            historialEspecies.Add(speciesId, new List<SpeciesSnapshot>());
+            historialEspecies.Add(speciesId, new List<EspeciesSnapshot>());
 
-        SpeciesSnapshot nuevoSnapshot = new SpeciesSnapshot
+        EspeciesSnapshot nuevoSnapshot = new EspeciesSnapshot
         {
-            avgSpeed = acc.sumSpeed / acc.count,
+            avgVel = acc.sumVel / acc.count,
             avgVision = acc.sumVision / acc.count,
-            avgSize = acc.sumSize / acc.count
+            avgTamano = acc.sumTamano / acc.count,
+            avgEnergia = acc.sumEnergia / acc.count,
+            avgConsumo = acc.sumConsumo / acc.count,
+            avgVidaUtil = acc.sumVidaUtil / acc.count
+
         };
 
         historialEspecies[speciesId].Add(nuevoSnapshot);
