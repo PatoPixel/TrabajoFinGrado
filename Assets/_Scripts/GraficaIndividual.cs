@@ -3,9 +3,10 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
 using System.Collections;
-using System.Text.RegularExpressions; // ¡NUEVO! Necesario para formatear el texto
+using System.Text.RegularExpressions;
+using UnityEngine.EventSystems;
 
-public class GraficaIndividual : MonoBehaviour
+public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
 {
     // --- 1. CONFIGURACIÓN ---
     public enum TipoEstadistica { Velocidad, Vision, Tamaño, Consumo, EnergíaMáxima, EsperanzaDeVida }
@@ -18,9 +19,11 @@ public class GraficaIndividual : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textoActual;
     [SerializeField] private TextMeshProUGUI textoMax;
     [SerializeField] private TextMeshProUGUI textoMin;
+    private List<EspeciesSnapshot> historialGuardado;
     [Header("Info Extra (Opcional)")]
     // Es para la energia máxima
     [SerializeField] private TextMeshProUGUI textoInfoSecundaria;
+
     [Header("Referencias Acordeón")]
     [SerializeField] private GameObject cuerpoGrafica;
     [SerializeField] private Button botonCabecera;
@@ -90,6 +93,7 @@ public class GraficaIndividual : MonoBehaviour
     // --- 3. LÓGICA DE LA GRÁFICA ---
     public void ActualizarGrafica(List<EspeciesSnapshot> historial)
     {
+        this.historialGuardado = historial;
         if (historial == null || historial.Count == 0) return;
 
         int puntosADibujar = Mathf.Min(historial.Count, maxPuntosVisible);
@@ -183,5 +187,25 @@ public class GraficaIndividual : MonoBehaviour
     {
         if (lineaGrafica != null) lineaGrafica.positionCount = 0;
         if (textoActual != null) textoActual.text = "-";
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        // Si ha hecho 2 clics muy rápidos
+        if (eventData.clickCount == 2)
+        {
+            Debug.Log("Doble clic detectado. Abriendo visor grande...");
+            // --- DEBUG DE ERRORES ---
+            if (VisorGraficaGrande.Instance == null)
+                Debug.LogError(" ERROR CRÍTICO: VisorGraficaGrande.Instance es NULL. ¿El objeto Visor existe en la escena? ¿Está ACTIVADO?");
+
+            if (historialGuardado == null)
+                Debug.LogError(" ERROR CRÍTICO: historialGuardado es NULL. No se están guardando los datos en ActualizarGrafica.");
+            //
+            if (VisorGraficaGrande.Instance != null && historialGuardado != null)
+            {
+                VisorGraficaGrande.Instance.AbrirVisor(historialGuardado, estadisticaAsignada);
+            }
+        }
     }
 }
