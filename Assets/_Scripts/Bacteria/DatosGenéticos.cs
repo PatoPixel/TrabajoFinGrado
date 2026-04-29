@@ -10,11 +10,11 @@ public struct DatosGeneticos
     public float energiaMax;
     public float consumo;
     public float tamano;
-    public float EficienciaAlimentacion;
     public float vidaUtil;
     public float rangoMutacion;
+    public float tiempreEntreReproduccion;
     public Color colorLinaje;
-    public DatosGeneticos(int idLinaje, int generaciones, float velocidad, float radioVision, float energiaMax, float consumo, float tamano, float eficienciaAlimentacion, float vidaUtil, float rangoMutacion, Color color)
+    public DatosGeneticos(int idLinaje, int generaciones, float velocidad, float radioVision, float energiaMax, float consumo, float tamano, float vidaUtil, float rangoMutacion, float tiempoEntreReproduccion, Color color)
     {
         this.idLinaje = idLinaje;
         this.generaciones = generaciones;
@@ -23,9 +23,9 @@ public struct DatosGeneticos
         this.energiaMax = energiaMax;
         this.consumo = consumo;
         this.tamano = tamano;
-        this.EficienciaAlimentacion = eficienciaAlimentacion;
         this.vidaUtil = vidaUtil;
         this.rangoMutacion = rangoMutacion;
+        this.tiempreEntreReproduccion = tiempoEntreReproduccion;
         this.colorLinaje = color;
     }
     public static float CalcularGasto(float t, float v, float r)

@@ -4,13 +4,15 @@ using UnityEngine;
 public class SistemaVida : MonoBehaviour
 {
     public DatosGeneticos misStats;
-    private bool reproduciendose = false;
+    private float factorRitmo = 5f;
 
     [Header("Monitor")]
     [SerializeField] private string nombreDePila;
     [SerializeField] private float energiaActual;
     [SerializeField] private float edadActual;
+    [SerializeField] private float cooldownRestante;
     public float EnergiaActual { get => energiaActual; set => energiaActual = value; }
+    public float EdadActual { get => edadActual; set => edadActual = value; }
     public float MultiplicadorActividad { get; set; } = 1f;
     void Start()
     {
@@ -18,12 +20,12 @@ public class SistemaVida : MonoBehaviour
         {
             nombreDePila = gameObject.name;
         }
-        // 1. Si los stats están a 0, inicializamos con valores base
+        // 1. Si los stats estï¿½n a 0, inicializamos con valores base
         if (misStats.idLinaje == 0)
         {
             AsignarStatsBase();
 
-            // Ahora usamos la propiedad Instance que es más inteligente
+            // Ahora usamos la propiedad Instance que es mï¿½s inteligente
             if (GestorLinajes.Instance != null)
             {
                 misStats.idLinaje = GestorLinajes.Instance.ObtenerNuevoId();
@@ -32,12 +34,12 @@ public class SistemaVida : MonoBehaviour
             }
             else
             {
-                // Este es el último recurso si el objeto NO existe en la escena
-                Debug.LogError("CRÍTICO: El objeto GestorLinajes no existe en la jerarquía.");
+                // Este es el ï¿½ltimo recurso si el objeto NO existe en la escena
+                Debug.LogError("CRï¿½TICO: El objeto GestorLinajes no existe en la jerarquï¿½a.");
             }
         }
-        // 2. IMPORTANTE: Sincronizar energía y componentes
-        energiaActual = misStats.energiaMax * 0.7f; // Nacen con un 70% de energía
+        // 2. IMPORTANTE: Sincronizar energï¿½a y componentes
+        energiaActual = misStats.energiaMax * 0.7f; // Nacen con un 70% de energï¿½a
 
     }
     public void AsignarStatsBase()
@@ -50,6 +52,8 @@ public class SistemaVida : MonoBehaviour
         misStats.rangoMutacion = 0.10f;
         misStats.vidaUtil = 100f / (((float)Math.Pow(misStats.tamano, 3f) + (float)Math.Pow(misStats.velocidad, 2) + misStats.radioVision) / 4);
         misStats.consumo = ((float) Math.Pow(misStats.tamano, 3f) + (float) Math.Pow(misStats.velocidad, 2) + misStats.radioVision)/4;
+        misStats.tiempreEntreReproduccion = (misStats.energiaMax / misStats.vidaUtil) * factorRitmo;
+        cooldownRestante = misStats.tiempreEntreReproduccion;
         if (misStats.colorLinaje.a == 0)
         {
             misStats.colorLinaje = GetComponent<SpriteRenderer>().color;
@@ -58,17 +62,18 @@ public class SistemaVida : MonoBehaviour
     }
     void Update()
     {
-        energiaActual -= misStats.consumo * MultiplicadorActividad * Time.deltaTime;
+        float dt = Time.deltaTime;
+        energiaActual -= misStats.consumo * MultiplicadorActividad * dt;
+        edadActual += dt;
 
-        edadActual += Time.deltaTime;
-        if (energiaActual <= 0)
+        if (energiaActual <= 0 || edadActual > misStats.vidaUtil)
         {
-            Morir();
+            if (energiaActual <= 0 || CheckMuerteNatural()) Morir();
         }
-        if (edadActual > misStats.vidaUtil)
+
+        if (cooldownRestante > 0)
         {
-            // Ejecutamos el azar solo una vez por segundo, no por frame, para optimizar
-            if (CheckMuerteNatural()) Morir();
+            cooldownRestante -= dt;
         }
     }
 
@@ -76,24 +81,23 @@ public class SistemaVida : MonoBehaviour
     {
         energiaActual += cantidad;
         energiaActual = Mathf.Clamp(energiaActual, 0, misStats.energiaMax);
-        reproduciendose = false;
     }
 
     public void Reproducir(float costoReproduccion)
     {
-        energiaActual -= costoReproduccion;
-
-        if (!reproduciendose)
+        // CondiciÃ³n de seguridad: EnergÃ­a suficiente Y cooldown agotado
+        if (cooldownRestante <= 0 && energiaActual >= costoReproduccion)
         {
+            energiaActual -= costoReproduccion;
+
+            // Bloqueamos la reproducciÃ³n inmediatamente (Cooldown de seguridad)
+            cooldownRestante = misStats.tiempreEntreReproduccion;
+
             GameObject hijo = BacteriasMuertas.Instance.GetBacteria(transform.position);
-
-            SistemaVida vidaHijo = hijo.GetComponent<SistemaVida>();
-
-            if (vidaHijo != null)
+            if (hijo != null && hijo.TryGetComponent(out SistemaVida vidaHijo))
             {
                 vidaHijo.InicializarHijo(misStats);
             }
-            reproduciendose = true;
         }
     }
 
@@ -102,7 +106,7 @@ public class SistemaVida : MonoBehaviour
         // 1. Generamos el nuevo paquete de ADN
         this.misStats = MutarGenes(genesPadre);
         this.energiaActual = misStats.energiaMax * 0.5f;
-        this.reproduciendose = true;
+        this.cooldownRestante = misStats.tiempreEntreReproduccion;
         transform.localScale = Vector3.one * misStats.tamano;
 
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
@@ -110,13 +114,11 @@ public class SistemaVida : MonoBehaviour
         {
             sr.color = misStats.colorLinaje;
         }
-        // 2. Aplicamos cambios físicos y visuales
+        // 2. Aplicamos cambios fï¿½sicos y visuales
         string nombreBase = GestorLinajes.Instance.GetNombrePorId(misStats.idLinaje);
         gameObject.name = $"{nombreBase} (Gen {misStats.generaciones})";
         edadActual = 0;
-        Invoke("ResetReproduccion", 5f);
     }
-    private void ResetReproduccion() => reproduciendose = false;
     private DatosGeneticos MutarGenes(DatosGeneticos padre)
     {
         float var = padre.rangoMutacion;
@@ -126,9 +128,11 @@ public class SistemaVida : MonoBehaviour
         float nTamano = padre.tamano * UnityEngine.Random.Range(1 - var / 2, 1 + var / 2);
         float nRadio = padre.radioVision * UnityEngine.Random.Range(1 - var, 1 + var);
         // 2. Calculamos el consumo usando los NUEVOS valores locales
-        // Así evitamos usar 'misStats' del padre por error
+        // Asï¿½ evitamos usar 'misStats' del padre por error
         float nConsumo = DatosGeneticos.CalcularGasto(nTamano, nVelocidad, nRadio);
-
+        float nVidaUtil = (nTamano * nTamano * 100) / nConsumo;
+        float nEnergiaMax = nTamano * 100;
+        float nCooldown = (nEnergiaMax / nVidaUtil) * factorRitmo;
         // 3. Empaquetamos en el nuevo struct
         return new DatosGeneticos
         {
@@ -138,8 +142,9 @@ public class SistemaVida : MonoBehaviour
             tamano = nTamano,
             radioVision = nRadio,
             consumo = nConsumo,
-            vidaUtil = (nTamano*nTamano*100)/nConsumo,
-            energiaMax = nTamano*100,
+            vidaUtil = nVidaUtil,
+            energiaMax = nEnergiaMax,
+            tiempreEntreReproduccion = nCooldown,
             rangoMutacion = padre.rangoMutacion,
             colorLinaje = padre.colorLinaje
         };
@@ -151,14 +156,16 @@ public class SistemaVida : MonoBehaviour
     {
         if (otroObjeto.CompareTag("Comida"))
         {
-            Alimentar(40f);
-            Destroy(otroObjeto.gameObject);
+            Comida comida = otroObjeto.GetComponent<Comida>();
+            float energia = comida != null ? comida.Energia : 40f;
+            Alimentar(energia);
+            comida?.Devolver();
         }
     }
 
     private bool CheckMuerteNatural()
     {
-        // Calculamos qué tan "viejo" es respecto a su límite (ej: 1.2 es un 20% extra)
+        // Calculamos quï¿½ tan "viejo" es respecto a su lï¿½mite (ej: 1.2 es un 20% extra)
         float factorExceso = edadActual / misStats.vidaUtil;
 
         // Probabilidad base que sube con el tiempo
@@ -168,12 +175,34 @@ public class SistemaVida : MonoBehaviour
     }
 
 
-
     public void Morir()
     {
-        CancelInvoke(); // Detenemos cualquier proceso pendiente (como la reproducción)
+        CancelInvoke();
+        SoltarNutrientes();
         gameObject.SetActive(false);
         BacteriasMuertas.Instance.bacteriasMuertas.Push(gameObject);
+    }
+
+    /// <summary>
+    /// Releases nutrients proportional to this bacteria's tamano when it dies.
+    /// </summary>
+    private void SoltarNutrientes()
+    {
+        if (PoolComida.Instance == null) return;
+
+        int cantidad = Mathf.Max(1, Mathf.RoundToInt(misStats.tamano * 2f));
+        float tamanoChunk = misStats.tamano / cantidad;
+
+        for (int i = 0; i < cantidad; i++)
+        {
+            Vector3 offset = new Vector3(
+                UnityEngine.Random.Range(-0.2f, 0.2f),
+                UnityEngine.Random.Range(-0.2f, 0.2f),
+                0f);
+
+            GameObject obj = PoolComida.Instance.GetComida(transform.position + offset, tamanoChunk);
+            obj.GetComponent<Comida>()?.Inicializar(tamanoChunk);
+        }
     }
     public void OnEnable()
     {

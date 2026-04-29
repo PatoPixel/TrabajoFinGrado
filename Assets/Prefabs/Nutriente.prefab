@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2557989648766891229}
   - component: {fileID: 7364458273610396719}
   - component: {fileID: 6695011643581899842}
+  - component: {fileID: -5959373926621599341}
   m_Layer: 6
   m_Name: Nutriente
   m_TagString: Comida
@@ -35,6 +36,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7364458273610396719
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -80,6 +82,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 1, g: 0.70772064, b: 0.20188677, a: 1}
   m_FlipX: 0
@@ -89,7 +92,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!58 &6695011643581899842
 CircleCollider2D:
@@ -127,3 +129,15 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: -0.0025730054}
   m_Radius: 0.5539984
+--- !u!114 &-5959373926621599341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8524807538240655609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1d90458f3b7bca469f6094fb023036b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Comida

@@ -35,6 +35,8 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
 
     private bool estaExpandido = false;
 
+    [SerializeField] private Camera camaraPrincipal;
+
     void Start()
     {
         if (botonCabecera != null)
@@ -52,6 +54,25 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
             cuerpoGrafica.SetActive(false);
 
         ActualizarLayoutPadre();
+    }
+
+    private void Update()
+    {
+        if (estaExpandido)
+        {
+            if (VisorGraficaGrande.Instance != null && VisorGraficaGrande.Instance.camaraPrincipal != null)
+            {
+                // 2. Leemos el zoom directamente de la referencia que YA tenemos en el Singleton
+                float zoomActual = VisorGraficaGrande.Instance.camaraPrincipal.orthographicSize;
+
+                // 3. Aplicamos la proporción (ajusta el 0.05f según lo que te guste)
+                // Multiplicamos para que a más zoom (cámara lejos), la línea sea más gruesa.
+                lineaGrafica.widthMultiplier = zoomActual * 0.05f;
+            }
+        }
+
+
+
     }
 
     // --- FUNCIÓN NUEVA: CONVIERTE "EsperanzaDeVida" en "Esperanza De Vida" ---
@@ -94,6 +115,14 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
     public void ActualizarGrafica(List<EspeciesSnapshot> historial)
     {
         this.historialGuardado = historial;
+        if (VisorGraficaGrande.Instance != null && VisorGraficaGrande.Instance.estaAbierto)
+        {
+            if (VisorGraficaGrande.Instance.estadisticaActiva == this.estadisticaAsignada)
+            {
+                // Le mandamos los datos frescos para que se redibuje sola
+                VisorGraficaGrande.Instance.AbrirVisor(historial, this.estadisticaAsignada);
+            }
+        }
         if (historial == null || historial.Count == 0) return;
 
         int puntosADibujar = Mathf.Min(historial.Count, maxPuntosVisible);

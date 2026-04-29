@@ -22,9 +22,34 @@ public struct Acumulador
     public int count;
     public void Reset() { sumVel = sumVision = sumTamano =  sumEnergia = sumConsumo = sumVidaUtil = 0; count = 0; }
 }
+
+public struct RangoEstadisticoEspecie
+    {
+    public float minVel;
+    public float maxVel;
+    public float minVision;
+    public float maxVision;
+    public float minTamano;
+    public float maxTamano;
+    public float minEnergia;
+    public float maxEnergia;
+    public float minConsumo;
+    public float maxConsumo;
+    public float minVidaUtil;
+    public float maxVidaUtil;
+}
+
+public struct EspeciesSnapshotAssssss
+{
+    public EspeciesSnapshot snapshot;
+    public RangoEstadisticoEspecie rango;
+}
+
+
 public class EvolutionTracker : MonoBehaviour
 {
     public int familiaSeleccionada = 1; // Por defecto vemos la 1
+
     private Dictionary<int, List<EspeciesSnapshot>> historialEspecies = new Dictionary<int, List<EspeciesSnapshot>>();
 
     public List<GraficaIndividual> todasLasGraficas = new List<GraficaIndividual>();

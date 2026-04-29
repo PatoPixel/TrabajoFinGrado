@@ -1,0 +1,44 @@
+using UnityEngine;
+
+/// <summary>
+/// Component attached to every nutrient prefab instance.
+/// Holds the energy value of this nutrient and handles pool return on pickup.
+/// </summary>
+public class Comida : MonoBehaviour
+{
+    // -------------------------------------------------------------------------
+    // Constants
+    // -------------------------------------------------------------------------
+    private const float EnergiaBase = 40f;
+    private const float EscalaEnergiaMultiplicador = 20f;
+
+    // -------------------------------------------------------------------------
+    // State
+    // -------------------------------------------------------------------------
+    /// <summary>Energy granted to a bacteria that picks this up.</summary>
+    public float Energia { get; private set; } = EnergiaBase;
+
+    // -------------------------------------------------------------------------
+    // Public API
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Called by PoolComida or SistemaVida when placing this nutrient.
+    /// Sets visual scale and derived energy value.
+    /// </summary>
+    public void Inicializar(float tamano)
+    {
+        float escalaFinal = Mathf.Max(0.1f, tamano);
+        transform.localScale = Vector3.one * escalaFinal;
+        Energia = EnergiaBase + escalaFinal * EscalaEnergiaMultiplicador;
+    }
+
+    /// <summary>Returns this nutrient to the pool.</summary>
+    public void Devolver()
+    {
+        if (PoolComida.Instance != null)
+            PoolComida.Instance.Devolver(gameObject);
+        else
+            gameObject.SetActive(false);
+    }
+}
