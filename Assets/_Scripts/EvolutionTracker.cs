@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-
+[System.Serializable]
 public struct EspeciesSnapshot
 {
     public float avgVel;
@@ -22,7 +22,7 @@ public struct Acumulador
     public int count;
     public void Reset() { sumVel = sumVision = sumTamano =  sumEnergia = sumConsumo = sumVidaUtil = 0; count = 0; }
 }
-
+[System.Serializable]
 public struct RangoEstadisticoEspecie
     {
     public float minVel;
@@ -39,24 +39,22 @@ public struct RangoEstadisticoEspecie
     public float maxVidaUtil;
 }
 
-public struct EspeciesSnapshotAssssss
-{
-    public EspeciesSnapshot snapshot;
-    public RangoEstadisticoEspecie rango;
-}
-
 
 public class EvolutionTracker : MonoBehaviour
 {
     public int familiaSeleccionada = 1; // Por defecto vemos la 1
 
     private Dictionary<int, List<EspeciesSnapshot>> historialEspecies = new Dictionary<int, List<EspeciesSnapshot>>();
-
+    private Dictionary<int, RangoEstadisticoEspecie> rangosEspecies = new Dictionary<int, RangoEstadisticoEspecie>();   
     public List<GraficaIndividual> todasLasGraficas = new List<GraficaIndividual>();
     [SerializeField] private float intervaloMuestreo = 2f;
     private float timer;
 
     private Acumulador[] acumulador = new Acumulador[100];
+
+    public Dictionary<int, List<EspeciesSnapshot>> HistorialEspecies { get => historialEspecies; }
+    public Dictionary<int, RangoEstadisticoEspecie> RangosEspecies { get => rangosEspecies; }
+
 
     void Update()
     {
@@ -101,6 +99,17 @@ public class EvolutionTracker : MonoBehaviour
         if (!historialEspecies.ContainsKey(speciesId))
             historialEspecies.Add(speciesId, new List<EspeciesSnapshot>());
 
+        if (!rangosEspecies.ContainsKey(speciesId))
+            rangosEspecies.Add(speciesId, new RangoEstadisticoEspecie
+            {
+                minVel = float.MaxValue, maxVel = float.MinValue,
+                minVision = float.MaxValue, maxVision = float.MinValue,
+                minTamano = float.MaxValue, maxTamano = float.MinValue,
+                minEnergia = float.MaxValue, maxEnergia = float.MinValue,
+                minConsumo = float.MaxValue, maxConsumo = float.MinValue,
+                minVidaUtil = float.MaxValue, maxVidaUtil = float.MinValue
+            });
+
         EspeciesSnapshot nuevoSnapshot = new EspeciesSnapshot
         {
             avgVel = acc.sumVel / acc.count,
@@ -113,13 +122,31 @@ public class EvolutionTracker : MonoBehaviour
         };
 
         historialEspecies[speciesId].Add(nuevoSnapshot);
+        RangoEstadisticoEspecie rangoActual = rangosEspecies[speciesId];
+        RangoEstadisticoEspecie nuevoRango = new RangoEstadisticoEspecie
+        {
+            minVel = Mathf.Min(rangoActual.minVel, nuevoSnapshot.avgVel),
+            maxVel = Mathf.Max(rangoActual.maxVel, nuevoSnapshot.avgVel),
+            minVision = Mathf.Min(rangoActual.minVision, nuevoSnapshot.avgVision),
+            maxVision = Mathf.Max(rangoActual.maxVision, nuevoSnapshot.avgVision),
+            minTamano = Mathf.Min(rangoActual.minTamano, nuevoSnapshot.avgTamano),
+            maxTamano = Mathf.Max(rangoActual.maxTamano, nuevoSnapshot.avgTamano),
+            minEnergia = Mathf.Min(rangoActual.minEnergia, nuevoSnapshot.avgEnergia),
+            maxEnergia = Mathf.Max(rangoActual.maxEnergia, nuevoSnapshot.avgEnergia),
+            minConsumo = Mathf.Min(rangoActual.minConsumo, nuevoSnapshot.avgConsumo),
+            maxConsumo = Mathf.Max(rangoActual.maxConsumo, nuevoSnapshot.avgConsumo),
+            minVidaUtil = Mathf.Min(rangoActual.minVidaUtil, nuevoSnapshot.avgVidaUtil),
+            maxVidaUtil = Mathf.Max(rangoActual.maxVidaUtil, nuevoSnapshot.avgVidaUtil)
+        };
+
+        rangosEspecies[speciesId] = nuevoRango;
 
         if (speciesId == familiaSeleccionada && todasLasGraficas != null)
         {
             // Avisamos a todos los paneles a la vez
             foreach (GraficaIndividual panel in todasLasGraficas)
             {
-                panel.ActualizarGrafica(historialEspecies[speciesId]);
+                panel.ActualizarGrafica(historialEspecies[speciesId], rangosEspecies[speciesId]);
             }
         }
     }
@@ -135,7 +162,7 @@ public class EvolutionTracker : MonoBehaviour
             {
                 foreach (GraficaIndividual panel in todasLasGraficas)
                 {
-                    panel.ActualizarGrafica(historialEspecies[nuevoId]);
+                    panel.ActualizarGrafica(historialEspecies[nuevoId], rangosEspecies[nuevoId]);
                 }
             }
             else

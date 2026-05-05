@@ -18,14 +18,7 @@ public class Comida : MonoBehaviour
     /// <summary>Energy granted to a bacteria that picks this up.</summary>
     public float Energia { get; private set; } = EnergiaBase;
 
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
-
-    /// <summary>
-    /// Called by PoolComida or SistemaVida when placing this nutrient.
-    /// Sets visual scale and derived energy value.
-    /// </summary>
+    //Llamada por el PoolComida al sacar un nuevo objeto para usar. Ajusta su escala y energía según el tamaño dado.
     public void Inicializar(float tamano)
     {
         float escalaFinal = Mathf.Max(0.1f, tamano);

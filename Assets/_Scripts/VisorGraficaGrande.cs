@@ -24,7 +24,11 @@ public class VisorGraficaGrande : MonoBehaviour
     public Transform contenedorEjeX;     // Donde nacen los números horizontales
     public GameObject prefabTextoEje;    // El prefab del numerito
 
-    [SerializeField] public Camera camaraPrincipal; 
+    [SerializeField] private Camera camaraPrincipal;
+
+    public Camera CamaraPrincipal { get { return camaraPrincipal; } }
+    
+
     private void Awake()
     {
         Instance = this;
@@ -41,7 +45,7 @@ public class VisorGraficaGrande : MonoBehaviour
     }
 
     // --- FUNCIÓN PRINCIPAL QUE LLAMARÁS AL DOBLE CLICK ---
-    public void AbrirVisor(List<EspeciesSnapshot> historialCompleto, GraficaIndividual.TipoEstadistica tipo)
+    public void AbrirVisor(List<EspeciesSnapshot> historialCompleto, GraficaIndividual.TipoEstadistica tipo, RangoEstadisticoEspecie rango)
     {
         if (historialCompleto.Count <= 1)
         {
@@ -56,16 +60,11 @@ public class VisorGraficaGrande : MonoBehaviour
 
         LimpiarEjes(); // Limpiamos cualquier número viejo antes de dibujar
 
-        // 2. Calcular Máximos y Mínimos Reales
-        float minValor = float.MaxValue;
-        float maxValor = float.MinValue;
+        // 2. OBTENER RANGO DINÁMICO (Min y Max) para escalar la gráfica
+        Vector2 limites = ObtenerLimites(rango, tipo);
 
-        foreach (var snap in historialCompleto)
-        {
-            float val = ObtenerValor(snap, tipo);
-            if (val > maxValor) maxValor = val;
-            if (val < minValor) minValor = val;
-        }
+        float minValor = limites.x;
+        float maxValor = limites.y;
 
         // Evitar línea plana
         if (Mathf.Approximately(maxValor, minValor)) { maxValor += 1; minValor -= 1; }
@@ -115,7 +114,7 @@ public class VisorGraficaGrande : MonoBehaviour
             float porcentaje = (float)i / (pasos - 1);
             float valorNum = Mathf.Lerp(min, max, porcentaje);
             float posY = (porcentaje * alto) - (alto / 2f); // Posición local Y
-            ObtenerTextoDelPool(contenedorEjeY, new Vector2(-20, posY)).GetComponent<TextMeshProUGUI>().text = valorNum.ToString("F2"); // Un poco a la izquierda
+            ObtenerTextoDelPool(contenedorEjeY, new Vector2(0, posY)).GetComponent<TextMeshProUGUI>().text = valorNum.ToString("F2"); // Un poco a la izquierda
         }
     }
     private void DibujarEjeX(int totalPuntosDeTiempo)
@@ -245,6 +244,20 @@ public class VisorGraficaGrande : MonoBehaviour
             textoObj.SetActive(false);
             _poolTextos.Push(textoObj);
             textoObj.transform.SetParent(this.transform, false);
+        }
+    }
+
+    private Vector2 ObtenerLimites(RangoEstadisticoEspecie rango, GraficaIndividual.TipoEstadistica tipo)
+    {
+        switch (tipo)
+        {
+            case GraficaIndividual.TipoEstadistica.Velocidad: return new Vector2(rango.minVel, rango.maxVel);
+            case GraficaIndividual.TipoEstadistica.Vision: return new Vector2(rango.minVision, rango.maxVision);
+            case GraficaIndividual.TipoEstadistica.Tamaño: return new Vector2(rango.minTamano, rango.maxTamano);
+            case GraficaIndividual.TipoEstadistica.Consumo: return new Vector2(rango.minConsumo, rango.maxConsumo);
+            case GraficaIndividual.TipoEstadistica.EnergíaMáxima: return new Vector2(rango.minEnergia, rango.maxEnergia);
+            case GraficaIndividual.TipoEstadistica.EsperanzaDeVida: return new Vector2(rango.minVidaUtil, rango.maxVidaUtil);
+            default: return Vector2.zero;
         }
     }
 }

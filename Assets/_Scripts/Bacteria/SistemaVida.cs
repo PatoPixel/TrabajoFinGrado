@@ -11,8 +11,10 @@ public class SistemaVida : MonoBehaviour
     [SerializeField] private float energiaActual;
     [SerializeField] private float edadActual;
     [SerializeField] private float cooldownRestante;
+    public String NombreDePila { get => nombreDePila; set => nombreDePila = value; }
     public float EnergiaActual { get => energiaActual; set => energiaActual = value; }
     public float EdadActual { get => edadActual; set => edadActual = value; }
+    public float CooldownRestante { get => cooldownRestante; set => cooldownRestante = value; }
     public float MultiplicadorActividad { get; set; } = 1f;
     void Start()
     {

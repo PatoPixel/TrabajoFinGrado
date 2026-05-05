@@ -27,6 +27,10 @@ public class GestorLinajes : MonoBehaviour
     };
 
     private int siguienteIdDisponible = 1;
+    public int SiguienteIdDisponible { 
+        get { return siguienteIdDisponible; } 
+        private set { siguienteIdDisponible = value; }
+    }
 
     void Awake()
     {

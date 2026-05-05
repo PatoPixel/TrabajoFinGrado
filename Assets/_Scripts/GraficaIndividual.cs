@@ -13,12 +13,14 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
 
     [Header("Configuración General")]
     public TipoEstadistica estadisticaAsignada;
+    private RangoEstadisticoEspecie rangoEspecieAsignada; // Para mostrar el rango real de la especie en los textos de máximo y mínimo
 
     [Header("Referencias UI Gráfica")]
     [SerializeField] private LineRenderer lineaGrafica;
     [SerializeField] private TextMeshProUGUI textoActual;
     [SerializeField] private TextMeshProUGUI textoMax;
     [SerializeField] private TextMeshProUGUI textoMin;
+    private RectTransform cuerpoRect;
     private List<EspeciesSnapshot> historialGuardado;
     [Header("Info Extra (Opcional)")]
     // Es para la energia máxima
@@ -37,6 +39,7 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
 
     [SerializeField] private Camera camaraPrincipal;
 
+
     void Start()
     {
         if (botonCabecera != null)
@@ -50,8 +53,12 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
             textoTituloBoton.text = FormatearNombre(estadisticaAsignada.ToString());
         }
 
-        if (cuerpoGrafica != null)
+        if (cuerpoGrafica != null) 
+        {
+            cuerpoRect = cuerpoGrafica.GetComponent<RectTransform>();
             cuerpoGrafica.SetActive(false);
+
+            }
 
         ActualizarLayoutPadre();
     }
@@ -60,10 +67,10 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
     {
         if (estaExpandido)
         {
-            if (VisorGraficaGrande.Instance != null && VisorGraficaGrande.Instance.camaraPrincipal != null)
+            if (VisorGraficaGrande.Instance != null && VisorGraficaGrande.Instance.CamaraPrincipal != null)
             {
                 // 2. Leemos el zoom directamente de la referencia que YA tenemos en el Singleton
-                float zoomActual = VisorGraficaGrande.Instance.camaraPrincipal.orthographicSize;
+                float zoomActual = VisorGraficaGrande.Instance.CamaraPrincipal.orthographicSize;
 
                 // 3. Aplicamos la proporción (ajusta el 0.05f según lo que te guste)
                 // Multiplicamos para que a más zoom (cámara lejos), la línea sea más gruesa.
@@ -112,15 +119,16 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
     }
 
     // --- 3. LÓGICA DE LA GRÁFICA ---
-    public void ActualizarGrafica(List<EspeciesSnapshot> historial)
+    public void ActualizarGrafica(List<EspeciesSnapshot> historial, RangoEstadisticoEspecie rango)
     {
         this.historialGuardado = historial;
+        this.rangoEspecieAsignada = rango;
         if (VisorGraficaGrande.Instance != null && VisorGraficaGrande.Instance.estaAbierto)
         {
             if (VisorGraficaGrande.Instance.estadisticaActiva == this.estadisticaAsignada)
             {
                 // Le mandamos los datos frescos para que se redibuje sola
-                VisorGraficaGrande.Instance.AbrirVisor(historial, this.estadisticaAsignada);
+                VisorGraficaGrande.Instance.AbrirVisor(historial, this.estadisticaAsignada, rango);
             }
         }
         if (historial == null || historial.Count == 0) return;
@@ -129,6 +137,7 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
         lineaGrafica.positionCount = puntosADibujar;
         int indiceInicio = historial.Count - puntosADibujar;
 
+        /*
         // --- PASO 1: ENCONTRAR EL RANGO REAL DE LOS DATOS VISIBLES ---
         float minVisible = float.MaxValue;
         float maxVisible = float.MinValue;
@@ -147,7 +156,17 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
             maxVisible += 1f;
             minVisible -= 1f;
         }
+        */
 
+        Vector2 limitesGlobales = ObtenerLimitesGlobales();
+        float minVisible = limitesGlobales.x;
+        float maxVisible = limitesGlobales.y;
+
+        if (Mathf.Approximately(minVisible, maxVisible))
+        {
+            minVisible -= 1f;
+            maxVisible += 1f;
+        }
         // --- PASO 2: ACTUALIZAR TEXTOS CON LA REALIDAD ---
         float valorActual = ObtenerValorDeSnapshot(historial[historial.Count - 1]);
 
@@ -159,7 +178,7 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
         float alturaCaja = 100f; // Valor por defecto por si falla el Rect
         if (cuerpoGrafica != null)
         {
-            alturaCaja = cuerpoGrafica.GetComponent<RectTransform>().rect.height;
+            alturaCaja = cuerpoRect.rect.height;
         }
 
         // Dejamos un pequeño margen (padding) para que la línea no toque los bordes exactos (90% del espacio)
@@ -182,7 +201,7 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
             lineaGrafica.SetPosition(i, new Vector3(xPos, yPos, 0));
             if (textoInfoSecundaria != null)
             {
-                if (estadisticaAsignada == TipoEstadistica.Tamaño) // OJO: Asegúrate de escribirlo igual que en tu Enum
+                if (estadisticaAsignada == TipoEstadistica.Tamaño)
                 {
                     // Calculamos la energía basada en el tamaño actual
                     float energiaCalculada = valorActual * 100f;
@@ -233,8 +252,21 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
             //
             if (VisorGraficaGrande.Instance != null && historialGuardado != null)
             {
-                VisorGraficaGrande.Instance.AbrirVisor(historialGuardado, estadisticaAsignada);
+                VisorGraficaGrande.Instance.AbrirVisor(historialGuardado, estadisticaAsignada, rangoEspecieAsignada);
             }
+        }
+    }
+    private Vector2 ObtenerLimitesGlobales()
+    {
+        switch (estadisticaAsignada)
+        {
+            case TipoEstadistica.Velocidad: return new Vector2(rangoEspecieAsignada.minVel, rangoEspecieAsignada.maxVel);
+            case TipoEstadistica.Vision: return new Vector2(rangoEspecieAsignada.minVision, rangoEspecieAsignada.maxVision);
+            case TipoEstadistica.Tamaño: return new Vector2(rangoEspecieAsignada.minTamano, rangoEspecieAsignada.maxTamano);
+            case TipoEstadistica.Consumo: return new Vector2(rangoEspecieAsignada.minConsumo, rangoEspecieAsignada.maxConsumo);
+            case TipoEstadistica.EnergíaMáxima: return new Vector2(rangoEspecieAsignada.minEnergia, rangoEspecieAsignada.maxEnergia);
+            case TipoEstadistica.EsperanzaDeVida: return new Vector2(rangoEspecieAsignada.minVidaUtil, rangoEspecieAsignada.maxVidaUtil);
+            default: return new Vector2(0, 1);
         }
     }
 }
