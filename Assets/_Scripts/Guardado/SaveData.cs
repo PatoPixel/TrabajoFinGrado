@@ -14,8 +14,24 @@ public class SaveData
     public List<DatosContenedorEspecie> historialEspecies = new List<DatosContenedorEspecie>();
 
     // Datos del Mundo
-    public List<Vector2> posicionesComida = new List<Vector2>();
+    public List<DatosComidas> datosComidas = new List<DatosComidas>();
 }
+[System.Serializable]
+
+public class DatosComidas
+{
+    public float posX;
+    public float posY;
+    public float tamano;
+    public DatosComidas() { }
+    public DatosComidas(float x, float y, float tamano)
+    {
+        this.posX = x;
+        this.posY = y;
+        this.tamano = tamano;
+    }
+}
+
 [System.Serializable]
 public class DatosContenedorEspecie
 {
@@ -54,6 +70,7 @@ public class DatosEntidad
     // Estado dinámico (Lo que cambia en tiempo real)
     public float posX;
     public float posY;
+    public float quaternionZ;
     public float energiaActual;
     public float edadActual;
     public float cooldownRestante;
@@ -62,7 +79,7 @@ public class DatosEntidad
     public DatosEntidad() { }
 
     // Constructor de ayuda para "sacar la foto" a una bacteria viva
-    public DatosEntidad(SistemaVida sv, Vector3 posicion)
+    public DatosEntidad(SistemaVida sv, Vector3 posicion, float giro)
     {
         // Copiamos los genes desde misStats
         this.idLinaje = sv.misStats.idLinaje;
@@ -86,5 +103,9 @@ public class DatosEntidad
         // Posición
         this.posX = posicion.x;
         this.posY = posicion.y;
+        
+        this.quaternionZ = giro; // Solo guardamos la rotación en Z para 2D
     }
+
+    
 }

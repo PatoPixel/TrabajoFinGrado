@@ -29,7 +29,7 @@ public class GestorLinajes : MonoBehaviour
     private int siguienteIdDisponible = 1;
     public int SiguienteIdDisponible { 
         get { return siguienteIdDisponible; } 
-        private set { siguienteIdDisponible = value; }
+        set { siguienteIdDisponible = value; }
     }
 
     void Awake()
@@ -79,5 +79,19 @@ public class GestorLinajes : MonoBehaviour
         {
             RegistroVida.Remove(id);
         }
+    }
+
+    public void Purga()
+    {
+        var claves = new List<int>(RegistroVida.Keys);
+
+        foreach (var id in claves)
+        {
+            if (RegistroVida.TryGetValue(id, out var vida) && vida != null)
+            {
+                vida.Purga();
+            }
+        }
+        siguienteIdDisponible = 1;
     }
 }

@@ -39,9 +39,9 @@ public class SistemaVida : MonoBehaviour
                 // Este es el �ltimo recurso si el objeto NO existe en la escena
                 Debug.LogError("CR�TICO: El objeto GestorLinajes no existe en la jerarqu�a.");
             }
-        }
-        // 2. IMPORTANTE: Sincronizar energ�a y componentes
-        energiaActual = misStats.energiaMax * 0.7f; // Nacen con un 70% de energ�a
+        } 
+         // 2. IMPORTANTE: Sincronizar energ�a y componentes
+         energiaActual = misStats.energiaMax * 0.7f; // Nacen con un 70% de energ�a
 
     }
     public void AsignarStatsBase()
@@ -60,7 +60,37 @@ public class SistemaVida : MonoBehaviour
         {
             misStats.colorLinaje = GetComponent<SpriteRenderer>().color;
         }
+    }
 
+    public void AsignarStatsLoad(DatosEntidad datosEntidadLoad)
+    {
+        this.misStats = new DatosGeneticos
+        {
+            idLinaje = datosEntidadLoad.idLinaje,
+            generaciones = datosEntidadLoad.generaciones,
+            velocidad = datosEntidadLoad.velocidad,
+            radioVision = datosEntidadLoad.radioVision,
+            energiaMax = datosEntidadLoad.energiaMax,
+            consumo = datosEntidadLoad.consumo,
+            tamano = datosEntidadLoad.tamano,
+            vidaUtil = datosEntidadLoad.vidaUtil,
+            rangoMutacion = datosEntidadLoad.rangoMutacion,
+            tiempreEntreReproduccion = datosEntidadLoad.tiempreEntreReproduccion,
+            colorLinaje = datosEntidadLoad.colorLinaje
+        };
+
+        this.nombreDePila = datosEntidadLoad.nombreDePila;
+        this.energiaActual = datosEntidadLoad.energiaActual;
+        this.edadActual = datosEntidadLoad.edadActual;
+        this.cooldownRestante = datosEntidadLoad.cooldownRestante;
+        this.transform.position = new Vector3(datosEntidadLoad.posX, datosEntidadLoad.posY, 0);
+        this.transform.rotation = Quaternion.Euler(0, 0, datosEntidadLoad.quaternionZ);
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            sr.color = this.misStats.colorLinaje;
+        }
+        gameObject.name = this.nombreDePila;
     }
     void Update()
     {
@@ -216,5 +246,12 @@ public class SistemaVida : MonoBehaviour
     public void OnDisable()
     {
         GestorLinajes.RegistroVida.Remove(gameObject.GetInstanceID());
+    }
+
+    public void Purga()
+    {
+        CancelInvoke();
+        gameObject.SetActive(false);
+        BacteriasMuertas.Instance.bacteriasMuertas.Push(gameObject);
     }
 }

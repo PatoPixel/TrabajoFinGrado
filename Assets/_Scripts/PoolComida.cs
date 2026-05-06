@@ -52,7 +52,7 @@ public class PoolComida : MonoBehaviour
     /// Returns a nutrient instance placed at the given world position.
     /// Scale is set proportional to <paramref name="tamano"/> if > 0.
     /// </summary>
-    public GameObject GetComida(Vector3 posicion, float tamano = 1f)
+    public GameObject GetComida(Vector3 posicion, float tamano = 0.3f)
     {
         GameObject obj = _pool.Count > 0
             ? _pool.Pop()
@@ -81,6 +81,15 @@ public class PoolComida : MonoBehaviour
             GameObject obj = Instantiate(prefabComida);
             obj.SetActive(false);
             _pool.Push(obj);
+        }
+    }
+
+    public void Purga()
+    {
+        Comida[] comidasEnMapa = FindObjectsByType<Comida>(FindObjectsSortMode.None);
+        foreach (Comida comida in comidasEnMapa)
+        {
+            Devolver(comida.gameObject);
         }
     }
 }
