@@ -1,13 +1,14 @@
-using UnityEngine;
+using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Collections.Generic; 
+using UnityEngine;
 
 public class GestorGuardado : MonoBehaviour
 {
     // Paso previo: obtener la instancia de EvolutionTracker
     EvolutionTracker EvolutionTrackerInstance => FindFirstObjectByType<EvolutionTracker>();
 
-    public void GuardarPartida()
+    public void GuardarPartida(string nombreArchivo)
     {
         // 1. Pausa temporal
         float velocidadJuego = Time.timeScale;
@@ -27,7 +28,7 @@ public class GestorGuardado : MonoBehaviour
         }
         ;
         // 5. Llenar Historial del Tracker (Acuérdate de instanciar DatosContenedorEspecie)
-        EvolutionTracker evolutionTracker = EvolutionTrackerInstance; 
+        EvolutionTracker evolutionTracker = EvolutionTrackerInstance;
         foreach (var par in evolutionTracker.HistorialEspecies)
         {
             int id = par.Key;
@@ -50,7 +51,7 @@ public class GestorGuardado : MonoBehaviour
         // --- MAGIA DEL GUARDADO ---
         // Convertimos a texto y guardamos (¡De esto me encargo yo, tú haz lo de arriba!)
         string json = JsonUtility.ToJson(data, true);
-        string ruta = Path.Combine(Application.persistentDataPath, "PartidaTFG.json");
+        string ruta = Path.Combine(Application.persistentDataPath, nombreArchivo + ".json");
         File.WriteAllText(ruta, json);
 
         Debug.Log("Partida Guardada con éxito en: " + ruta);
@@ -58,9 +59,9 @@ public class GestorGuardado : MonoBehaviour
         // Despausar (o dejarlo pausado para que el usuario elija)
         Time.timeScale = velocidadJuego;
     }
-    public void CargarPartida()
+    public void CargarPartida(string nombreArchivo)
     {
-        string ruta = Path.Combine(Application.persistentDataPath, "PartidaTFG.json");
+        string ruta = Path.Combine(Application.persistentDataPath, nombreArchivo + ".json");
 
         if (!File.Exists(ruta))
         {
@@ -126,8 +127,48 @@ public class GestorGuardado : MonoBehaviour
                 Debug.LogError("La bacteria obtenida del pool no tiene SistemaVida.");
             }
         }
-
+        ObtenerPartidasGuardadas();
         Debug.Log("Partida Cargada con éxito.");
         Time.timeScale = velocidadJuego;
+    }
+
+    public List<string> ObtenerPartidasGuardadas()
+    {
+        List<string> nombresPartidas = new List<string>();
+        string rutaCarpeta = Application.persistentDataPath;
+
+        // Aquí está la magia: Directory.GetFiles busca en la carpeta todos los archivos con la extensión que le digas
+        string[] archivos = Directory.GetFiles(rutaCarpeta, "*.json");
+
+        foreach (string archivo in archivos)
+        {
+            string nombreLimpio = Path.GetFileNameWithoutExtension(archivo);
+            DateTime fechaGuardado = File.GetLastWriteTime(archivo);
+
+            // Formateamos la fecha para que se vea bonita en la consola (y en tu UI de mañana)
+            string fechaString = fechaGuardado.ToString("dd/MM/yyyy HH:mm");
+
+            // Añadimos la fecha al Debug para comprobarlo hoy
+            Debug.Log($"Partida: {nombreLimpio} | Fecha: {fechaString}");
+
+            nombresPartidas.Add(nombreLimpio);
+        }
+
+        return nombresPartidas;
+    }
+    public void BorrarPartida(string nombreArchivo)
+    {
+        string ruta = Path.Combine(Application.persistentDataPath, nombreArchivo + ".json");
+
+        // Siempre comprobamos si existe antes de intentar borrar, o Unity dará un error
+        if (File.Exists(ruta))
+        {
+            File.Delete(ruta);
+            Debug.Log("Partida eliminada: " + nombreArchivo);
+        }
+        else
+        {
+            Debug.LogWarning("No se encontró el archivo para borrar: " + nombreArchivo);
+        }
     }
 }

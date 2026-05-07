@@ -91,6 +91,7 @@ public class SistemaVida : MonoBehaviour
             sr.color = this.misStats.colorLinaje;
         }
         gameObject.name = this.nombreDePila;
+        this.transform.localScale = Vector3.one * this.misStats.tamano;
     }
     void Update()
     {
