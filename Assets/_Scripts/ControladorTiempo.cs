@@ -1,53 +1,63 @@
 using UnityEngine;
 
-// Controla la velocidad global del juego para acelerar la simulación.
-// - Método público `ToggleVelocidad` para enlazar a un botón UI.
-// - También responde a la tecla T para alternar rápidamente.
-// - Ajusta Time.fixedDeltaTime para que la física siga comportándose correctamente.
 public class ControladorTiempo : MonoBehaviour
 {
- [SerializeField] private float velocidadNormal =1f;
- [SerializeField] private float velocidadRapida =5f;
+    [SerializeField] private float velocidadNormal = 1f;
+    [SerializeField] private float velocidadRapida = 5f;
+    [SerializeField] private float velocidadParado = 0f;
 
- private bool rapido = false;
- private float baseFixedDeltaTime;
+    private float baseFixedDeltaTime;
+    // Guardamos la velocidad actual por si otros scripts (como el de Guardado) necesitan consultarla
+    public float EscalaActual { get; private set; }
 
- void Awake()
- {
- baseFixedDeltaTime = Time.fixedDeltaTime;
- }
+    void Awake()
+    {
+        // Guardamos el valor original de la física (0.02 por defecto en Unity)
+        baseFixedDeltaTime = Time.fixedDeltaTime;
+    }
 
- void OnEnable()
- {
- AplicarEscala(velocidadNormal);
- }
+    void Start()
+    {
+        // Empezamos siempre en velocidad normal
+        CambiarVelocidad(velocidadNormal);
+    }
 
- void Update()
- {
- // Tecla rápida para alternar (útil en el editor)
- if (Input.GetKeyDown(KeyCode.T))
- {
- ToggleVelocidad();
- }
- }
+    // --- MÉTODOS PARA LOS BOTONES ---
 
- // Método público para enlazar desde un botón UI (OnClick)
- public void ToggleVelocidad()
- {
- rapido = !rapido;
- AplicarEscala(rapido ? velocidadRapida : velocidadNormal);
- }
+    public void BotonParar() => CambiarVelocidad(velocidadParado);
+    public void BotonNormal() => CambiarVelocidad(velocidadNormal);
+    public void BotonRapido() => CambiarVelocidad(velocidadRapida);
 
- // Aplicar la escala de tiempo y ajustar fixedDeltaTime
- public void AplicarEscala(float escala)
- {
- Time.timeScale = escala;
- Time.fixedDeltaTime = baseFixedDeltaTime * escala;
- }
+    // --- LÓGICA CENTRAL ---
 
- // Opcional: restaurar al valor normal al deshabilitar el componente
- void OnDisable()
- {
- AplicarEscala(velocidadNormal);
- }
+    public void CambiarVelocidad(float nuevaEscala)
+    {
+        EscalaActual = nuevaEscala;
+        Time.timeScale = nuevaEscala;
+
+        // Si la velocidad es 0, no multiplicamos el fixedDeltaTime (evitamos errores)
+        // Si no es 0, lo ajustamos proporcionalmente como hacías tú
+        if (nuevaEscala > 0)
+        {
+            Time.fixedDeltaTime = baseFixedDeltaTime * nuevaEscala;
+        }
+        else
+        {
+            // Cuando está pausado, mantenemos el fixedDeltaTime normal o pequeño
+            Time.fixedDeltaTime = baseFixedDeltaTime;
+        }
+
+        Debug.Log("Simulación a x" + nuevaEscala);
+    }
+
+    void Update()
+    {
+        // Mantengo tu acceso rápido por teclado, pero ahora cicla: 1 -> 5 -> 0 -> 1...
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            if (Time.timeScale == velocidadNormal) CambiarVelocidad(velocidadRapida);
+            else if (Time.timeScale == velocidadRapida) CambiarVelocidad(velocidadParado);
+            else CambiarVelocidad(velocidadNormal);
+        }
+    }
 }

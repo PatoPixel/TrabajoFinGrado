@@ -1,10 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Object pool for nutrient GameObjects. Mirrors BacteriasMuertas pattern.
-/// Call GetComida() to rent an instance and Comida.Devolver() to return it.
-/// </summary>
 public class PoolComida : MonoBehaviour
 {
     // -------------------------------------------------------------------------
@@ -44,14 +40,6 @@ public class PoolComida : MonoBehaviour
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
-
-    /// <summary>
-    /// Returns a nutrient instance placed at the given world position.
-    /// Scale is set proportional to <paramref name="tamano"/> if > 0.
-    /// </summary>
     public GameObject GetComida(Vector3 posicion, float tamano = 0.3f)
     {
         GameObject obj = _pool.Count > 0
@@ -64,16 +52,12 @@ public class PoolComida : MonoBehaviour
         return obj;
     }
 
-    /// <summary>Returns a nutrient instance to the pool.</summary>
     public void Devolver(GameObject obj)
     {
         obj.SetActive(false);
         _pool.Push(obj);
     }
 
-    // -------------------------------------------------------------------------
-    // Internal
-    // -------------------------------------------------------------------------
     private void PreCalentar()
     {
         for (int i = 0; i < CapacidadInicial; i++)

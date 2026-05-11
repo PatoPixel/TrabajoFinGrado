@@ -1,14 +1,37 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
+using System.Linq;
 
 public class GestorGuardado : MonoBehaviour
 {
-    // Paso previo: obtener la instancia de EvolutionTracker
+    public string nombrePartidaActual = "";
     EvolutionTracker EvolutionTrackerInstance => FindFirstObjectByType<EvolutionTracker>();
+    [Header("Referencias UI")]
+    public Canvas canvasPrincipal;
+    public GameObject menuSeccionPartidas;
 
-    public void GuardarPartida(string nombreArchivo)
+    [System.Serializable]
+    public class MetadatosPartida
+    {
+        public string nombrePartida;
+        public int totalBacterias;
+        public int totalLinajesRestantes;
+        public float horasJugadas;
+        public string fechaCreacion;
+    }
+
+    public float tiempoJugadoTotal = 0f;
+
+    void Update()
+    {
+        // Usamos 'unscaledDeltaTime' para que cuente segundos reales.
+        // Si usáramos 'deltaTime' normal, al poner el juego a x5, el tiempo sumaría el quíntuple.
+        tiempoJugadoTotal += Time.unscaledDeltaTime;
+    }
+    public void GuardarPartida()
     {
         // 1. Pausa temporal
         float velocidadJuego = Time.timeScale;
@@ -48,16 +71,35 @@ public class GestorGuardado : MonoBehaviour
             data.datosComidas.Add(datosComida);
         }
 
-        // --- MAGIA DEL GUARDADO ---
-        // Convertimos a texto y guardamos (¡De esto me encargo yo, tú haz lo de arriba!)
         string json = JsonUtility.ToJson(data, true);
-        string ruta = Path.Combine(Application.persistentDataPath, nombreArchivo + ".json");
+        string ruta = Path.Combine(Application.persistentDataPath, nombrePartidaActual + ".json");
         File.WriteAllText(ruta, json);
 
         Debug.Log("Partida Guardada con éxito en: " + ruta);
 
         // Despausar (o dejarlo pausado para que el usuario elija)
         Time.timeScale = velocidadJuego;
+
+        // 1. RUTAS NUEVAS
+        string rutaMeta = Path.Combine(Application.persistentDataPath, nombrePartidaActual + "_meta.json");
+        string rutaImagen = Path.Combine(Application.persistentDataPath, nombrePartidaActual + ".png");
+        MetadatosPartida meta = new MetadatosPartida();
+        meta.nombrePartida = nombrePartidaActual;
+        meta.totalBacterias = GestorLinajes.RegistroVida.Count;
+        meta.totalLinajesRestantes = GestorLinajes.RegistroVida.Values.Select(b => b.misStats.idLinaje).Distinct().Count();
+        meta.horasJugadas = tiempoJugadoTotal;
+
+        // Si la partida es nueva, le ponemos la fecha de hoy. Si la estamos sobrescribiendo, 
+        // deberíamos mantener la que tenía, pero para simplificar ahora, pondremos la de hoy.
+        meta.fechaCreacion = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+
+        // Guardamos el JSON pequeñito
+        File.WriteAllText(rutaMeta, JsonUtility.ToJson(meta));
+
+        // 3. CAPTURA DE PANTALLA (Magia de Unity de 1 sola línea)
+        StartCoroutine(TomarFotoSinUI(rutaImagen));
+
+        Debug.Log("Guardado completo: Datos + Metadatos + Foto");
     }
     public void CargarPartida(string nombreArchivo)
     {
@@ -73,24 +115,22 @@ public class GestorGuardado : MonoBehaviour
         float velocidadJuego = Time.timeScale;
         Time.timeScale = 0f;
 
-        // 2. Leer maleta
+        // 2. Leer json
         string json = File.ReadAllText(ruta);
         SaveData data = JsonUtility.FromJson<SaveData>(json);
 
-        // 3. LA PURGA (Limpiamos la escena actual)
+        // 3. Purgar lo que haya en escena para evitar duplicados o conflictos
         GestorLinajes.Instance?.Purga();
         PoolComida.Instance?.Purga(); // O la clase/gestor desde donde llames a esto
 
-        // 4. RESTAURAR LEYES (Gestor de Linajes)
+        // 4. LinajeSiguiente
         GestorLinajes.Instance.SiguienteIdDisponible = data.proximoIdLinaje;
 
-        // 5. RESTAURAR HISTORIAL (Evolution Tracker)
+        // 5. Historiales
         EvolutionTracker tracker = EvolutionTrackerInstance;
         tracker.HistorialEspecies.Clear();
         tracker.RangosEspecies.Clear();
-        // TODO: Haz un foreach sobre data.historialEspecies.
-        // Saca el idLinaje, el historial y el rango de cada 'DatosContenedorEspecie' 
-        // y mételos en los diccionarios del tracker.
+
         foreach (var contenedor in data.historialEspecies)
         {
             tracker.HistorialEspecies[contenedor.idLinaje] = contenedor.historial;
@@ -98,20 +138,16 @@ public class GestorGuardado : MonoBehaviour
         }
 
 
-        // 6. RESTAURAR HABITANTES (Bacterias y Comida)
+        // 6. Comida
 
-        // 6A. Comida: 
-        // TODO: Haz un foreach sobre data.posicionesComida. Pide comida al Pool en esa posición.
         foreach (var comida in data.datosComidas)
         {
             Vector2 posicion = new Vector2(comida.posX, comida.posY);
             PoolComida.Instance.GetComida(posicion, comida.tamano);
         }
-        // 6B. Bacterias:
-        // TODO: Haz un foreach sobre data.bacteriasVivas.
-        // 1. Pide una bacteria al pool usando su posX y posY.
-        // 2. Consigue su componente SistemaVida.
-        // 3. Llámale a AsignarStatsLoad(...) pasándole los datos.
+
+
+        // 7. Bacterias
 
         foreach (var entidad in data.bacteriasVivas)
         {
@@ -127,7 +163,25 @@ public class GestorGuardado : MonoBehaviour
                 Debug.LogError("La bacteria obtenida del pool no tiene SistemaVida.");
             }
         }
+
+        // 8. Tiempo de juego
+        string rutaMeta = Path.Combine(Application.persistentDataPath, nombreArchivo + "_meta.json");
+        if (File.Exists(rutaMeta))
+        {
+            string jsonMeta = File.ReadAllText(rutaMeta);
+            MetadatosPartida meta = JsonUtility.FromJson<MetadatosPartida>(jsonMeta);
+
+            // Le decimos al cronómetro que empiece desde donde lo dejamos
+            tiempoJugadoTotal = meta.horasJugadas;
+            Debug.Log("Tiempo restaurado: " + tiempoJugadoTotal + " segundos.");
+        }
+        else
+        {
+            // Si por algún motivo cargamos una partida vieja que no tenía metadatos, empezamos de cero
+            tiempoJugadoTotal = 0f;
+        }
         ObtenerPartidasGuardadas();
+        nombrePartidaActual = nombreArchivo;
         Debug.Log("Partida Cargada con éxito.");
         Time.timeScale = velocidadJuego;
     }
@@ -170,5 +224,34 @@ public class GestorGuardado : MonoBehaviour
         {
             Debug.LogWarning("No se encontró el archivo para borrar: " + nombreArchivo);
         }
+    }
+
+    private System.Collections.IEnumerator TomarFotoSinUI(string ruta)
+    {
+        // 1. Apagamos la UI
+        canvasPrincipal.enabled = false;
+
+        // 2. Esperamos a que termine el frame actual para que Unity dibuje la pantalla limpia
+        yield return new WaitForEndOfFrame();
+
+        // 3. Tomamos la foto como una textura en memoria RAM
+        Texture2D textura = ScreenCapture.CaptureScreenshotAsTexture();
+
+        // 4. Volvemos a encender la UI instantáneamente (el jugador no verá parpadeos)
+        canvasPrincipal.enabled = true;
+
+        // 5. Convertimos la textura a archivo PNG y la guardamos en el disco duro
+        byte[] bytes = textura.EncodeToPNG();
+        File.WriteAllBytes(ruta, bytes);
+
+        // Quitamos la textura de la memoria para no llenarla con fotos antiguas
+        Destroy(textura);
+
+        Debug.Log("Foto limpia guardada en: " + ruta);
+    }
+
+    public void abrirGestor()
+    {
+        menuSeccionPartidas.SetActive(true);
     }
 }
