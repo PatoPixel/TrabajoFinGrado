@@ -52,6 +52,8 @@ public class ControladorTiempo : MonoBehaviour
 
     void Update()
     {
+        if (ControladorMenuPausa.juegoPausado) return;
+
         // Mantengo tu acceso rápido por teclado, pero ahora cicla: 1 -> 5 -> 0 -> 1...
         if (Input.GetKeyDown(KeyCode.T))
         {

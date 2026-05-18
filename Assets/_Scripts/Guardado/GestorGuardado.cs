@@ -27,6 +27,7 @@ public class GestorGuardado : MonoBehaviour
 
     void Update()
     {
+        if (ControladorMenuPausa.juegoPausado) return;
         // Usamos 'unscaledDeltaTime' para que cuente segundos reales.
         // Si usáramos 'deltaTime' normal, al poner el juego a x5, el tiempo sumaría el quíntuple.
         tiempoJugadoTotal += Time.unscaledDeltaTime;
@@ -103,6 +104,7 @@ public class GestorGuardado : MonoBehaviour
     }
     public void CargarPartida(string nombreArchivo)
     {
+
         string ruta = Path.Combine(Application.persistentDataPath, nombreArchivo + ".json");
 
         if (!File.Exists(ruta))
