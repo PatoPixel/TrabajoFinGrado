@@ -662,7 +662,7 @@ GameObject:
   - component: {fileID: 6480752820559032644}
   - component: {fileID: 1184067259512604982}
   m_Layer: 5
-  m_Name: Image (1)
+  m_Name: FondoColor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1446,7 +1446,7 @@ GameObject:
   - component: {fileID: 5910720588199476851}
   - component: {fileID: 8317943924271410507}
   m_Layer: 5
-  m_Name: Image (2)
+  m_Name: FondoBlanco
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

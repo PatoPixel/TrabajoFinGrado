@@ -28,8 +28,10 @@ public class CamaraControladorPro : MonoBehaviour
         _targetZoom = _cam.orthographicSize;
     }
 
+
     void LateUpdate() // Usamos LateUpdate para que la cámara se mueva después que las bacterias
     {
+        if (ControladorMenuPausa.juegoPausado) return;
         GestionarZoom();
         GestionarMovimiento();
         AplicarLimites();

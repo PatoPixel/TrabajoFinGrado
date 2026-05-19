@@ -3,15 +3,29 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using System.Linq;
+using TMPro;
 
 public class GestorGuardado : MonoBehaviour
 {
+    [Header("PANELES DE DIÁLOGO (NUEVO)")]
+    public GameObject ventanaConfirmacion;
+    public TMP_Text textoConfirmacion; // Texto que cambiaremos dinámicamente
+    public GameObject ventanaNuevoGuardado;
+    public TMP_InputField inputNombrePartida; // El cuadro de texto para el nombre
+    public GameObject ventanaExito;
+
+    // Variables internas para "recordar" qué archivo seleccionó el jugador en la ficha
+    private string archivoPendienteAccion = "";
+    private enum TipoAccion { Cargar, SobrescribirFicha }
+    private TipoAccion accionActual;
     public string nombrePartidaActual = "";
     EvolutionTracker EvolutionTrackerInstance => FindFirstObjectByType<EvolutionTracker>();
-    [Header("Referencias UI")]
+    [Header("Referencias Extra para Foto")]
     public Canvas canvasPrincipal;
+    public GameObject[] objetosAOcultarEnFoto;
+    [Header("Referencias UI")]
     public GameObject menuSeccionPartidas;
+    public MenuSeleccionPartidas menuSeleccionPartidas;
 
     [System.Serializable]
     public class MetadatosPartida
@@ -24,7 +38,14 @@ public class GestorGuardado : MonoBehaviour
     }
 
     public float tiempoJugadoTotal = 0f;
-
+    void Awake()
+    {
+        // Apagamos todas las ventanas por código al arrancar el juego
+        // por si se nos olvidó apagarlas en el editor.
+        if (ventanaConfirmacion != null) ventanaConfirmacion.SetActive(false);
+        if (ventanaNuevoGuardado != null) ventanaNuevoGuardado.SetActive(false);
+        if (ventanaExito != null) ventanaExito.SetActive(false);
+    }
     void Update()
     {
         if (ControladorMenuPausa.juegoPausado) return;
@@ -32,7 +53,7 @@ public class GestorGuardado : MonoBehaviour
         // Si usáramos 'deltaTime' normal, al poner el juego a x5, el tiempo sumaría el quíntuple.
         tiempoJugadoTotal += Time.unscaledDeltaTime;
     }
-    public void GuardarPartida()
+    public void GuardarPartida(string nombreArchivo)
     {
         // 1. Pausa temporal
         float velocidadJuego = Time.timeScale;
@@ -73,7 +94,7 @@ public class GestorGuardado : MonoBehaviour
         }
 
         string json = JsonUtility.ToJson(data, true);
-        string ruta = Path.Combine(Application.persistentDataPath, nombrePartidaActual + ".json");
+        string ruta = Path.Combine(Application.persistentDataPath, nombreArchivo + ".json");
         File.WriteAllText(ruta, json);
 
         Debug.Log("Partida Guardada con éxito en: " + ruta);
@@ -82,8 +103,8 @@ public class GestorGuardado : MonoBehaviour
         Time.timeScale = velocidadJuego;
 
         // 1. RUTAS NUEVAS
-        string rutaMeta = Path.Combine(Application.persistentDataPath, nombrePartidaActual + "_meta.json");
-        string rutaImagen = Path.Combine(Application.persistentDataPath, nombrePartidaActual + ".png");
+        string rutaMeta = Path.Combine(Application.persistentDataPath, nombreArchivo + "_meta.json");
+        string rutaImagen = Path.Combine(Application.persistentDataPath, nombreArchivo + ".png");
         MetadatosPartida meta = new MetadatosPartida();
         meta.nombrePartida = nombrePartidaActual;
         meta.totalBacterias = GestorLinajes.RegistroVida.Count;
@@ -212,48 +233,169 @@ public class GestorGuardado : MonoBehaviour
 
         return nombresPartidas;
     }
+    private System.Collections.IEnumerator TomarFotoSinUI(string ruta)
+    {
+        canvasPrincipal.enabled = false;
+
+        bool[] estadosPrevios = null;
+
+        if (objetosAOcultarEnFoto != null)
+        {
+            // Creamos la libreta con tantas páginas como objetos haya
+            estadosPrevios = new bool[objetosAOcultarEnFoto.Length];
+
+            for (int i = 0; i < objetosAOcultarEnFoto.Length; i++)
+            {
+                if (objetosAOcultarEnFoto[i] != null)
+                {
+                    // Apuntamos si estaba encendido (true) o apagado (false)
+                    estadosPrevios[i] = objetosAOcultarEnFoto[i].activeSelf;
+
+                    // Ahora sí, lo apagamos por la fuerza para la captura
+                    objetosAOcultarEnFoto[i].SetActive(false);
+                }
+            }
+        }
+
+        yield return new WaitForEndOfFrame();
+
+        Texture2D textura = ScreenCapture.CaptureScreenshotAsTexture();
+        canvasPrincipal.enabled = true;
+
+        if (objetosAOcultarEnFoto != null && estadosPrevios != null)
+        {
+            for (int i = 0; i < objetosAOcultarEnFoto.Length; i++)
+            {
+                if (objetosAOcultarEnFoto[i] != null)
+                {
+                    // En lugar de poner 'true' a lo bruto, le pasamos lo que apuntamos en la libreta
+                    objetosAOcultarEnFoto[i].SetActive(estadosPrevios[i]);
+                }
+            }
+        }
+
+        byte[] bytes = textura.EncodeToPNG();
+        File.WriteAllBytes(ruta, bytes);
+        Destroy(textura);
+
+        //Le decimos al menú que refresque las fichas
+        if (menuSeleccionPartidas != null) menuSeleccionPartidas.RefrescarMenu();
+
+        Debug.Log("Foto guardada y menú ordenado.");
+    }
+
     public void BorrarPartida(string nombreArchivo)
     {
         string ruta = Path.Combine(Application.persistentDataPath, nombreArchivo + ".json");
+        string rutaMeta = Path.Combine(Application.persistentDataPath, nombreArchivo + "_meta.json");
+        string rutaImagen = Path.Combine(Application.persistentDataPath, nombreArchivo + ".png");
 
-        // Siempre comprobamos si existe antes de intentar borrar, o Unity dará un error
-        if (File.Exists(ruta))
-        {
-            File.Delete(ruta);
-            Debug.Log("Partida eliminada: " + nombreArchivo);
-        }
-        else
-        {
-            Debug.LogWarning("No se encontró el archivo para borrar: " + nombreArchivo);
-        }
-    }
+        if (File.Exists(ruta)) File.Delete(ruta);
+        if (File.Exists(rutaMeta)) File.Delete(rutaMeta);
+        if (File.Exists(rutaImagen)) File.Delete(rutaImagen);
 
-    private System.Collections.IEnumerator TomarFotoSinUI(string ruta)
-    {
-        // 1. Apagamos la UI
-        canvasPrincipal.enabled = false;
+        Debug.Log("Partida eliminada: " + nombreArchivo);
 
-        // 2. Esperamos a que termine el frame actual para que Unity dibuje la pantalla limpia
-        yield return new WaitForEndOfFrame();
-
-        // 3. Tomamos la foto como una textura en memoria RAM
-        Texture2D textura = ScreenCapture.CaptureScreenshotAsTexture();
-
-        // 4. Volvemos a encender la UI instantáneamente (el jugador no verá parpadeos)
-        canvasPrincipal.enabled = true;
-
-        // 5. Convertimos la textura a archivo PNG y la guardamos en el disco duro
-        byte[] bytes = textura.EncodeToPNG();
-        File.WriteAllBytes(ruta, bytes);
-
-        // Quitamos la textura de la memoria para no llenarla con fotos antiguas
-        Destroy(textura);
-
-        Debug.Log("Foto limpia guardada en: " + ruta);
+        if (menuSeleccionPartidas != null) menuSeleccionPartidas.RefrescarMenu();
     }
 
     public void abrirGestor()
     {
         menuSeccionPartidas.SetActive(true);
+    }
+
+    public void SolicitarCargarPartida(string nombreArchivo)
+    {
+        archivoPendienteAccion = nombreArchivo;
+        accionActual = TipoAccion.Cargar;
+
+        textoConfirmacion.text = $"¿Estás seguro de que quieres cargar '{nombreArchivo}'?\nTodo el progreso actual no guardado se perderá.";
+        ventanaConfirmacion.SetActive(true);
+    }
+
+    // Esto lo llamará el botón GUARDAR de la ficha de partida
+    public void SolicitarSobrescribirFicha(string nombreArchivo)
+    {
+        archivoPendienteAccion = nombreArchivo;
+        accionActual = TipoAccion.SobrescribirFicha;
+
+        textoConfirmacion.text = $"¿Estás seguro de que quieres sobrescribir la partida '{nombreArchivo}'?\nLos datos viejos se borrarán.";
+        ventanaConfirmacion.SetActive(true);
+    }
+
+    // Este método va en el botón "SÍ" de la ventana de confirmación
+    public void ConfirmarAccionVentana()
+    {
+        ventanaConfirmacion.SetActive(false);
+
+        if (accionActual == TipoAccion.Cargar)
+        {
+            CargarPartida(archivoPendienteAccion); // Tu método viejo de cargar
+        }
+        else if (accionActual == TipoAccion.SobrescribirFicha)
+        {
+            GuardarPartida(archivoPendienteAccion); // Tu método viejo de guardar
+            MostrarVentanaExito();
+        }
+    }
+
+
+    // ==========================================
+    // FLUJO 3: BOTÓN GUARDAR DEL MENÚ DE PAUSA GENERAL
+    // ==========================================
+
+    // Esto lo llamará el botón "Guardar" grande del menú de pausa
+    public void AbrirVentanaNuevoGuardado()
+    {
+        // Sugerimos el nombre actual por si ya estábamos jugando en una partida
+        inputNombrePartida.text = nombrePartidaActual;
+        ventanaNuevoGuardado.SetActive(true);
+    }
+
+    // Este método va en el botón "Confirmar" de la ventana donde tecleas el nombre
+    public void ProcesarNuevoGuardado()
+    {
+        string nombreIntroducido = inputNombrePartida.text.Trim();
+
+        // Evitamos que guarden con un nombre vacío
+        if (string.IsNullOrEmpty(nombreIntroducido)) return;
+
+        ventanaNuevoGuardado.SetActive(false);
+
+        // Si el nombre tecleado es exactamente el mismo de la partida en curso...
+        if (nombreIntroducido == nombrePartidaActual)
+        {
+            // Guardamos directamente sin preguntar ni molestar al jugador
+            GuardarPartida(nombreIntroducido);
+            MostrarVentanaExito();
+            return; // Cortamos la función aquí para que no siga leyendo hacia abajo
+        }
+
+        // COMPROBACIÓN CLAVE: Si es un nombre diferente... ¿Existe ya ese archivo?
+        string ruta = Path.Combine(Application.persistentDataPath, nombreIntroducido + ".json");
+
+        if (File.Exists(ruta))
+        {
+            // Si el archivo existe (y sabemos que NO es nuestra partida actual), pedimos confirmación
+            SolicitarSobrescribirFicha(nombreIntroducido);
+        }
+        else
+        {
+            // Si no existe, es un ecosistema 100% nuevo
+            nombrePartidaActual = nombreIntroducido;
+            GuardarPartida(nombreIntroducido);
+            MostrarVentanaExito();
+        }
+
+        nombrePartidaActual = nombreIntroducido;
+    }
+
+
+    // ==========================================
+    // VENTANA DE ÉXITO
+    // ==========================================
+    private void MostrarVentanaExito()
+    {
+        ventanaExito.SetActive(true);
     }
 }

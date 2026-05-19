@@ -87,24 +87,26 @@ public class FichaPartidaUI : MonoBehaviour
         botonGuardar.onClick.AddListener(AlPulsarSobrescribir);
     }
 
-    private void AlPulsarCargar()
-    {
-        Debug.Log("Cargando: " + nombrePartidaAsociada);
-        gestor.CargarPartida(nombrePartidaAsociada);
-    }
-
     private void AlPulsarBorrar()
     {
         Debug.Log("Borrando: " + nombrePartidaAsociada);
         gestor.BorrarPartida(nombrePartidaAsociada);
         Destroy(this.gameObject); // Destruimos la ficha visualmente
     }
+    private void AlPulsarCargar()
+    {
+        Debug.Log("Solicitando confirmación para Cargar: " + nombrePartidaAsociada);
+
+        // En lugar de cargar a lo bruto, llamamos al método que enciende la ventana
+        gestor.SolicitarCargarPartida(nombrePartidaAsociada);
+    }
 
     private void AlPulsarSobrescribir()
     {
-        Debug.Log("Sobrescribiendo: " + nombrePartidaAsociada);
-        gestor.GuardarPartida();
-        // Aquí podríamos actualizar la fecha visualmente
+        Debug.Log("Solicitando confirmación para Sobrescribir: " + nombrePartidaAsociada);
+
+        // En lugar de guardar a lo bruto, llamamos al método que enciende la ventana
+        gestor.SolicitarSobrescribirFicha(nombrePartidaAsociada);
     }
 
     void OnDestroy()
