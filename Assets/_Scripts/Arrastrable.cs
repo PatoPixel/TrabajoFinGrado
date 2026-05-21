@@ -2,24 +2,29 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+/*
+- Permite arrastrar una ventana UI desde su cabecera 
+y ponerla flotando en la pantalla
+*/
+
 public class ArrastrarVentanaDesdeCabecera : MonoBehaviour, IBeginDragHandler, IDragHandler
 {
-    private RectTransform ventanaRect; // La ventana completa (Padre)
-    private Transform lienzoFlotante;
+    private RectTransform ventanaRect; // RectTransform de la ventana
+    private Transform lienzoFlotante; // Parent para el arrastre
     private Canvas canvasPrincipal;
 
     void Start()
     {
-        // 1. Buscamos a nuestro PADRE (La Ventana real)
+        // Encontrar el RectTransform de la ventana padre
         if (transform.parent != null)
         {
             ventanaRect = transform.parent.GetComponent<RectTransform>();
         }
 
-        // 2. Buscamos el Canvas principal para saber la escala
+        // Obtener el Canvas para corregir el movimiento
         canvasPrincipal = GetComponentInParent<Canvas>();
 
-        // 3. Buscamos la Zona Flotante (o el Canvas si no existe)
+        // Buscar el contenedor de arrastre o usar el Canvas
         GameObject zona = GameObject.Find("ZonaFlotante");
         if (zona != null)
         {
@@ -35,18 +40,16 @@ public class ArrastrarVentanaDesdeCabecera : MonoBehaviour, IBeginDragHandler, I
     {
         if (ventanaRect == null) return;
 
-        // Guardamos el tamaño actual de la VENTANA (no del botón)
-        Vector2 tamañoVentana = ventanaRect.rect.size;
+        // Guardar el tamaÃ±o actual antes de mover
+        Vector2 tamanoVentana = ventanaRect.rect.size;
 
-        // CAMBIAMOS DE PADRE A LA VENTANA (El botón sigue siendo hijo de la ventana)
+        // Cambiar el padre para arrastrar libremente
         ventanaRect.SetParent(lienzoFlotante);
 
-        // Restauramos el tamaño de la ventana
-        ventanaRect.sizeDelta = tamañoVentana;
+        // Mantener el tamaÃ±o de la ventana
+        ventanaRect.sizeDelta = tamanoVentana;
 
-        //  AQUÍ ESTÁ EL TRUCO:
-        // Decimos que la VENTANA sea la última hermana del Canvas (para verse encima de otras ventanas)
-        // NO el botón. El botón se queda quieto en su sitio dentro de la ventana.
+        // Poner la ventana por delante
         ventanaRect.SetAsLastSibling();
     }
 
@@ -54,7 +57,7 @@ public class ArrastrarVentanaDesdeCabecera : MonoBehaviour, IBeginDragHandler, I
     {
         if (ventanaRect == null || canvasPrincipal == null) return;
 
-        // Movemos la VENTANA entera
+        // Actualizar la posiciÃ³n segÃºn el arrastre
         ventanaRect.anchoredPosition += eventData.delta / canvasPrincipal.scaleFactor;
     }
 }

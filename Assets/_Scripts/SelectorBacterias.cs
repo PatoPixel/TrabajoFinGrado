@@ -1,5 +1,12 @@
 using UnityEngine;
 
+/*
+- Este script se encarga de detectar clics del mouse sobre las bacterias en el mundo del juego.
+- Cuando el jugador hace clic sobre una bacteria, se abre un panel de inspección con información
+detallada sobre esa bacteria, y se notifica al EvolutionTracker para que cambie la familia seleccionada.
+- Requiere que las bacterias tengan un componente SistemaVida para funcionar correctamente (asi que las comidas por ejemplo les da igual).
+*/
+
 public class SelectorBacterias : MonoBehaviour
 {
     [Header("Conexion con el Tracker")]
@@ -10,6 +17,7 @@ public class SelectorBacterias : MonoBehaviour
 
     private void Update()
     {
+        // Solo respondemos al clic izquierdo del mouse.
         if (!Input.GetMouseButtonDown(0)) return;
 
         Vector2 posicionRatonMundo = Camera.main.ScreenToWorldPoint(Input.mousePosition);

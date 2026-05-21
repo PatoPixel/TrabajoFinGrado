@@ -1,5 +1,12 @@
 using UnityEngine;
 
+/*
+- Controla la velocidad de la simulacion (tiempo) segun el boton que se pulse: parado, normal o rapido
+- Ajusta el Time.timeScale de Unity para cambiar la velocidad global del juego, y tambien
+ajusta el Time.fixedDeltaTime para que la fisica siga funcionando correctamente incluso a velocidades muy altas o con la simulacion pausada
+- Permite cambiar la velocidad con atajos de teclado (T) para alternar entre las 3 velocidades
+*/
+
 public class ControladorTiempo : MonoBehaviour
 {
     [SerializeField] private float velocidadNormal = 1f;
@@ -12,7 +19,7 @@ public class ControladorTiempo : MonoBehaviour
 
     void Awake()
     {
-        // Guardamos el valor original de la física (0.02 por defecto en Unity)
+        // Guardamos el valor original de la fisica (0.02 por defecto en Unity)
         baseFixedDeltaTime = Time.fixedDeltaTime;
     }
 
@@ -22,13 +29,13 @@ public class ControladorTiempo : MonoBehaviour
         CambiarVelocidad(velocidadNormal);
     }
 
-    // --- MÉTODOS PARA LOS BOTONES ---
+    // --- METODOS PARA LOS BOTONES ---
 
     public void BotonParar() => CambiarVelocidad(velocidadParado);
     public void BotonNormal() => CambiarVelocidad(velocidadNormal);
     public void BotonRapido() => CambiarVelocidad(velocidadRapida);
 
-    // --- LÓGICA CENTRAL ---
+    // --- LOGICA ---
 
     public void CambiarVelocidad(float nuevaEscala)
     {
@@ -36,25 +43,25 @@ public class ControladorTiempo : MonoBehaviour
         Time.timeScale = nuevaEscala;
 
         // Si la velocidad es 0, no multiplicamos el fixedDeltaTime (evitamos errores)
-        // Si no es 0, lo ajustamos proporcionalmente como hacías tú
+        // Si no es 0, lo ajustamos proporcionalmente para que la fisica siga funcionando correctamente
         if (nuevaEscala > 0)
         {
             Time.fixedDeltaTime = baseFixedDeltaTime * nuevaEscala;
         }
         else
         {
-            // Cuando está pausado, mantenemos el fixedDeltaTime normal o pequeño
+            // Cuando este pausado, mantenemos el fixedDeltaTime normal para evitar problemas con la fisica al reanudar
             Time.fixedDeltaTime = baseFixedDeltaTime;
         }
 
-        Debug.Log("Simulación a x" + nuevaEscala);
+        Debug.Log("Simulacion a x" + nuevaEscala);
     }
 
     void Update()
     {
         if (ControladorMenuPausa.juegoPausado) return;
 
-        // Mantengo tu acceso rápido por teclado, pero ahora cicla: 1 -> 5 -> 0 -> 1...
+        // Atajo de teclado para cambiar la velocidad (T) - Alterna entre normal, rapido y parado
         if (Input.GetKeyDown(KeyCode.T))
         {
             if (Time.timeScale == velocidadNormal) CambiarVelocidad(velocidadRapida);

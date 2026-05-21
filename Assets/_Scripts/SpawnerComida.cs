@@ -1,18 +1,16 @@
 using UnityEngine;
 
-/// <summary>
-/// Spawns nutrients at random positions using PoolComida instead of Instantiate/Destroy.
-/// </summary>
+/*
+- Este script se encarga de generar comida (nutrientes) de forma periódica dentro
+del área de juego (la "placa de Petri").
+- Utiliza el PoolComida para obtener objetos de comida sin necesidad de instanciarlos cada
+vez, lo que mejora el rendimiento.
+*/
+
 public class SpawnerComida : MonoBehaviour
 {
-    // -------------------------------------------------------------------------
-    // Constants
-    // -------------------------------------------------------------------------
-    private const float TamanoNutrienteBase = 0.3f;
 
-    // -------------------------------------------------------------------------
-    // Inspector
-    // -------------------------------------------------------------------------
+    private const float TamanoNutrienteBase = 0.3f;
     [Header("Configuracion")]
     [Tooltip("Seconds between each nutrient spawn.")]
     public float tiempoEntreComida = 0.5f;
@@ -20,14 +18,8 @@ public class SpawnerComida : MonoBehaviour
     [Tooltip("Half-extents of the spawn area (Petri dish bounds).")]
     public Vector2 areaGeneracion = new Vector2(8f, 4f);
 
-    // -------------------------------------------------------------------------
-    // State
-    // -------------------------------------------------------------------------
     private float _cronometro;
 
-    // -------------------------------------------------------------------------
-    // Unity lifecycle
-    // -------------------------------------------------------------------------
     private void Update()
     {
         _cronometro += Time.deltaTime;
@@ -38,9 +30,6 @@ public class SpawnerComida : MonoBehaviour
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Internal
-    // -------------------------------------------------------------------------
     private void GenerarComida()
     {
         if (PoolComida.Instance == null) return;
@@ -53,9 +42,6 @@ public class SpawnerComida : MonoBehaviour
         obj.GetComponent<Comida>()?.Inicializar(TamanoNutrienteBase);
     }
 
-    // -------------------------------------------------------------------------
-    // Gizmos
-    // -------------------------------------------------------------------------
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;

@@ -1,31 +1,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+- Pool de objetos para la comida, para evitar instanciaciones y destrucciones constantes que puedan afectar al rendimiento
+- Tiene una capacidad inicial que se pre-calienta al inicio, y luego puede crecer dinámicamente si se necesitan más objetos de los que hay en la pool
+- Cada objeto de comida tiene un método para inicializar su tamaño y energía, y otro para devolverlo a la pool cuando ya no se necesita
+*/
+
+
 public class PoolComida : MonoBehaviour
 {
-    // -------------------------------------------------------------------------
-    // Constants
-    // -------------------------------------------------------------------------
     private const int CapacidadInicial = 200;
-
-    // -------------------------------------------------------------------------
-    // Singleton
-    // -------------------------------------------------------------------------
     public static PoolComida Instance { get; private set; }
 
-    // -------------------------------------------------------------------------
-    // Inspector
-    // -------------------------------------------------------------------------
     [SerializeField] private GameObject prefabComida;
-
-    // -------------------------------------------------------------------------
-    // State
-    // -------------------------------------------------------------------------
     private readonly Stack<GameObject> _pool = new Stack<GameObject>(CapacidadInicial);
 
-    // -------------------------------------------------------------------------
-    // Unity lifecycle
-    // -------------------------------------------------------------------------
     private void Awake()
     {
         if (Instance == null)

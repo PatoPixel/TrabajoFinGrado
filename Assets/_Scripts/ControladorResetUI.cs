@@ -1,7 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using System.Linq; // ¡IMPORTANTE! Necesario para ordenar listas (Sort)
+using System.Linq;
+
+/*
+- Controla el boton de reset en la UI de graficas, devolviendo cada grafica a su posicion original dentro del contenedor
+- Para esto, busca todas las graficas activas en la escena, las ordena por
+el valor de la estadistica que representan (que coincide con el orden original) y las recoloca en el contenedor en ese orden
+*/
 
 public class ControladorResetUI : MonoBehaviour
 {
@@ -9,32 +15,31 @@ public class ControladorResetUI : MonoBehaviour
     [Tooltip("El objeto que tiene el Vertical Layout Group (Area_De_Graficas)")]
     public Transform contenedorOriginal;
 
-    // Esta función la llamarás desde el Botón en Unity
+    // Esta funcion se llama desde el boton en Unity
     public void ResetearPosiciones()
     {
-        // 1. Buscamos TODAS las gráficas activas en la escena, estén donde estén
+        // 1. Buscamos TODAS las graficas activas en la escena, esten donde esten (incluso las que el usuario haya arrastrado fuera del contenedor)
         GraficaIndividual[] todasLasGraficas = FindObjectsByType<GraficaIndividual>(FindObjectsSortMode.None);
 
         // 2. Las convertimos a una lista para poder ordenarlas
         List<GraficaIndividual> listaOrdenada = new List<GraficaIndividual>(todasLasGraficas);
 
-        // 3. MAGIA: Las ordenamos por su número de Enum (Velocidad=0, Vision=1...)
-        // Esto asegura que siempre vuelvan en el mismo orden perfecto.
+        // 3. La ordenamos por el valor de la estadistica que representan, para que vuelvan a su orden original (que es el orden de las estadisticas en el enum)
         listaOrdenada.Sort((a, b) => a.estadisticaAsignada.CompareTo(b.estadisticaAsignada));
 
         // 4. Las recolocamos en su sitio
         foreach (GraficaIndividual grafica in listaOrdenada)
         {
-            // A. Devolver al padre original (la cárcel del Layout Group)
+            // A. Devolver al padre original
             grafica.transform.SetParent(contenedorOriginal);
 
-            // B. Resetear escalas raras (por si al arrastrar se deformó algo)
+            // B. Resetear escalas por si acaso
             grafica.transform.localScale = Vector3.one;
 
-            // C. Asegurar que se ve (por si alguna estaba oculta)
+            // C. Asegurar que se ven por si acaso
             grafica.gameObject.SetActive(true);
             
-            // D. Asegurar que está al frente del contenedor
+            // D. Asegurar que estan al frente del contenedor
             grafica.transform.SetAsLastSibling();
         }
 

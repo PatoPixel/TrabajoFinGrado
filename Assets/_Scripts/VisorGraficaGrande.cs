@@ -4,12 +4,22 @@ using TMPro;
 using System.Collections.Generic;
 using System;
 
+/*
+- Este script se encarga de mostrar una grafica grande con el historial completo de una estadistica
+cuando el jugador hace doble click sobre una grafica pequeÃ±a de una bacteria.
+- Es un visor detallado que muestra toda la evolucion de esa estadistica a lo largo del
+tiempo, con ejes escalados dinamicamente segun el rango de valores.
+- Utiliza un sistema de pool para los textos de los ejes, evitando instanciaciones y destrucciones constantes.
+- Se comunica con el EvolutionTracker para obtener los datos histÃ³ricos de la especie seleccionada.
+- Se activa y desactiva el panel completo del visor, y ajusta el grosor de la lÃ­nea segÃºn el zoom de la cÃ¡mara.
+*/
+
+
 public class VisorGraficaGrande : MonoBehaviour
 {
     // SINGLETON: Para poder llamarlo desde cualquier lado sin arrastrar referencias
     public static VisorGraficaGrande Instance;
 
-    // Añade estas dos variables nuevas
     [HideInInspector] public bool estaAbierto = false;
     [HideInInspector] public GraficaIndividual.TipoEstadistica estadisticaActiva;
 
@@ -20,14 +30,15 @@ public class VisorGraficaGrande : MonoBehaviour
     public TextMeshProUGUI tituloGrafica;
 
     [Header("Ejes")]
-    public Transform contenedorEjeY;     // Donde nacen los números verticales
-    public Transform contenedorEjeX;     // Donde nacen los números horizontales
+    public Transform contenedorEjeY;     // Donde nacen los numeros verticales
+    public Transform contenedorEjeX;     // Donde nacen los numeros horizontales
     public GameObject prefabTextoEje;    // El prefab del numerito
 
     [SerializeField] private Camera camaraPrincipal;
 
     public Camera CamaraPrincipal { get { return camaraPrincipal; } }
-    
+    private Stack<GameObject> _poolTextos = new Stack<GameObject>();
+
 
     private void Awake()
     {
@@ -39,12 +50,11 @@ public class VisorGraficaGrande : MonoBehaviour
     {
         if (estaAbierto)
         {
-            lineaGrande.widthMultiplier = 0.005f * camaraPrincipal.orthographicSize; // Ajusta el grosor según el zoom
+            lineaGrande.widthMultiplier = 0.005f * camaraPrincipal.orthographicSize; // Ajusta el grosor segun el zoom
 
         }
     }
 
-    // --- FUNCIÓN PRINCIPAL QUE LLAMARÁS AL DOBLE CLICK ---
     public void AbrirVisor(List<EspeciesSnapshot> historialCompleto, GraficaIndividual.TipoEstadistica tipo, RangoEstadisticoEspecie rango)
     {
         if (historialCompleto.Count <= 1)
@@ -58,24 +68,24 @@ public class VisorGraficaGrande : MonoBehaviour
         panelCompleto.SetActive(true);
         tituloGrafica.text = "Historial Completo: " + tipo.ToString();
 
-        LimpiarEjes(); // Limpiamos cualquier número viejo antes de dibujar
+        LimpiarEjes(); // Limpiamos cualquier numero viejo antes de dibujar
 
-        // 2. OBTENER RANGO DINÁMICO (Min y Max) para escalar la gráfica
+        // Obtener rango limites (Min y Max) para escalar la grafica
         Vector2 limites = ObtenerLimites(rango, tipo);
 
         float minValor = limites.x;
         float maxValor = limites.y;
 
-        // Evitar línea plana
+        // Evitar linea plana
         if (Mathf.Approximately(maxValor, minValor)) { maxValor += 1; minValor -= 1; }
 
-        // 3. DIBUJAR EJE Y (Vertical - Valores)
+        // Dibujar Eje Y (Vertical - Valores)
         DibujarEjeY(minValor, maxValor);
 
-        // 4. DIBUJAR EJE X (Horizontal - Generaciones)
+        // Dibujar Eje X (Horizontal - Generaciones)
         DibujarEjeX(historialCompleto.Count);
 
-        // 5. DIBUJAR LA LÍNEA
+        // Dibujar la Linea con el historial completo
         DibujarLinea(historialCompleto, tipo, minValor, maxValor);
     }
 
@@ -105,7 +115,7 @@ public class VisorGraficaGrande : MonoBehaviour
 
     private void DibujarEjeY(float min, float max)
     {
-        // Vamos a poner 5 marcas fijas: Min, 25%, 50%, 75%, Max
+        // Hay 5 marcas fijas: Min, 25%, 50%, 75%, Max
         int pasos = 5;
         float alto = areaGrafica.rect.height;
 
@@ -113,7 +123,7 @@ public class VisorGraficaGrande : MonoBehaviour
         {
             float porcentaje = (float)i / (pasos - 1);
             float valorNum = Mathf.Lerp(min, max, porcentaje);
-            float posY = (porcentaje * alto) - (alto / 2f); // Posición local Y
+            float posY = (porcentaje * alto) - (alto / 2f);
             ObtenerTextoDelPool(contenedorEjeY, new Vector2(0, posY)).GetComponent<TextMeshProUGUI>().text = valorNum.ToString("F2"); // Un poco a la izquierda
         }
     }
@@ -131,7 +141,7 @@ public class VisorGraficaGrande : MonoBehaviour
             float porcentaje = (float)i / (totalPuntosDeTiempo - 1);
             float posX = (porcentaje * ancho) - (ancho / 2f);
 
-            // Convertimos el índice 'i' a segundos totales
+            // Convertimos el inidice 'i' a segundos totales
             int segundosTotales = i * segundosPorPunto;
 
             // Llamamos a la magia del formateo
@@ -143,7 +153,6 @@ public class VisorGraficaGrande : MonoBehaviour
 
     }
 
-    // --- FUNCIÓN NUEVA: ESCALADO DINÁMICO DE TIEMPO ---
     private string FormatearTiempo(int segundos)
     {
         if (segundos < 60)
@@ -159,15 +168,15 @@ public class VisorGraficaGrande : MonoBehaviour
         }
         else if (segundos < 86400)
         {
-            // Entre 1 hora y 1 día: Mostramos horas con 1 decimal (Ej: "2.4h")
+            // Entre 1 hora y 1 dia: Mostramos horas con 1 decimal (Ej: "2.4h")
             float horas = segundos / 3600f;
             return horas.ToString("F1") + "h";
         }
         else
         {
-            // Más de 1 día: Mostramos días (Ej: "Día 1.2")
+            // Mas de 1 dia: Mostramos dias (Ej: "Dia 1.2")
             float dias = segundos / 86400f;
-            return "Día " + dias.ToString("F1");
+            return "Dï¿½a " + dias.ToString("F1");
         }
     }
 
@@ -188,31 +197,26 @@ public class VisorGraficaGrande : MonoBehaviour
         }
         while (contenedorEjeX.childCount > 0)
         {
-            // Cogemos al primero de la fila y lo mandamos al almacén.
+            // Cogemos al primero de la fila y lo mandamos al almacen.
             DevolverTextoAlPool(contenedorEjeX.GetChild(0).gameObject);
         }
     }
 
-    // Tu traductor de siempre
+
     private float ObtenerValor(EspeciesSnapshot snap, GraficaIndividual.TipoEstadistica tipo)
     {
         switch (tipo)
         {
             case GraficaIndividual.TipoEstadistica.Velocidad: return snap.avgVel;
             case GraficaIndividual.TipoEstadistica.Vision: return snap.avgVision;
-            case GraficaIndividual.TipoEstadistica.Tamaño: return snap.avgTamano;
+            case GraficaIndividual.TipoEstadistica.Tamaï¿½o: return snap.avgTamano;
             case GraficaIndividual.TipoEstadistica.Consumo: return snap.avgConsumo;
-            case GraficaIndividual.TipoEstadistica.EnergíaMáxima: return snap.avgEnergia;
+            case GraficaIndividual.TipoEstadistica.Energï¿½aMï¿½xima: return snap.avgEnergia;
             case GraficaIndividual.TipoEstadistica.EsperanzaDeVida: return snap.avgVidaUtil;
             default: return 0;
         }
     }
 
-    // 1. EL ALMACÉN (Añade esto arriba con tus variables)
-    private Stack<GameObject> _poolTextos = new Stack<GameObject>();
-
-
-    // 2. EL NUEVO "INSTANTIATE" (Úsalo en DibujarEjeX y DibujarEjeY)
     private GameObject ObtenerTextoDelPool(Transform padre, Vector2 posLocal)
     {
         GameObject textoObj;
@@ -229,13 +233,13 @@ public class VisorGraficaGrande : MonoBehaviour
             textoObj.transform.localScale = Vector3.one; // Aseguramos escala correcta
         }
 
-        // Finalmente, le aplicamos la posición (esto sirve para ambos casos)
+        // Finalmente, le aplicamos la posicion (esto sirve para ambos casos)
         textoObj.transform.localPosition = posLocal;
         return textoObj;
     }
 
 
-    // 3. EL NUEVO "DESTROY" (Úsalo en tu método LimpiarEjes)
+    // 3.Detroy en vez de destruir, lo que hacemos es devolverlo al pool para reutilizarlo luego
     private void DevolverTextoAlPool(GameObject textoObj)
     {
  
@@ -253,9 +257,9 @@ public class VisorGraficaGrande : MonoBehaviour
         {
             case GraficaIndividual.TipoEstadistica.Velocidad: return new Vector2(rango.minVel, rango.maxVel);
             case GraficaIndividual.TipoEstadistica.Vision: return new Vector2(rango.minVision, rango.maxVision);
-            case GraficaIndividual.TipoEstadistica.Tamaño: return new Vector2(rango.minTamano, rango.maxTamano);
+            case GraficaIndividual.TipoEstadistica.Tamaï¿½o: return new Vector2(rango.minTamano, rango.maxTamano);
             case GraficaIndividual.TipoEstadistica.Consumo: return new Vector2(rango.minConsumo, rango.maxConsumo);
-            case GraficaIndividual.TipoEstadistica.EnergíaMáxima: return new Vector2(rango.minEnergia, rango.maxEnergia);
+            case GraficaIndividual.TipoEstadistica.Energï¿½aMï¿½xima: return new Vector2(rango.minEnergia, rango.maxEnergia);
             case GraficaIndividual.TipoEstadistica.EsperanzaDeVida: return new Vector2(rango.minVidaUtil, rango.maxVidaUtil);
             default: return Vector2.zero;
         }

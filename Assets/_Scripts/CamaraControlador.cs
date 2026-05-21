@@ -1,6 +1,12 @@
 using System;
 using UnityEngine;
 
+/*
+- Zoom con la rueda del ratÃ³n
+- Movimiento con WASD
+- Movimiento de arrastre con el botÃ³n central del ratÃ³n
+- LÃ­mites para que la cÃ¡mara no salga de la â€œplaca petriâ€
+*/
 public class CamaraControladorPro : MonoBehaviour
 {
     [Header("Movimiento")]
@@ -13,8 +19,8 @@ public class CamaraControladorPro : MonoBehaviour
     [SerializeField] private float sensibilidadZoom = 10f;
     [SerializeField] private float suavizadoZoom = 5f;
 
-    [Header("Límites (Placa Petri)")]
-    [SerializeField] private SpriteRenderer objetoLimite; // Arrastra aquí tu fondo/placa
+    [Header("Lï¿½mites (Placa Petri)")]
+    [SerializeField] private SpriteRenderer objetoLimite;
 
     private Camera _cam;
     private float _targetZoom;
@@ -28,8 +34,8 @@ public class CamaraControladorPro : MonoBehaviour
         _targetZoom = _cam.orthographicSize;
     }
 
-
-    void LateUpdate() // Usamos LateUpdate para que la cámara se mueva después que las bacterias
+    // Usamos LateUpdate para que la camara se mueva despues que las bacterias
+    void LateUpdate() 
     {
         if (ControladorMenuPausa.juegoPausado) return;
         GestionarZoom();
@@ -70,7 +76,7 @@ public class CamaraControladorPro : MonoBehaviour
         {
             Vector3 diferencia = Input.mousePosition - _ultimaPosicionRaton;
 
-            // Aplicamos el multiplicador a la sensibilidad del ratón
+            // Aplicamos el multiplicador a la sensibilidad del raton
             float sensibilidadReal = sensibilidadArrastre * multiplicadorZoom;
 
             transform.position += new Vector3(-diferencia.x, -diferencia.y, 0) * sensibilidadReal * Time.unscaledDeltaTime;
@@ -78,7 +84,7 @@ public class CamaraControladorPro : MonoBehaviour
             _ultimaPosicionRaton = Input.mousePosition;
         }
 
-        // Si el jugador está usando el teclado o arrastrando, disparamos el evento de intervención manual
+        // Si el jugador esta usando el teclado o arrastrando, disparamos el evento de intervenciï¿½n manual
         if (mov != Vector3.zero || Input.GetMouseButton(2))
         {
             OnIntervencionManual?.Invoke();
@@ -92,18 +98,18 @@ public class CamaraControladorPro : MonoBehaviour
         // 1. Obtenemos los bordes reales del objeto placa petri
         Bounds limitesPlaca = objetoLimite.bounds;
 
-        // 2. Calculamos cuánto "ve" la cámara en vertical y horizontal
+        // 2. Calculamos cuanto "ve" la camara en vertical y horizontal
         float altoCamara = _cam.orthographicSize;
         float anchoCamara = altoCamara * _cam.aspect;
 
-        // 3. Calculamos los límites permitidos para el CENTRO de la cámara
-        // Restamos el tamaño de la cámara a los límites de la placa para que el borde no se salga
+        // 3. Calculamos los limites permitidos para el CENTRO de la camara
+        // Restamos el tamanno de la camara a los limites de la placa para que el borde no se salga
         float minX = limitesPlaca.min.x + anchoCamara;
         float maxX = limitesPlaca.max.x - anchoCamara;
         float minY = limitesPlaca.min.y + altoCamara;
         float maxY = limitesPlaca.max.y - altoCamara;
 
-        // 4. Si la placa es más pequeña que el zoom actual, bloqueamos en el centro
+        // 4. Si la placa es mas pequenna que el zoom actual, bloqueamos en el centro
         if (minX > maxX) { float centroX = limitesPlaca.center.x; minX = maxX = centroX; }
         if (minY > maxY) { float centroY = limitesPlaca.center.y; minY = maxY = centroY; }
 

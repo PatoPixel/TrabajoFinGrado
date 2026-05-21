@@ -1,8 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
+
 [System.Serializable]
 public struct EspeciesSnapshot
 {
+    // Promedios de cada estadística para una especie en un momento de muestreo
     public float avgVel;
     public float avgVision;
     public float avgTamano;
@@ -13,6 +15,7 @@ public struct EspeciesSnapshot
 }
 public struct Acumulador
 {
+    // Suma de valores y cuenta de elementos antes de calcular promedios
     public float sumVel;
     public float sumVision;
     public float sumTamano;
@@ -20,11 +23,13 @@ public struct Acumulador
     public float sumConsumo;
     public float sumVidaUtil;
     public int count;
-    public void Reset() { sumVel = sumVision = sumTamano =  sumEnergia = sumConsumo = sumVidaUtil = 0; count = 0; }
+    public void Reset() { sumVel = sumVision = sumTamano = sumEnergia = sumConsumo = sumVidaUtil = 0; count = 0; }
 }
+
 [System.Serializable]
 public struct RangoEstadisticoEspecie
-    {
+{
+    // Valores mínimos y máximos registrados para una especie
     public float minVel;
     public float maxVel;
     public float minVision;
@@ -39,17 +44,27 @@ public struct RangoEstadisticoEspecie
     public float maxVidaUtil;
 }
 
+/* 
+- Se encarga de recolectar datos de las bacterias a lo largo del tiempo y organizarlos por especie.
+- Cada cierto intervalo de tiempo, recorre el registro de vida de las bacterias, acum
+ula sus estadísticas en un buffer temporal, y luego calcula promedios para cada especie.
+- Guarda estos promedios en un historial por especie, y también actualiza los rangos
+estadísticos (mínimos y máximos) para cada especie.
+- Cuando se selecciona una especie para mostrar, notifica a todas las gráficas individuales para
+que actualicen su visualización con los datos de esa especie.
+*/
 
 public class EvolutionTracker : MonoBehaviour
 {
-    public int familiaSeleccionada = 1; // Por defecto vemos la 1
+    public int familiaSeleccionada = 1; // Especie seleccionada para mostrar en las gráficas
 
     private Dictionary<int, List<EspeciesSnapshot>> historialEspecies = new Dictionary<int, List<EspeciesSnapshot>>();
-    private Dictionary<int, RangoEstadisticoEspecie> rangosEspecies = new Dictionary<int, RangoEstadisticoEspecie>();   
+    private Dictionary<int, RangoEstadisticoEspecie> rangosEspecies = new Dictionary<int, RangoEstadisticoEspecie>();
     public List<GraficaIndividual> todasLasGraficas = new List<GraficaIndividual>();
     [SerializeField] private float intervaloMuestreo = 2f;
     private float timer;
 
+    // Buffer fijo para agrupar datos antes de guardarlos en el historial
     private Acumulador[] acumulador = new Acumulador[100];
 
     public Dictionary<int, List<EspeciesSnapshot>> HistorialEspecies { get => historialEspecies; }
@@ -66,14 +81,15 @@ public class EvolutionTracker : MonoBehaviour
         }
     }
 
+    // Recolecta datos actuales de las especies y los convierte en snapshots
     void PerformSnapshot()
     {
         for (int i = 0; i < acumulador.Length; i++) acumulador[i].Reset();
 
-        // Accedemos al RegistroVida que ya tienes en GestorLinajes
+        // Recorremos cada registro de vida y sumamos estadísticas en un acumulador
         foreach (var par in GestorLinajes.RegistroVida)
         {
-            // Usamos el id de linaje para saber en qu� caj�n sumar
+            // Convertimos el id de linaje a un índice válido dentro del arreglo
             int id = par.Value.misStats.idLinaje % acumulador.Length;
 
             acumulador[id].sumVel += par.Value.misStats.velocidad;
@@ -94,6 +110,7 @@ public class EvolutionTracker : MonoBehaviour
         }
     }
 
+    // Calcula el snapshot final y actualiza los datos históricos y los rangos
     void GuardarEnHistorial(int speciesId, Acumulador acc)
     {
         if (!historialEspecies.ContainsKey(speciesId))
@@ -154,10 +171,10 @@ public class EvolutionTracker : MonoBehaviour
     {
         familiaSeleccionada = nuevoId;
 
-        // Nos aseguramos de que la lista de gr�ficas est� inicializada
+        // Nos aseguramos de que la lista de graficas este inicializada
         if (todasLasGraficas != null)
         {
-            // Si ya tenemos datos de esa familia, actualizamos todas las gr�ficas al instante
+            // Si ya tenemos datos de esa familia, actualizamos todas las gráficas al instante
             if (historialEspecies.ContainsKey(nuevoId))
             {
                 foreach (GraficaIndividual panel in todasLasGraficas)
@@ -167,7 +184,7 @@ public class EvolutionTracker : MonoBehaviour
             }
             else
             {
-                // Si es una familia nueva y a�n no hay datos, limpiamos las gr�ficas por si hab�a otra seleccionada antes
+                // Si es una familia nueva y aún no hay datos, limpiamos las gráficas por si había otra seleccionada antes
                 foreach (GraficaIndividual panel in todasLasGraficas)
                 {
                     panel.Limpiar();

@@ -1,24 +1,19 @@
 using UnityEngine;
 
-/// <summary>
-/// Component attached to every nutrient prefab instance.
-/// Holds the energy value of this nutrient and handles pool return on pickup.
-/// </summary>
+/*
+- Representa un objeto de comida que las bacterias pueden recoger para ganar energía.
+- La energía que otorga se basa en su tamaño, con una cantidad base y un multiplicador.
+- Tiene un método para inicializar su tamaño y energía, y otro para devolverlo a la pool cuando ya no se necesita.
+*/
+
 public class Comida : MonoBehaviour
 {
-    // -------------------------------------------------------------------------
-    // Constants
-    // -------------------------------------------------------------------------
     private const float EnergiaBase = 40f;
     private const float EscalaEnergiaMultiplicador = 20f;
 
-    // -------------------------------------------------------------------------
-    // State
-    // -------------------------------------------------------------------------
-    /// <summary>Energy granted to a bacteria that picks this up.</summary>
     public float Energia { get; private set; } = EnergiaBase;
 
-    //Llamada por el PoolComida al sacar un nuevo objeto para usar. Ajusta su escala y energ�a seg�n el tama�o dado.
+    //Llamada por el PoolComida al sacar un nuevo objeto para usar. Ajusta su escala y energia según el tamanno dado.
     public void Inicializar(float tamano)
     {
         float escalaFinal = Mathf.Max(0.1f, tamano);
@@ -26,7 +21,7 @@ public class Comida : MonoBehaviour
         Energia = EnergiaBase + escalaFinal * EscalaEnergiaMultiplicador;
     }
 
-    /// <summary>Returns this nutrient to the pool.</summary>
+    // Devuelve el objeto a la pool para que pueda ser reutilizado, o lo desactiva si la pool no esta disponible
     public void Devolver()
     {
         if (PoolComida.Instance != null)
