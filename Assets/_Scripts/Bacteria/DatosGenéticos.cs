@@ -1,6 +1,13 @@
 using UnityEngine;
 
-[System.Serializable] // Para que aparezca en el Inspector de Unity
+/*
+- Este struct se encarga de almacenar los datos geneticos de cada bacteria, incluyendo su linaje, generaciones, velocidad, radio de vision, energia maxima, consumo, tamano, vida util, rango de mutacion, tiempo entre reproduccion y color del linaje.
+- Estos datos son utilizados para determinar el comportamiento de cada bacteria, su capacidad de supervivencia y
+    su capacidad de reproduccion.
+- El struct incluye un metodo para calcular el gasto energetico de una bacteria en funcion de su tamano, velocidad y radio de vision.
+*/
+
+[System.Serializable]
 public struct DatosGeneticos
 {
     public int idLinaje;
@@ -30,7 +37,7 @@ public struct DatosGeneticos
     }
     public static float CalcularGasto(float t, float v, float r)
     {
-        // Elevamos al cubo (t*t*t) para penalizar el tamaño masivamente
+        // Elevamos al cubo (t*t*t) para penalizar el tamanno masivamente
         return ((t * t * t) + (v * v) + r) * 0.25f;
     }
 }

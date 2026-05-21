@@ -1,8 +1,19 @@
 using UnityEngine;
 
+/*
+- Este script se encarga de controlar los sensores de las bacterias, permitiÃ©ndoles detectar comida y amenazas en su entorno.
+- Utiliza un sistema de capas para filtrar los objetos que la bacteria puede detectar, y un buffer de colisiones para optimizar el rendimiento.
+- La bacteria escanea su entorno cada cierto tiempo, buscando objetos dentro de su radio de visiÃ³n  
+y asignando el mÃ¡s cercano como comida, siempre y cuando no sea de su mismo linaje y sea significativamente mÃ¡s pequeÃ±o.
+- Si detecta una amenaza (un objeto significativamente mÃ¡s grande que ella), asigna esa amenaza como prioridad mÃ¡xima, ignorando cualquier comida detectada.
+
+//Posible annadido al juego y no solo depuracion:
+- El script tambiÃ©n incluye una funciÃ³n para dibujar un gizmo en el editor de Unity, mostrando el radio de visiÃ³n de la bacteria para facilitar la depuraciÃ³n y el diseÃ±o del entorno.
+*/
+
 public class SensorBacteria : MonoBehaviour
 {
-    [Header("Configuración del Radar")]
+    [Header("Configuraciï¿½n del Radar")]
     public LayerMask capasObjetivo;
 
     public Transform comidaCercana;
@@ -34,7 +45,7 @@ public class SensorBacteria : MonoBehaviour
 
     void BuscarObjetivo()
     {
-        // 1. Escaneamos todo en el radio de visión
+        // Escaneamos todo en el radio de vision
         int cantidadDetectada = Physics2D.OverlapCircle(
                 transform.position,
                 sistemaVida.misStats.radioVision,
@@ -57,27 +68,27 @@ public class SensorBacteria : MonoBehaviour
             if (GestorLinajes.RegistroVida.TryGetValue(idDelDetectado, out SistemaVida vidaEncontrada))
             {
 
-                // Ignorar si no tiene stats (por seguridad, aunque no debería pasar)
+                // Ignorar si no tiene stats (aunque no deberia pasar)
                 if (vidaEncontrada == null) continue;
 
                 // Ignorar si es de mi familia
                 if (vidaEncontrada.misStats.idLinaje == sistemaVida.misStats.idLinaje) continue;
-                // Si el otro es un 20% más grande que yo huyo
+                // Si el otro es un 20% mas grande que yo huyo
                 if (vidaEncontrada.misStats.tamano > sistemaVida.misStats.tamano * 1.2f)
                 {
-                    // PRIORIDAD MÁXIMA: Guardamos la amenaza y abortamos búsqueda
+                    //  Guardamos la amenaza y abortamos busqueda
                     AmenazaCercana = col.transform;
                     break;
                 }
 
-                //Si no es 20% mas pequeño que yo lo ignoro
+                //Si no es 20% mas pequenno que yo lo ignoro
                 if (sistemaVida.misStats.tamano <= vidaEncontrada.misStats.tamano * 1.2f) continue;
 
 
 
                 }
 
-            // Cálculo de distancia para encontrar al más cercano
+            // Calculo de distancia para encontrar al mas cercano
             float distancia = (transform.position - col.transform.position).sqrMagnitude;
             if (distancia < distanciaMinima)
             {
@@ -86,10 +97,10 @@ public class SensorBacteria : MonoBehaviour
             }
         }
 
-        // 2. Asignamos el resultado
+        // Asignamos el resultado
         comidaCercana = candidatoOpcional;
 
-        // 3. Debug Visual
+        // Debug Visual
         if (comidaCercana != null)
         {
             Color colorDebug = comidaCercana.CompareTag("Bacteria") ? Color.magenta : Color.yellow;

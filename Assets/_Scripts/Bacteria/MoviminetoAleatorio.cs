@@ -1,5 +1,17 @@
 using UnityEngine;
 
+/*
+- Este script se encarga de controlar el movimiento de las bacterias, utilizando un sistema de estados para determinar su comportamiento en cada momento.
+- Las bacterias pueden estar en uno de los siguientes estados: Vagando, Persiguiendo, Reproduciendo o Huyendo.
+- En el estado de Vagando, la bacteria se mueve de forma aleatoria por el entorno, cambiando de dirección cada cierto tiempo o al chocar con una pared.
+- En el estado de Persiguiendo, la bacteria se dirige hacia una fuente de comida que ha detectado, pero si detecta una amenaza cercana, cambia al estado de Huyendo.
+- En el estado de Reproduciendo, la bacteria crea una copia de sí misma aplicandole mutaciones y luego vuelve al estado de Vagando.
+- En el estado de Huyendo, la bacteria se aleja rápidamente de la amenaza detectada, pero si la amenaza desaparece, vuelve al estado de Vagando.
+- El script también incluye lógica para manejar colisiones con otras bacterias, determinando si debe comer a la otra bacteria 
+(si es de un linaje diferente y es significativamente más pequeña) o simplemente cambiar de dirección para evitar el choque.
+- Además, se aplica una fuerza de separación para evitar que las bacterias se amontonen unas encima de otras, especialmente si son del mismo linaje.
+*/
+
 public class MovimientoAleatorio : MonoBehaviour
 {
     public enum EstadoBacteria { Vagando, Persiguiendo, Reproduciendo, Huyendo }
@@ -9,7 +21,8 @@ public class MovimientoAleatorio : MonoBehaviour
     [SerializeField] private float giroMaximoPorSegundo = 180f;
     [SerializeField] private float suavizadoVelocidad = 2f;
     [SerializeField] private float fuerzaSeparacion = 1f;
-
+    [SerializeField] private float costoReproducir = 50f;
+    
     private Vector2 direccionObjetivo;
     private float tiempoSiguienteChoque;
     private Rigidbody2D miCuerpoFisico;
@@ -17,12 +30,10 @@ public class MovimientoAleatorio : MonoBehaviour
     private SensorBacteria misOjos;
     private SistemaVida sistemaVida;
     private EstadoBacteria estadoActual;
-    // Guardamos el angulo para no calcularlo mil veces
     private float anguloObjetivoCacheado; 
 
     void Start()
     {
-        // Miramos si tenemos el script de vida
         sistemaVida = GetComponent<SistemaVida>();
         if (sistemaVida == null) { enabled = false; return; }
 
@@ -107,7 +118,7 @@ public class MovimientoAleatorio : MonoBehaviour
             // Si chocamos con una pared, rebotamos
             Vector2 normalPared = colision.contacts[0].normal;
             direccionObjetivo = Vector2.Reflect(direccionObjetivo, normalPared).normalized;
-            ActualizarAnguloCacheado(); // IMPORTANTE: recalculamos el angulo tras rebotar
+            ActualizarAnguloCacheado(); // Recalculamos el angulo tras rebotar
             if (estadoActual == EstadoBacteria.Persiguiendo) estadoActual = EstadoBacteria.Vagando;
             tiempoSiguienteChoque = Time.time + cooldownChoque;
         }
@@ -178,7 +189,7 @@ public class MovimientoAleatorio : MonoBehaviour
     private void LogicaReproducirse()
     {
         // Creamos una copia y volvemos a caminar
-        sistemaVida.Reproducir(50);
+        sistemaVida.Reproducir(costoReproducir);
         estadoActual = EstadoBacteria.Vagando;
     }
 

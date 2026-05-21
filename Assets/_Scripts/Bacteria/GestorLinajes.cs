@@ -1,6 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+- Este script se encarga de gestionar los linajes de las bacterias, asignando un
+ID unico a cada linaje y manteniendo un registro de las bacterias vivas asociadas a cada ID.
+- Proporciona un metodo para obtener un nuevo ID de linaje, que se incrementa automaticamente cada vez que se solicita uno nuevo.
+- Tambien incluye una lista de nombres de familias para asignar a los linajes, y un metodo para obtener el nombre de un linaje a partir de su ID.
+- Ademas, tiene un metodo para purgar el registro de vida, eliminando todas las bacterias vivas registradas y reiniciando el contador de IDs.
+*/
+
 public class GestorLinajes : MonoBehaviour
 {
     private static GestorLinajes _instance;
@@ -52,7 +60,6 @@ public class GestorLinajes : MonoBehaviour
         return idAEntregar;
     }
 
-    // Nueva función para que las bacterias consulten su nombre
     public string GetNombrePorId(int id)
     {
         if (nombresFamilias == null || nombresFamilias.Count == 0)
