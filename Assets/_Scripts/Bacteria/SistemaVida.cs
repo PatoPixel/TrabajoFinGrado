@@ -116,11 +116,14 @@ public class SistemaVida : MonoBehaviour
         energiaActual = Mathf.Clamp(energiaActual, 0, misStats.energiaMax);
     }
 
-    public void Reproducir(float costoReproduccion)
+    public void Reproducir()
     {
         // Condición de seguridad: Energía suficiente Y cooldown agotado
+        float costoReproduccion = DatosGeneticos.CalcularCosteReproduccion(misStats.consumo, misStats.tiempreEntreReproduccion);
+
         if (cooldownRestante <= 0 && energiaActual >= costoReproduccion)
         {
+
             energiaActual -= costoReproduccion;
 
             // Bloqueamos la reproducción inmediatamente (Cooldown de seguridad)

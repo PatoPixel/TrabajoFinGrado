@@ -21,7 +21,6 @@ public class MovimientoAleatorio : MonoBehaviour
     [SerializeField] private float giroMaximoPorSegundo = 180f;
     [SerializeField] private float suavizadoVelocidad = 2f;
     [SerializeField] private float fuerzaSeparacion = 1f;
-    [SerializeField] private float costoReproducir = 50f;
     
     private Vector2 direccionObjetivo;
     private float tiempoSiguienteChoque;
@@ -189,7 +188,7 @@ public class MovimientoAleatorio : MonoBehaviour
     private void LogicaReproducirse()
     {
         // Creamos una copia y volvemos a caminar
-        sistemaVida.Reproducir(costoReproducir);
+        sistemaVida.Reproducir();
         estadoActual = EstadoBacteria.Vagando;
     }
 

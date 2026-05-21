@@ -21,10 +21,10 @@ o el rango local de los datos visibles (minimo y maximo entre los ultimos X punt
 public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
 {
     // --- CONFIGURACON ---
-    public enum TipoEstadistica { Velocidad, Vision, Tama�o, Consumo, Energ�aM�xima, EsperanzaDeVida }
+    public enum TipoEstadistica { Velocidad, Vision, Tamanno, Consumo, EnergiaMaxima, EsperanzaDeVida }
 
     [Header("Configuraci�n General")]
-    public TipoEstadistica estadisticaAsignada
+    public TipoEstadistica estadisticaAsignada;
     private RangoEstadisticoEspecie rangoEspecieAsignada;
 
     [Header("Referencias UI Gr�fica")]
@@ -212,11 +212,11 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
             lineaGrafica.SetPosition(i, new Vector3(xPos, yPos, 0));
             if (textoInfoSecundaria != null)
             {
-                if (estadisticaAsignada == TipoEstadistica.Tama�o)
+                if (estadisticaAsignada == TipoEstadistica.Tamanno)
                 {
                     // Calculamos la energia basada en el tamanno actual
                     float energiaCalculada = valorActual * 100f;
-                    textoInfoSecundaria.text = $"(E. M�x: {energiaCalculada:F0})"; // F0 para quitar decimales
+                    textoInfoSecundaria.text = $"(E. Max: {energiaCalculada:F0})"; // F0 para quitar decimales
                     textoInfoSecundaria.gameObject.SetActive(true);
                 }
                 else
@@ -234,9 +234,9 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
         {
             case TipoEstadistica.Velocidad: return snap.avgVel;
             case TipoEstadistica.Vision: return snap.avgVision;
-            case TipoEstadistica.Tama�o: return snap.avgTamano;
+            case TipoEstadistica.Tamanno: return snap.avgTamano;
             case TipoEstadistica.Consumo: return snap.avgConsumo;
-            case TipoEstadistica.Energ�aM�xima: return snap.avgEnergia;
+            case TipoEstadistica.EnergiaMaxima: return snap.avgEnergia;
             case TipoEstadistica.EsperanzaDeVida: return snap.avgVidaUtil;
             default: return 0f;
         }
@@ -273,9 +273,9 @@ public class GraficaIndividual : MonoBehaviour, IPointerClickHandler
         {
             case TipoEstadistica.Velocidad: return new Vector2(rangoEspecieAsignada.minVel, rangoEspecieAsignada.maxVel);
             case TipoEstadistica.Vision: return new Vector2(rangoEspecieAsignada.minVision, rangoEspecieAsignada.maxVision);
-            case TipoEstadistica.Tama�o: return new Vector2(rangoEspecieAsignada.minTamano, rangoEspecieAsignada.maxTamano);
+            case TipoEstadistica.Tamanno: return new Vector2(rangoEspecieAsignada.minTamano, rangoEspecieAsignada.maxTamano);
             case TipoEstadistica.Consumo: return new Vector2(rangoEspecieAsignada.minConsumo, rangoEspecieAsignada.maxConsumo);
-            case TipoEstadistica.Energ�aM�xima: return new Vector2(rangoEspecieAsignada.minEnergia, rangoEspecieAsignada.maxEnergia);
+            case TipoEstadistica.EnergiaMaxima: return new Vector2(rangoEspecieAsignada.minEnergia, rangoEspecieAsignada.maxEnergia);
             case TipoEstadistica.EsperanzaDeVida: return new Vector2(rangoEspecieAsignada.minVidaUtil, rangoEspecieAsignada.maxVidaUtil);
             default: return new Vector2(0, 1);
         }

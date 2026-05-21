@@ -209,9 +209,9 @@ public class VisorGraficaGrande : MonoBehaviour
         {
             case GraficaIndividual.TipoEstadistica.Velocidad: return snap.avgVel;
             case GraficaIndividual.TipoEstadistica.Vision: return snap.avgVision;
-            case GraficaIndividual.TipoEstadistica.Tama�o: return snap.avgTamano;
+            case GraficaIndividual.TipoEstadistica.Tamanno: return snap.avgTamano;
             case GraficaIndividual.TipoEstadistica.Consumo: return snap.avgConsumo;
-            case GraficaIndividual.TipoEstadistica.Energ�aM�xima: return snap.avgEnergia;
+            case GraficaIndividual.TipoEstadistica.EnergiaMaxima: return snap.avgEnergia;
             case GraficaIndividual.TipoEstadistica.EsperanzaDeVida: return snap.avgVidaUtil;
             default: return 0;
         }
@@ -257,9 +257,9 @@ public class VisorGraficaGrande : MonoBehaviour
         {
             case GraficaIndividual.TipoEstadistica.Velocidad: return new Vector2(rango.minVel, rango.maxVel);
             case GraficaIndividual.TipoEstadistica.Vision: return new Vector2(rango.minVision, rango.maxVision);
-            case GraficaIndividual.TipoEstadistica.Tama�o: return new Vector2(rango.minTamano, rango.maxTamano);
+            case GraficaIndividual.TipoEstadistica.Tamanno: return new Vector2(rango.minTamano, rango.maxTamano);
             case GraficaIndividual.TipoEstadistica.Consumo: return new Vector2(rango.minConsumo, rango.maxConsumo);
-            case GraficaIndividual.TipoEstadistica.Energ�aM�xima: return new Vector2(rango.minEnergia, rango.maxEnergia);
+            case GraficaIndividual.TipoEstadistica.EnergiaMaxima: return new Vector2(rango.minEnergia, rango.maxEnergia);
             case GraficaIndividual.TipoEstadistica.EsperanzaDeVida: return new Vector2(rango.minVidaUtil, rango.maxVidaUtil);
             default: return Vector2.zero;
         }

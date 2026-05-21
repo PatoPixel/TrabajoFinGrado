@@ -40,4 +40,11 @@ public struct DatosGeneticos
         // Elevamos al cubo (t*t*t) para penalizar el tamanno masivamente
         return ((t * t * t) + (v * v) + r) * 0.25f;
     }
+    public static float CalcularCosteReproduccion(float consumo, float tiempoEntreReproduccion)
+    {
+        // Fórmula basada en el metabolismo: 
+        // A mayor tiempo o mayor consumo, más cuesta reproducirse, 
+        // pero permite alcanzar tamaños gigantes de hasta 4.0 sin morir.
+        return (tiempoEntreReproduccion * 0.5f) + (consumo * 10f);
+    }
 }
