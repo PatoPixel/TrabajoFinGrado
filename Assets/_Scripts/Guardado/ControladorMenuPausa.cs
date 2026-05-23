@@ -2,38 +2,41 @@ using UnityEngine;
 
 public class ControladorMenuPausa : MonoBehaviour
 {
-
-
     [Header("Referencias UI")]
-    public GameObject panelPausa; // Arrastra aquí el panel contenedor de tu menú
+    public GameObject panelPausa;
+    public GameObject panelListaPartidas;
 
     public static bool juegoPausado = false;
-    private float velocidadAnterior = 1f; // Para recordar si el jugador estaba a x1, x2, etc.
+    private float velocidadAnterior = 1f;
 
-    [Header("Referencias Sub-Menús")]
-    public GameObject panelListaPartidas;      // El panel del Gestor de Guardado
+    private void Awake()
+    {
+        // 1. Reseteo absoluto al iniciar
+        Time.timeScale = 1f;
+        velocidadAnterior = 1f;
+        juegoPausado = false;
+    }
 
     private void Start()
     {
-        // Asegurarnos de que el menú de pausa esté oculto al iniciar
-        panelPausa.SetActive(false);
+        // 2. Ocultamos todo directamente por seguridad
+        if (panelListaPartidas != null) panelListaPartidas.SetActive(false);
+        if (panelPausa != null) panelPausa.SetActive(false);
+
+        Debug.Log("MenuPausa Sistema Iniciado. Paneles apagados.");
     }
-
-
-    // ... (Mantienes tus variables juegoPausado y velocidadAnterior igual) ...
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            // Escenario 1: El juego está pausado Y estamos dentro del sub-menú de partidas
+            Debug.Log(" MenuPausa Tecla ESC pulsada.");
+
             if (juegoPausado && panelListaPartidas.activeSelf)
             {
-                // Hacemos por código exactamente lo mismo que hace tu botón "X"
                 CerrarSubMenu();
                 panelPausa.SetActive(true);
             }
-            // Escenario 2: Estamos jugando normal, o en el menú de pausa principal
             else
             {
                 AlternarPausa();
@@ -41,52 +44,53 @@ public class ControladorMenuPausa : MonoBehaviour
         }
     }
 
-    // He creado esta función por si en el futuro añades un menú de Ajustes. 
-    // Así todo se centraliza aquí.
     private void CerrarSubMenu()
     {
-        panelListaPartidas.SetActive(false);
+        if (panelListaPartidas != null) panelListaPartidas.SetActive(false);
     }
 
-    // Este método lo llamaremos tanto desde el Update como desde el botón de las 3 líneas
     public void AlternarPausa()
     {
-        juegoPausado = !juegoPausado;
+        // MAGIA DE SENIOR: Ya no confiamos en variables, miramos si el panel existe visualmente
+        bool elPanelEstaEncendido = panelPausa.activeSelf;
 
-        if (juegoPausado)
+        if (elPanelEstaEncendido)
         {
-            PausarJuego();
+            ReanudarJuego();
         }
         else
         {
-            ReanudarJuego();
+            PausarJuego();
         }
     }
 
     private void PausarJuego()
     {
-        // Encendemos la UI
+        Debug.Log(" MenuPausa Pausando juego y ENCENDIENDO panel...");
+
+        // 1. Encendemos visualmente
         panelPausa.SetActive(true);
 
-        // Guardamos a qué velocidad iba el juego antes de pausar
+        // 2. Guardamos la velocidad
         if (Time.timeScale > 0f)
         {
             velocidadAnterior = Time.timeScale;
         }
 
-        // Congelamos el mundo
+        // 3. Congelamos
         Time.timeScale = 0f;
+        juegoPausado = true;
     }
 
-    // La hacemos pública por si quieres poner un botón de "Continuar" en el menú
     public void ReanudarJuego()
     {
-        // Apagamos la UI
+        Debug.Log(" MenuPausa Reanudando juego y APAGANDO panel...");
+
+        // 1. Apagamos visualmente
         panelPausa.SetActive(false);
 
-        // Devolvemos el juego a la velocidad que tenía
-        Time.timeScale = velocidadAnterior;
-
+        // 2. Descongelamos
+        Time.timeScale = velocidadAnterior > 0f ? velocidadAnterior : 1f;
         juegoPausado = false;
     }
 }

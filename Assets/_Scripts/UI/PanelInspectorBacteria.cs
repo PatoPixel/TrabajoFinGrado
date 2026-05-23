@@ -26,9 +26,10 @@ public class PanelInspectorBacteria : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textoVision;
     [SerializeField] private TextMeshProUGUI textoTamano;
     [SerializeField] private TextMeshProUGUI textoConsumo;
-    [SerializeField] private TextMeshProUGUI textoVidaUtil; // Ahora lo usaremos para el tiempo en vivo
+    [SerializeField] private TextMeshProUGUI textoVidaUtil;
     [SerializeField] private TextMeshProUGUI textoEnergia;
-
+    [SerializeField] private TextMeshProUGUI textoCosteReproduccion;
+    [SerializeField] private TextMeshProUGUI textoTiempoReproduccion;
     // -------------------------------------------------------------------------
     // Inspector — Energy bar
     // -------------------------------------------------------------------------
@@ -99,6 +100,7 @@ public class PanelInspectorBacteria : MonoBehaviour
         // --- Si llegamos aquí, la bacteria está viva y coleando ---
         ActualizarBarraEnergia();
         ActualizarVidaUtil();
+        ActualizarTiempoReproduccion();
         ActualizarCamaraPiP();
 
         if (_siguiendo)
@@ -174,8 +176,12 @@ public class PanelInspectorBacteria : MonoBehaviour
         if (textoVision != null) textoVision.text = $"Visión: {g.radioVision:F2}";
         if (textoTamano != null) textoTamano.text = $"Tamaño: {g.tamano:F2}";
         if (textoConsumo != null) textoConsumo.text = $"Consumo: {g.consumo:F3}/s";
+        if (textoCosteReproduccion != null)
+        {
+            float costo = DatosGeneticos.CalcularCosteReproduccion(g.consumo, g.tiempreEntreReproduccion);
+            textoCosteReproduccion.text = $"Coste Mitosis: {costo:F0} E";
+        }
 
-        // ELIMINADO: textoVidaUtil ya no se actualiza aquí porque ahora es dinámico.
     }
 
     // -------------------------------------------------------------------------
@@ -205,6 +211,22 @@ public class PanelInspectorBacteria : MonoBehaviour
 
             // Mostrará algo como: "Edad: 12.5s / 40.0s"
             textoVidaUtil.text = $"Edad: {tiempoVivido:F1}s / {vidaMaxima:F1}s";
+        }
+    }
+    private void ActualizarTiempoReproduccion()
+    {
+        if (textoTiempoReproduccion != null)
+        {
+            float tiempoRestante = _bacteriaActual.CooldownRestante;
+
+            if (tiempoRestante <= 0f)
+            {
+                textoTiempoReproduccion.text = "Mitosis: ¡LISTA!";
+            }
+            else
+            {
+                textoTiempoReproduccion.text = $"Mitosis en: {tiempoRestante:F1}s";
+            }
         }
     }
 

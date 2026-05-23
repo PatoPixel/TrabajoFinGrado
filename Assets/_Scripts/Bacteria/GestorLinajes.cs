@@ -1,26 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/*
-- Este script se encarga de gestionar los linajes de las bacterias, asignando un
-ID unico a cada linaje y manteniendo un registro de las bacterias vivas asociadas a cada ID.
-- Proporciona un metodo para obtener un nuevo ID de linaje, que se incrementa automaticamente cada vez que se solicita uno nuevo.
-- Tambien incluye una lista de nombres de familias para asignar a los linajes, y un metodo para obtener el nombre de un linaje a partir de su ID.
-- Ademas, tiene un metodo para purgar el registro de vida, eliminando todas las bacterias vivas registradas y reiniciando el contador de IDs.
-*/
-
 public class GestorLinajes : MonoBehaviour
 {
     private static GestorLinajes _instance;
+
     public static Dictionary<int, SistemaVida> RegistroVida = new Dictionary<int, SistemaVida>();
+    public Dictionary<int, DatosGeneticos> plantillasLinajes = new Dictionary<int, DatosGeneticos>();
+    public Dictionary<int, string> nombresLinajes = new Dictionary<int, string>();
+
     public static GestorLinajes Instance
     {
         get
         {
-            if (_instance == null)
-            {
-                _instance = FindFirstObjectByType<GestorLinajes>();
-            }
+            if (_instance == null) _instance = FindFirstObjectByType<GestorLinajes>();
             return _instance;
         }
     }
@@ -35,8 +28,9 @@ public class GestorLinajes : MonoBehaviour
     };
 
     private int siguienteIdDisponible = 1;
-    public int SiguienteIdDisponible { 
-        get { return siguienteIdDisponible; } 
+    public int SiguienteIdDisponible
+    {
+        get { return siguienteIdDisponible; }
         set { siguienteIdDisponible = value; }
     }
 
@@ -60,45 +54,50 @@ public class GestorLinajes : MonoBehaviour
         return idAEntregar;
     }
 
+    public int RegistrarLinajeManual(string nombre, DatosGeneticos stats)
+    {
+        int nuevoId = ObtenerNuevoId();
+        stats.idLinaje = nuevoId;
+        stats.generaciones = 1; // Es la cepa original de este linaje
+
+        // Guardamos el ADN y el nombre en los diccionarios
+        plantillasLinajes[nuevoId] = stats;
+        nombresLinajes[nuevoId] = nombre;
+
+        return nuevoId;
+    }
     public string GetNombrePorId(int id)
     {
+        if (nombresLinajes.ContainsKey(id))
+            return nombresLinajes[id];
+
         if (nombresFamilias == null || nombresFamilias.Count == 0)
             return "Bacteria";
 
-        // Usamos el ID para elegir un nombre de la lista. 
-        // El (id - 1) es porque los IDs empiezan en 1 pero la lista en 0.
-        // El % asegura que si hay 100 linajes y 17 nombres, no de error.
         int indice = (id - 1) % nombresFamilias.Count;
         return nombresFamilias[indice];
     }
 
-    public void RegistrarVida(int id, SistemaVida vida)
+    public DatosGeneticos ObtenerPlantilla(int id)
     {
-        if (!RegistroVida.ContainsKey(id))
-        {
-            RegistroVida.Add(id, vida);
-        }
+        if (plantillasLinajes.ContainsKey(id))
+            return plantillasLinajes[id];
+
+        return new DatosGeneticos(); // Devuelve vacío si hay error
     }
 
-    public void EliminarVida(int id)
-    {
-        if (RegistroVida.ContainsKey(id))
-        {
-            RegistroVida.Remove(id);
-        }
-    }
+    public void RegistrarVida(int id, SistemaVida vida) { if (!RegistroVida.ContainsKey(id)) RegistroVida.Add(id, vida); }
+    public void EliminarVida(int id) { if (RegistroVida.ContainsKey(id)) RegistroVida.Remove(id); }
 
     public void Purga()
     {
         var claves = new List<int>(RegistroVida.Keys);
-
         foreach (var id in claves)
         {
-            if (RegistroVida.TryGetValue(id, out var vida) && vida != null)
-            {
-                vida.Purga();
-            }
+            if (RegistroVida.TryGetValue(id, out var vida) && vida != null) vida.Purga();
         }
         siguienteIdDisponible = 1;
+        plantillasLinajes.Clear();
+        nombresLinajes.Clear();
     }
 }
