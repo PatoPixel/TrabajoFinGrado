@@ -23,6 +23,9 @@ public class ControladorInteraccion : MonoBehaviour
     public Button botonInspeccionar;
     public Button botonCrear;
 
+    [Header("Ajustes de Físicas")]
+    public float radioDeSeguridad = 1f;
+
     private void Start()
     {
         ActualizarVisualBotones();
@@ -46,6 +49,29 @@ public class ControladorInteraccion : MonoBehaviour
             }
             else if (modoActual == ModoRaton.Creador)
             {
+                // El Radar Anti-Apilamiento
+                // Lanzamos un círculo invisible para ver si chocamos con algo
+                Collider2D[] colisiones = Physics2D.OverlapCircleAll(posicionRaton, radioDeSeguridad);
+                bool espacioOcupado = false;
+
+                foreach (Collider2D col in colisiones)
+                {
+                    // Si lo que tocamos tiene SistemaVida, es que ya hay una bacteria ahí
+                    if (col.GetComponent<SistemaVida>() != null)
+                    {
+                        espacioOcupado = true;
+                        break; // Salimos del bucle rápido para ahorrar rendimiento
+                    }
+                }
+
+                // Si el espacio está ocupado, cancelamos el clic
+                if (espacioOcupado)
+                {
+                    Debug.Log("[Anti-Apilamiento] Espacio ocupado. Busca un hueco libre.");
+                    return;
+                }
+
+                // Si está libre, la generamos normalmente
                 GenerarBacteria(posicionRaton);
             }
         }

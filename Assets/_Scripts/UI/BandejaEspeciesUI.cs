@@ -23,12 +23,25 @@ public class BandejaEspeciesUI : MonoBehaviour
             Destroy(hijo.gameObject);
         }
 
-        // 2. CREAMOS EL SLOT ESPECIAL (Botón de + CREAR NUEVA)
+        GameObject cartaComida = Instantiate(prefabCarta, contenedorContent);
+        if (cartaComida.TryGetComponent(out CartaEspecieUI uiComida))
+        {
+            DatosGeneticos statsComida = new DatosGeneticos();
+            // Le inyectamos color verde para que el script de tu carta lo detecte 
+            // y visualmente se distinga perfectamente en la barra inferior
+            statsComida.colorLinaje = Color.green;
+
+            uiComida.Inicializar(-2, "AÑADIR COMIDA", statsComida, controladorInteraccion);
+        }
+        // 2. CREAMOS EL SLOT ESPECIAL (Botón de + CREAR NUEVA - ID: -1)
         GameObject cartaLab = Instantiate(prefabCarta, contenedorContent);
         if (cartaLab.TryGetComponent(out CartaEspecieUI uiLab))
         {
             uiLab.Inicializar(-1, "+ CREAR NUEVA", new DatosGeneticos(), controladorInteraccion);
         }
+
+        //  2.5 CREAMOS EL SLOT ESPECIAL PARA LA COMIDA (ID: -2)
+
 
         // 3. DIBUJAMOS LAS ESPECIES REALES GUARDADAS EN EL GESTOR
         if (GestorLinajes.Instance != null)

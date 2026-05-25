@@ -7,6 +7,7 @@ public class SaveData
     // Datos del Gestor
     public int proximoIdLinaje;
 
+    public List<DatosPlantillaEspecie> plantillasLaboratorio = new List<DatosPlantillaEspecie>();
     // Datos de las Entidades Vivas
     public List<DatosEntidad> bacteriasVivas = new List<DatosEntidad>();
 
@@ -106,6 +107,20 @@ public class DatosEntidad
         
         this.quaternionZ = giro; // Solo guardamos la rotación en Z para 2D
     }
+   
+}
+[System.Serializable]
+public class DatosPlantillaEspecie
+{
+    public int idLinaje;
+    public DatosGeneticos stats;
+    public string nombre;
 
-    
+    public DatosPlantillaEspecie() { }
+    public DatosPlantillaEspecie(int id, DatosGeneticos stats, string nombre)
+    {
+        this.idLinaje = id;
+        this.stats = stats;
+        this.nombre = nombre;
+    }
 }

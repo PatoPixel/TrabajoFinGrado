@@ -62,30 +62,51 @@ public class GestorGuardado : MonoBehaviour
         // 2. Crear la maleta
         SaveData data = new SaveData();
 
-        // 3. Llenar GestorLinajes (Tu lógica aquí)
+        // 3. Llenar GestorLinajes
         data.proximoIdLinaje = GestorLinajes.Instance.SiguienteIdDisponible;
 
-        // 4. Llenar Bacterias Vivas (Tu lógica aquí con RegistroVida)
+        // Guardar las plantillas del laboratorio (Diccionario -> Lista JSON)
+        if (GestorLinajes.Instance != null)
+        {
+            foreach (var kvp in GestorLinajes.Instance.plantillasLinajes)
+            {
+                int id = kvp.Key;
+                DatosGeneticos stats = kvp.Value;
+                // Buscamos su nombre personalizado asignado, si no tiene usará el genérico
+                string nombreCustom = GestorLinajes.Instance.nombresLinajes.ContainsKey(id)
+                    ? GestorLinajes.Instance.nombresLinajes[id]
+                    : GestorLinajes.Instance.GetNombrePorId(id);
+
+                DatosPlantillaEspecie plantillaSave = new DatosPlantillaEspecie(id, stats, nombreCustom);
+                data.plantillasLaboratorio.Add(plantillaSave);
+            }
+        }
+
+        // 4. Llenar Bacterias Vivas (RegistroVida)
         foreach (var kvp in GestorLinajes.RegistroVida)
         {
-            DatosEntidad entidad = new DatosEntidad(kvp.Value, kvp.Value.transform.position, kvp.Value.transform.eulerAngles.z);
-            data.bacteriasVivas.Add(entidad);
+            if (kvp.Value != null)
+            {
+                DatosEntidad entidad = new DatosEntidad(kvp.Value, kvp.Value.transform.position, kvp.Value.transform.eulerAngles.z);
+                data.bacteriasVivas.Add(entidad);
+            }
         }
-        ;
-        // 5. Llenar Historial del Tracker (Acuérdate de instanciar DatosContenedorEspecie)
+
+        // 5. Llenar Historial del Tracker
         EvolutionTracker evolutionTracker = EvolutionTrackerInstance;
-        foreach (var par in evolutionTracker.HistorialEspecies)
+        if (evolutionTracker != null)
         {
-            int id = par.Key;
-            List<EspeciesSnapshot> historial = par.Value;
-            RangoEstadisticoEspecie rango = evolutionTracker.RangosEspecies.ContainsKey(id) ? evolutionTracker.RangosEspecies[id] : new RangoEstadisticoEspecie();
-            DatosContenedorEspecie contenedor = new DatosContenedorEspecie(id, historial, rango);
-            data.historialEspecies.Add(contenedor);
+            foreach (var par in evolutionTracker.HistorialEspecies)
+            {
+                int id = par.Key;
+                List<EspeciesSnapshot> historial = par.Value;
+                RangoEstadisticoEspecie rango = evolutionTracker.RangosEspecies.ContainsKey(id) ? evolutionTracker.RangosEspecies[id] : new RangoEstadisticoEspecie();
+                DatosContenedorEspecie contenedor = new DatosContenedorEspecie(id, historial, rango);
+                data.historialEspecies.Add(contenedor);
+            }
         }
 
-
-
-        // 6. Llenar Comida (Usando FindObjectsByType)
+        // 6. Llenar Comida
         Comida[] comidasEnMapa = FindObjectsByType<Comida>(FindObjectsSortMode.None);
         foreach (Comida comida in comidasEnMapa)
         {
@@ -99,33 +120,34 @@ public class GestorGuardado : MonoBehaviour
 
         Debug.Log("Partida Guardada con éxito en: " + ruta);
 
-        // Despausar (o dejarlo pausado para que el usuario elija)
         Time.timeScale = velocidadJuego;
 
-        // 1. RUTAS NUEVAS
+        // RUTAS METADATOS Y FOTO
         string rutaMeta = Path.Combine(Application.persistentDataPath, nombreArchivo + "_meta.json");
         string rutaImagen = Path.Combine(Application.persistentDataPath, nombreArchivo + ".png");
+
         MetadatosPartida meta = new MetadatosPartida();
         meta.nombrePartida = nombrePartidaActual;
         meta.totalBacterias = GestorLinajes.RegistroVida.Count;
-        meta.totalLinajesRestantes = GestorLinajes.RegistroVida.Values.Select(b => b.misStats.idLinaje).Distinct().Count();
-        meta.horasJugadas = tiempoJugadoTotal;
 
-        // Si la partida es nueva, le ponemos la fecha de hoy. Si la estamos sobrescribiendo, 
-        // deberíamos mantener la que tenía, pero para simplificar ahora, pondremos la de hoy.
+        // Contamos biodiversidad basándonos en los linajes vivos actuales
+        meta.totalLinajesRestantes = GestorLinajes.RegistroVida.Values
+            .Where(b => b != null)
+            .Select(b => b.misStats.idLinaje)
+            .Distinct()
+            .Count();
+
+        meta.horasJugadas = tiempoJugadoTotal;
         meta.fechaCreacion = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm");
 
-        // Guardamos el JSON pequeñito
         File.WriteAllText(rutaMeta, JsonUtility.ToJson(meta));
-
-        // 3. CAPTURA DE PANTALLA (Magia de Unity de 1 sola línea)
         StartCoroutine(TomarFotoSinUI(rutaImagen));
 
         Debug.Log("Guardado completo: Datos + Metadatos + Foto");
     }
+
     public void CargarPartida(string nombreArchivo)
     {
-
         string ruta = Path.Combine(Application.persistentDataPath, nombreArchivo + ".json");
 
         if (!File.Exists(ruta))
@@ -134,44 +156,54 @@ public class GestorGuardado : MonoBehaviour
             return;
         }
 
-        // 1. Pausa
         float velocidadJuego = Time.timeScale;
         Time.timeScale = 0f;
 
-        // 2. Leer json
         string json = File.ReadAllText(ruta);
         SaveData data = JsonUtility.FromJson<SaveData>(json);
 
-        // 3. Purgar lo que haya en escena para evitar duplicados o conflictos
+        // 3. Purgar escena para evitar duplicados
         GestorLinajes.Instance?.Purga();
-        PoolComida.Instance?.Purga(); // O la clase/gestor desde donde llames a esto
+        PoolComida.Instance?.Purga();
 
         // 4. LinajeSiguiente
         GestorLinajes.Instance.SiguienteIdDisponible = data.proximoIdLinaje;
 
-        // 5. Historiales
-        EvolutionTracker tracker = EvolutionTrackerInstance;
-        tracker.HistorialEspecies.Clear();
-        tracker.RangosEspecies.Clear();
-
-        foreach (var contenedor in data.historialEspecies)
+        // Reconstruir las plantillas del laboratorio (Lista JSON -> Diccionario)
+        if (GestorLinajes.Instance != null)
         {
-            tracker.HistorialEspecies[contenedor.idLinaje] = contenedor.historial;
-            tracker.RangosEspecies[contenedor.idLinaje] = contenedor.rango;
+            GestorLinajes.Instance.plantillasLinajes.Clear();
+            GestorLinajes.Instance.nombresLinajes.Clear();
+
+            foreach (var plantillaData in data.plantillasLaboratorio)
+            {
+                GestorLinajes.Instance.plantillasLinajes[plantillaData.idLinaje] = plantillaData.stats;
+                GestorLinajes.Instance.nombresLinajes[plantillaData.idLinaje] = plantillaData.nombre;
+            }
         }
 
+        // 5. Historiales del Tracker
+        EvolutionTracker tracker = EvolutionTrackerInstance;
+        if (tracker != null)
+        {
+            tracker.HistorialEspecies.Clear();
+            tracker.RangosEspecies.Clear();
 
-        // 6. Comida
+            foreach (var contenedor in data.historialEspecies)
+            {
+                tracker.HistorialEspecies[contenedor.idLinaje] = contenedor.historial;
+                tracker.RangosEspecies[contenedor.idLinaje] = contenedor.rango;
+            }
+        }
 
+        // 6. Regenerar Comida
         foreach (var comida in data.datosComidas)
         {
             Vector2 posicion = new Vector2(comida.posX, comida.posY);
             PoolComida.Instance.GetComida(posicion, comida.tamano);
         }
 
-
-        // 7. Bacterias
-
+        // 7. Regenerar Bacterias
         foreach (var entidad in data.bacteriasVivas)
         {
             Vector3 posicion = new Vector3(entidad.posX, entidad.posY, 0);
@@ -187,22 +219,31 @@ public class GestorGuardado : MonoBehaviour
             }
         }
 
+        // Forzar el redibujado de la bandeja inferior para que reaparezcan las cartas cargadas
+        ControladorInteraccion controlador = FindFirstObjectByType<ControladorInteraccion>();
+        if (controlador != null && controlador.panelSelectorEspecies != null)
+        {
+            BandejaEspeciesUI bandeja = controlador.panelSelectorEspecies.GetComponent<BandejaEspeciesUI>();
+            if (bandeja != null)
+            {
+                bandeja.RedibujarBandeja();
+            }
+        }
+
         // 8. Tiempo de juego
         string rutaMeta = Path.Combine(Application.persistentDataPath, nombreArchivo + "_meta.json");
         if (File.Exists(rutaMeta))
         {
             string jsonMeta = File.ReadAllText(rutaMeta);
             MetadatosPartida meta = JsonUtility.FromJson<MetadatosPartida>(jsonMeta);
-
-            // Le decimos al cronómetro que empiece desde donde lo dejamos
             tiempoJugadoTotal = meta.horasJugadas;
             Debug.Log("Tiempo restaurado: " + tiempoJugadoTotal + " segundos.");
         }
         else
         {
-            // Si por algún motivo cargamos una partida vieja que no tenía metadatos, empezamos de cero
             tiempoJugadoTotal = 0f;
         }
+
         ObtenerPartidasGuardadas();
         nombrePartidaActual = nombreArchivo;
         Debug.Log("Partida Cargada con éxito.");
