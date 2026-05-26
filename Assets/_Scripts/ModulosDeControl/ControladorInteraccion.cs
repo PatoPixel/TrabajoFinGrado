@@ -26,6 +26,8 @@ public class ControladorInteraccion : MonoBehaviour
     [Header("Ajustes de Físicas")]
     public float radioDeSeguridad = 1f;
 
+    public float energiaPincelComida = 50f;
+
     private void Start()
     {
         ActualizarVisualBotones();
@@ -49,34 +51,66 @@ public class ControladorInteraccion : MonoBehaviour
             }
             else if (modoActual == ModoRaton.Creador)
             {
-                // El Radar Anti-Apilamiento
-                // Lanzamos un círculo invisible para ver si chocamos con algo
-                Collider2D[] colisiones = Physics2D.OverlapCircleAll(posicionRaton, radioDeSeguridad);
-                bool espacioOcupado = false;
-
-                foreach (Collider2D col in colisiones)
+                // Separamos la Comida de las Bacterias
+                if (idEspecieSeleccionada == -2)
                 {
-                    // Si lo que tocamos tiene SistemaVida, es que ya hay una bacteria ahí
-                    if (col.GetComponent<SistemaVida>() != null)
+                    // MODO PINCEL DE COMIDA
+                    GenerarComidaManual(posicionRaton);
+                }
+                else
+                {
+                    // MODO PINCEL DE BACTERIAS (Con Radar Anti-Apilamiento)
+                    Collider2D[] colisiones = Physics2D.OverlapCircleAll(posicionRaton, radioDeSeguridad);
+                    bool espacioOcupado = false;
+
+                    foreach (Collider2D col in colisiones)
                     {
-                        espacioOcupado = true;
-                        break; // Salimos del bucle rápido para ahorrar rendimiento
+                        if (col.GetComponent<SistemaVida>() != null)
+                        {
+                            espacioOcupado = true;
+                            break;
+                        }
                     }
-                }
 
-                // Si el espacio está ocupado, cancelamos el clic
-                if (espacioOcupado)
-                {
-                    Debug.Log("[Anti-Apilamiento] Espacio ocupado. Busca un hueco libre.");
-                    return;
-                }
+                    if (espacioOcupado)
+                    {
+                        Debug.Log("[Anti-Apilamiento] Espacio ocupado. Busca un hueco libre.");
+                        return;
+                    }
 
-                // Si está libre, la generamos normalmente
-                GenerarBacteria(posicionRaton);
+                    GenerarBacteria(posicionRaton);
+                }
             }
         }
     }
 
+
+    // Inyección directa de comida desde el Pool
+    private void GenerarComidaManual(Vector2 posicion)
+    {
+        if (PoolComida.Instance != null)
+        {
+            // 1. Sacamos la comida de la pool. Pasamos un tamaño por defecto (ej: 0.5f), 
+            // pero no te preocupes porque el método EstablecerEnergiaManual lo va a re-escalar enseguida.
+            GameObject nuevaComida = PoolComida.Instance.GetComida(posicion, 0.5f);
+
+            if (nuevaComida != null)
+            {
+                if (nuevaComida.TryGetComponent(out Comida scriptComida))
+                {
+                    // 3. Le inyectamos la energía que guardamos de la carta UI. 
+                    // Esto cambiará la variable 'Energia' y re-escalará el objeto visualmente al instante.
+                    scriptComida.EstablecerEnergiaManual(energiaPincelComida);
+
+                    Debug.Log($"[Pincel] Comida spawneda con éxito. Energía: {energiaPincelComida} | Escala adaptada.");
+                }
+            }
+        }
+        else
+        {
+            Debug.LogError("Error crítico: No existe una instancia de PoolComida en la escena.");
+        }
+    }
     private void IntentarInspeccionar(Vector2 posicion)
     {
         RaycastHit2D hit = Physics2D.Raycast(posicion, Vector2.zero);
@@ -228,4 +262,5 @@ public class ControladorInteraccion : MonoBehaviour
         colores.normalColor = estaActivo ? new Color(0f, 0f, 0f, 0.4f) : new Color(0f, 0f, 0f, 0f);
         boton.colors = colores;
     }
+
 }

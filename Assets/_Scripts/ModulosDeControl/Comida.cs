@@ -13,12 +13,20 @@ public class Comida : MonoBehaviour
 
     public float Energia { get; private set; } = EnergiaBase;
 
-    //Llamada por el PoolComida al sacar un nuevo objeto para usar. Ajusta su escala y energia según el tamanno dado.
+    // Llamada por el PoolComida al sacar un nuevo objeto para usar. Ajusta su escala y energia según el tamanno dado.
     public void Inicializar(float tamano)
     {
         float escalaFinal = Mathf.Max(0.1f, tamano);
         transform.localScale = Vector3.one * escalaFinal;
         Energia = EnergiaBase + escalaFinal * EscalaEnergiaMultiplicador;
+    }
+    public void EstablecerEnergiaManual(float energiaPersonalizada)
+    {
+        Energia = energiaPersonalizada;
+        float tamanoProporcional = energiaPersonalizada / 100f;
+        float escalaFinal = Mathf.Clamp(tamanoProporcional, 0.2f, 2.5f);
+
+        transform.localScale = Vector3.one * escalaFinal;
     }
 
     // Devuelve el objeto a la pool para que pueda ser reutilizado, o lo desactiva si la pool no esta disponible

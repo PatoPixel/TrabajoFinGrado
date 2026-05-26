@@ -15657,7 +15657,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BandejaEspeciesUI
   contenedorContent: {fileID: 244589346}
-  prefabCarta: {fileID: 6282733874299346978, guid: 57b6985d312dab441b141f8268e4e9b8, type: 3}
+  prefabCartaEspecie: {fileID: 6282733874299346978, guid: 57b6985d312dab441b141f8268e4e9b8, type: 3}
+  prefabCartaHerramienta: {fileID: 8926124281617987367, guid: 07caa53334ad1514fa3b5e32df42f175, type: 3}
   controladorInteraccion: {fileID: 1864179786}
 --- !u!1 &1491855195
 GameObject:
@@ -17868,7 +17869,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.46, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 139.10565, y: -73.6}
+  m_AnchoredPosition: {x: 139.10603, y: -73.6}
   m_SizeDelta: {x: 148.22, y: 43.29}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1747446509
@@ -19036,6 +19037,7 @@ MonoBehaviour:
   botonInspeccionar: {fileID: 282750581}
   botonCrear: {fileID: 1480432667}
   radioDeSeguridad: 0.1
+  energiaPincelComida: 50
 --- !u!1 &1868165273
 GameObject:
   m_ObjectHideFlags: 0
@@ -19093,7 +19095,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Ajustes
+  m_text: "Nueva Simulaci\xF3n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
