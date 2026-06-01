@@ -43,5 +43,11 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Bacterias
+    uniqueID: 2640678289
+    locked: 0
+  - name: UI
+    uniqueID: 3107689855
+    locked: 0
   m_RenderingLayers:
   - Default

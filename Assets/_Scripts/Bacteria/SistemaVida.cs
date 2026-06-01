@@ -192,6 +192,7 @@ public class SistemaVida : MonoBehaviour
     {
         if (otroObjeto.CompareTag("Comida"))
         {
+            if (!otroObjeto.gameObject.activeInHierarchy) return;
             Comida comida = otroObjeto.GetComponent<Comida>();
             float energia = comida != null ? comida.Energia : 40f;
             Alimentar(energia);

@@ -7,7 +7,7 @@ del área de juego (la "placa de Petri").
 vez, lo que mejora el rendimiento.
 */
 
-public class SpawnerComida : MonoBehaviour
+public class SpawnerComida2 : MonoBehaviour
 {
 
     private const float TamanoNutrienteBase = 0.3f;

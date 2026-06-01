@@ -177,9 +177,9 @@ public class PanellCreacion : MonoBehaviour
 
             // AVISAMOS A LA BANDEJA QUE SE ACTUALICE
             ControladorInteraccion controlador = FindFirstObjectByType<ControladorInteraccion>();
-            if (controlador != null && controlador.panelSelectorEspecies != null)
+            if (controlador != null && controlador.panelSelector != null)
             {
-                BandejaEspeciesUI bandeja = controlador.panelSelectorEspecies.GetComponent<BandejaEspeciesUI>();
+                BandejaEspeciesUI bandeja = controlador.panelSelector.GetComponent<BandejaEspeciesUI>();
                 if (bandeja != null) bandeja.RedibujarBandeja();
 
                 // Automáticamente seleccionamos este pincel para que ya lo tengas en el ratón

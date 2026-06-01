@@ -2,10 +2,23 @@ using UnityEngine;
 
 public class BandejaEspeciesUI : MonoBehaviour
 {
-    [Header("Referencias")]
+    /// <summary>
+    /// Se dispara cuando el jugador selecciona una carta.
+    /// Todas las cartas escuchan este evento para actualizar su color de fondo.
+    /// </summary>
+    public static event System.Action<MonoBehaviour> OnCartaSeleccionada;
+    public static void NotificarSeleccion(MonoBehaviour carta) => OnCartaSeleccionada?.Invoke(carta);
+
+    [Header("Contenedor")]
     [SerializeField] private Transform contenedorContent;
-    [SerializeField] private GameObject prefabCartaEspecie;     
-    [SerializeField] private GameObject prefabCartaHerramienta;
+
+    [Header("Prefabs de Bacterias")]
+    [SerializeField] private GameObject prefabCartaEspecie;
+
+    [Header("Prefabs de Herramientas Separados")]
+    [SerializeField] private GameObject prefabCartaComida;
+    [SerializeField] private GameObject prefabCartaSpawner; // Renombrado
+
     [SerializeField] private ControladorInteraccion controladorInteraccion;
 
     private void OnEnable()
@@ -15,47 +28,57 @@ public class BandejaEspeciesUI : MonoBehaviour
 
     public void RedibujarBandeja()
     {
-        if (contenedorContent == null) return;
+        if (contenedorContent == null || controladorInteraccion == null) return;
 
-        // 1. Limpiamos las cartas antiguas
         foreach (Transform hijo in contenedorContent)
         {
             Destroy(hijo.gameObject);
         }
 
-        // 2. CREAMOS SLOT: AÑADIR COMIDA (ID: -2) -> ¡AHORA ES EL PRIMERO!
-        if (prefabCartaHerramienta != null)
+        if (controladorInteraccion.modoActual == ControladorInteraccion.ModoRaton.Herramientas)
         {
-            GameObject cartaComida = Instantiate(prefabCartaHerramienta, contenedorContent);
-            if (cartaComida.TryGetComponent(out CartaHerramientaUI uiComida))
+            if (prefabCartaComida != null)
             {
-                uiComida.Inicializar(-2, "AÑADIR COMIDA", "50", Color.orange, controladorInteraccion);
-            }
-        }
-
-        // 3. CREAMOS SLOT: LABORATORIO (ID: -1) -> VUELVE AL PREFAB ORIGINAL
-        if (prefabCartaEspecie != null)
-        {
-            GameObject cartaLab = Instantiate(prefabCartaEspecie, contenedorContent);
-            if (cartaLab.TryGetComponent(out CartaEspecieUI uiLab))
-            {
-                uiLab.Inicializar(-1, "+ CREAR NUEVA", new DatosGeneticos(), controladorInteraccion);
-            }
-        }
-
-        // 4. DIBUJAMOS LAS ESPECIES REALES GUARDADAS
-        if (GestorLinajes.Instance != null && prefabCartaEspecie != null)
-        {
-            foreach (var kvp in GestorLinajes.Instance.plantillasLinajes)
-            {
-                int idLinaje = kvp.Key;
-                DatosGeneticos stats = kvp.Value;
-                string nombreReal = GestorLinajes.Instance.GetNombrePorId(idLinaje);
-
-                GameObject nuevaCarta = Instantiate(prefabCartaEspecie, contenedorContent);
-                if (nuevaCarta.TryGetComponent(out CartaEspecieUI uiCarta))
+                GameObject cartaComida = Instantiate(prefabCartaComida, contenedorContent);
+                if (cartaComida.TryGetComponent(out CartaComidaUI uiComida))
                 {
-                    uiCarta.Inicializar(idLinaje, nombreReal, stats, controladorInteraccion);
+                    uiComida.Inicializar("Aï¿½ADIR COMIDA", "50", controladorInteraccion);
+                }
+            }
+
+            if (prefabCartaSpawner != null)
+            {
+                GameObject cartaSpawner = Instantiate(prefabCartaSpawner, contenedorContent);
+                if (cartaSpawner.TryGetComponent(out CartaSpawnerUI uiSpawner))
+                {
+                    uiSpawner.Inicializar("PLANTAR SPAWNER", "10", "30", "70", "0.2", controladorInteraccion);
+                }
+            }
+        }
+        else if (controladorInteraccion.modoActual == ControladorInteraccion.ModoRaton.Creador)
+        {
+            if (prefabCartaEspecie != null)
+            {
+                GameObject cartaLab = Instantiate(prefabCartaEspecie, contenedorContent);
+                if (cartaLab.TryGetComponent(out CartaEspecieUI uiLab))
+                {
+                    uiLab.Inicializar(-1, "+ CREAR NUEVA", new DatosGeneticos(), controladorInteraccion);
+                }
+            }
+
+            if (GestorLinajes.Instance != null && prefabCartaEspecie != null)
+            {
+                foreach (var kvp in GestorLinajes.Instance.plantillasLinajes)
+                {
+                    int idLinaje = kvp.Key;
+                    DatosGeneticos stats = kvp.Value;
+                    string nombreReal = GestorLinajes.Instance.GetNombrePorId(idLinaje);
+
+                    GameObject nuevaCarta = Instantiate(prefabCartaEspecie, contenedorContent);
+                    if (nuevaCarta.TryGetComponent(out CartaEspecieUI uiCarta))
+                    {
+                        uiCarta.Inicializar(idLinaje, nombreReal, stats, controladorInteraccion);
+                    }
                 }
             }
         }

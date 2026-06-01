@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Obliga a Unity a añadir un LineRenderer y un EdgeCollider2D 
+// Obliga a Unity a aï¿½adir un LineRenderer y un EdgeCollider2D 
 // en cuanto le pegas el script al GameObject, es imposible que se te olviden.
 [RequireComponent(typeof(EdgeCollider2D))]
 [RequireComponent(typeof(LineRenderer))]
@@ -16,21 +16,21 @@ public class GestorEntorno : MonoBehaviour
         }
     }
 
-    [Header("Configuración de la Placa de Petri")]
-    [Tooltip("Radio de la placa circular. Las bacterias no podrán salir de este radio.")]
-    public float radioPlaca = 25f;
+    [Header("Configuraciï¿½n de la Placa de Petri")]
+    [Tooltip("Radio de la placa circular. Las bacterias no podrï¿½n salir de este radio.")]
+    public float radioPlaca = 200f;
 
-    [Tooltip("Número de segmentos para formar el círculo. A más segmentos, más perfecto es el círculo.")]
+    [Tooltip("Nï¿½mero de segmentos para formar el cï¿½rculo. A mï¿½s segmentos, mï¿½s perfecto es el cï¿½rculo.")]
     [Range(30, 120)] public int segmentosCirculo = 60;
 
-    // Los dejamos públicos solo para el script, pero no hace falta arrastrarlos en el inspector
+    // Los dejamos pï¿½blicos solo para el script, pero no hace falta arrastrarlos en el inspector
     private EdgeCollider2D _muroCircular;
     private LineRenderer _lineaVisualBorde;
 
     private void Awake()
     {
        _instance = this;
-        // Al usar [RequireComponent], esto ya nunca jamás va a devolver null
+        // Al usar [RequireComponent], esto ya nunca jamï¿½s va a devolver null
         _muroCircular = GetComponent<EdgeCollider2D>();
         _lineaVisualBorde = GetComponent<LineRenderer>();
 
@@ -71,7 +71,7 @@ public class GestorEntorno : MonoBehaviour
             puntosVisuales[i] = new Vector3(x, y, 0f);
         }
 
-        // 1. Aplicamos físicas (EdgeCollider)
+        // 1. Aplicamos fï¿½sicas (EdgeCollider)
         _muroCircular.points = puntosMuro;
 
         // 2. Aplicamos visuales (LineRenderer)
@@ -79,12 +79,14 @@ public class GestorEntorno : MonoBehaviour
         _lineaVisualBorde.SetPositions(puntosVisuales);
 
         _lineaVisualBorde.useWorldSpace = false; // Fuerza al dibujo a alinearse con el colisionador
-        _lineaVisualBorde.loop = false; // Evita el "pico" gráfico al sobreponerse el último y primer punto
-        _lineaVisualBorde.numCapVertices = 5; // Suaviza las puntas de la línea
-        _lineaVisualBorde.numCornerVertices = 5; // Suaviza las esquinas de la línea
+        _lineaVisualBorde.loop = false; // Evita el "pico" grï¿½fico al sobreponerse el ï¿½ltimo y primer punto
+        _lineaVisualBorde.numCapVertices = 5; // Suaviza las puntas de la lï¿½nea
+        _lineaVisualBorde.numCornerVertices = 5; // Suaviza las esquinas de la lï¿½nea
 
-        // Grosor uniforme
-        _lineaVisualBorde.startWidth = 0.2f;
-        _lineaVisualBorde.endWidth = 0.2f;
+        // Grosor uniforme y color visible
+        _lineaVisualBorde.startWidth = 1.5f;
+        _lineaVisualBorde.endWidth = 1.5f;
+        _lineaVisualBorde.startColor = new Color(0.6f, 0.85f, 1f, 1f); // azul claro
+        _lineaVisualBorde.endColor   = new Color(0.6f, 0.85f, 1f, 1f);
     }
 }

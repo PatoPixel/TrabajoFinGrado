@@ -4,36 +4,53 @@ using UnityEngine.UI;
 
 public class ControladorInteraccion : MonoBehaviour
 {
-    public enum ModoRaton { Moverse, Inspeccion, Creador }
+    public enum ModoRaton { Moverse, Inspeccion, Creador, Herramientas }
+    public enum TipoHerramienta { Ninguna, PincelComida, PincelSpawner }
 
     [Header("Estado Actual")]
     public ModoRaton modoActual = ModoRaton.Moverse;
     public int idEspecieSeleccionada = -1;
+
+    [Header("Herramienta Actual")]
+    public TipoHerramienta herramientaSeleccionada = TipoHerramienta.Ninguna;
 
     [Header("Referencias UI")]
     public PanelInspectorBacteria inspectorUI;
     public EvolutionTracker trackerEvolucion;
     public ControladorMenuPausa menuPrincipal;
     public PanellCreacion panelLaboratorio;
-    public GameObject panelSelectorEspecies;
+
+    public GameObject panelSelector;
+    public BandejaEspeciesUI bandejaDinamica;
 
     [Header("Botones de Herramientas")]
     public Button botonMenu;
     public Button botonMover;
     public Button botonInspeccionar;
     public Button botonCrear;
+    public Button botonHerramientas;
 
-    [Header("Ajustes de Físicas")]
+    [Header("Ajustes de Fisicas")]
     public float radioDeSeguridad = 1f;
-
     public float energiaPincelComida = 50f;
+
+    [Header("Ajustes Pincel Spawner")]
+    public GameObject prefabSpawnerComida;
+    private float _spawnerMinEnergia = 30f;
+    private float _spawnerMaxEnergia = 70f;
+    private float _spawnerIntervalo = 0.2f;
+    private float _spawnerRadio = 1.5f;
+
+    /// <summary>Eventos para el TutorialManager.</summary>
+    public static event System.Action OnCamaraCentrada;
+    public static event System.Action OnBacteriaColocada;
+    public static event System.Action OnComidaColocada;
+    public static event System.Action OnSpawnerColocado;
 
     private void Start()
     {
         ActualizarVisualBotones();
-
-        if (panelSelectorEspecies != null) panelSelectorEspecies.SetActive(false);
-
+        if (panelSelector != null) panelSelector.SetActive(false);
         if (panelLaboratorio != null) panelLaboratorio.CerrarPanel();
     }
 
@@ -41,7 +58,8 @@ public class ControladorInteraccion : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            if (EventSystem.current.IsPointerOverGameObject()) return;
+            // En tutorial el overlay cubre la pantalla: ignoramos el bloqueo del EventSystem
+            if (!TutorialManager.TutorialActivo && EventSystem.current.IsPointerOverGameObject()) return;
 
             Vector2 posicionRaton = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
@@ -51,66 +69,66 @@ public class ControladorInteraccion : MonoBehaviour
             }
             else if (modoActual == ModoRaton.Creador)
             {
-                // Separamos la Comida de las Bacterias
-                if (idEspecieSeleccionada == -2)
+                Collider2D[] colisiones = Physics2D.OverlapCircleAll(posicionRaton, radioDeSeguridad);
+                bool espacioOcupado = false;
+
+                foreach (Collider2D col in colisiones)
                 {
-                    // MODO PINCEL DE COMIDA
+                    if (col.GetComponent<SistemaVida>() != null)
+                    {
+                        espacioOcupado = true;
+                        break;
+                    }
+                }
+
+                if (espacioOcupado)
+                {
+                    Debug.Log("[Anti-Apilamiento] Espacio ocupado. Busca un hueco libre.");
+                    return;
+                }
+
+                GenerarBacteria(posicionRaton);
+            }
+            else if (modoActual == ModoRaton.Herramientas)
+            {
+                if (herramientaSeleccionada == TipoHerramienta.PincelComida)
+                {
                     GenerarComidaManual(posicionRaton);
                 }
-                else
+                else if (herramientaSeleccionada == TipoHerramienta.PincelSpawner)
                 {
-                    // MODO PINCEL DE BACTERIAS (Con Radar Anti-Apilamiento)
-                    Collider2D[] colisiones = Physics2D.OverlapCircleAll(posicionRaton, radioDeSeguridad);
-                    bool espacioOcupado = false;
-
-                    foreach (Collider2D col in colisiones)
-                    {
-                        if (col.GetComponent<SistemaVida>() != null)
-                        {
-                            espacioOcupado = true;
-                            break;
-                        }
-                    }
-
-                    if (espacioOcupado)
-                    {
-                        Debug.Log("[Anti-Apilamiento] Espacio ocupado. Busca un hueco libre.");
-                        return;
-                    }
-
-                    GenerarBacteria(posicionRaton);
+                    GenerarSpawnerManual(posicionRaton);
                 }
             }
         }
     }
 
-
-    // Inyección directa de comida desde el Pool
     private void GenerarComidaManual(Vector2 posicion)
     {
         if (PoolComida.Instance != null)
         {
-            // 1. Sacamos la comida de la pool. Pasamos un tamaño por defecto (ej: 0.5f), 
-            // pero no te preocupes porque el método EstablecerEnergiaManual lo va a re-escalar enseguida.
             GameObject nuevaComida = PoolComida.Instance.GetComida(posicion, 0.5f);
-
-            if (nuevaComida != null)
+            if (nuevaComida != null && nuevaComida.TryGetComponent(out Comida scriptComida))
             {
-                if (nuevaComida.TryGetComponent(out Comida scriptComida))
-                {
-                    // 3. Le inyectamos la energía que guardamos de la carta UI. 
-                    // Esto cambiará la variable 'Energia' y re-escalará el objeto visualmente al instante.
-                    scriptComida.EstablecerEnergiaManual(energiaPincelComida);
-
-                    Debug.Log($"[Pincel] Comida spawneda con éxito. Energía: {energiaPincelComida} | Escala adaptada.");
-                }
+                scriptComida.EstablecerEnergiaManual(energiaPincelComida);
+                OnComidaColocada?.Invoke();
             }
         }
-        else
+    }
+
+    private void GenerarSpawnerManual(Vector2 posicion)
+    {
+        if (prefabSpawnerComida != null)
         {
-            Debug.LogError("Error crítico: No existe una instancia de PoolComida en la escena.");
+            GameObject spawnerObj = Instantiate(prefabSpawnerComida, posicion, Quaternion.identity);
+            if (spawnerObj.TryGetComponent(out SpawnerComida scriptSpawner))
+            {
+                scriptSpawner.Inicializar(_spawnerMinEnergia, _spawnerMaxEnergia, _spawnerIntervalo, _spawnerRadio);
+                OnSpawnerColocado?.Invoke();
+            }
         }
     }
+
     private void IntentarInspeccionar(Vector2 posicion)
     {
         RaycastHit2D hit = Physics2D.Raycast(posicion, Vector2.zero);
@@ -120,10 +138,7 @@ public class ControladorInteraccion : MonoBehaviour
             SistemaVida bacteria = hit.collider.GetComponent<SistemaVida>();
             if (bacteria != null)
             {
-                if (trackerEvolucion != null)
-                {
-                    trackerEvolucion.CambiarFamiliaSeleccionada(bacteria.misStats.idLinaje);
-                }
+                if (trackerEvolucion != null) trackerEvolucion.CambiarFamiliaSeleccionada(bacteria.misStats.idLinaje);
                 if (inspectorUI != null) inspectorUI.Abrir(bacteria);
             }
         }
@@ -132,81 +147,61 @@ public class ControladorInteraccion : MonoBehaviour
             if (inspectorUI != null) inspectorUI.Cerrar();
         }
     }
+
     private void GenerarBacteria(Vector2 posicion)
     {
-        // 1. Sacamos una carcasa vacía del Pool de bacterias muertas
+        // Sin especie seleccionada no se puede crear â€” hay que diseÃ±ar una en el laboratorio primero
+        if (idEspecieSeleccionada == -1)
+        {
+            Debug.LogWarning("[Laboratorio] Selecciona una especie en la bandeja antes de colocar bacterias.");
+            return;
+        }
+
         GameObject nuevaBacteria = BacteriasMuertas.Instance.GetBacteria(posicion);
 
         if (nuevaBacteria != null && nuevaBacteria.TryGetComponent(out SistemaVida vida))
         {
             if (GestorLinajes.Instance != null)
             {
-                if (idEspecieSeleccionada == -1)
                 {
-                    // --- MODO A: CEPA BASE POR DEFECTO (Si no hay nada seleccionado) ---
-                    vida.misStats.idLinaje = 0;
-                    vida.AsignarStatsBase();
-                    vida.misStats.idLinaje = GestorLinajes.Instance.ObtenerNuevoId();
-                    vida.gameObject.name = $"{GestorLinajes.Instance.GetNombrePorId(vida.misStats.idLinaje)} (Gen 1)";
-
-                    Debug.Log($"¡Modo Dios: Cepa Base inyectada en {posicion}!");
-                }
-                else
-                {
-                    // --- MODO B: CLONAR ESPECIE DEL LABORATORIO ---
-                    // extraemos el ADN exacto que guardamos en el laboratorio
                     DatosGeneticos plantillaAdn = GestorLinajes.Instance.ObtenerPlantilla(idEspecieSeleccionada);
-
-                    // Se lo inyectamos directamente a la nueva bacteria
                     vida.misStats = plantillaAdn;
-
-                    // Restauramos los valores dinámicos para que no nazca vieja o cansada
                     vida.EdadActual = 0f;
                     vida.CooldownRestante = plantillaAdn.tiempreEntreReproduccion;
-
-                    // Aplicamos los cambios físicos al transform de Unity
                     vida.transform.localScale = Vector3.one * plantillaAdn.tamano;
 
-                    // Pintamos su Sprite del color exacto de su linaje
                     SpriteRenderer sr = vida.GetComponent<SpriteRenderer>();
-                    if (sr != null)
-                    {
-                        sr.color = plantillaAdn.colorLinaje;
-                    }
+                    if (sr != null) sr.color = plantillaAdn.colorLinaje;
 
-                    // La bautizamos con su nombre real guardado en el gestor
                     string nombreReal = GestorLinajes.Instance.GetNombrePorId(idEspecieSeleccionada);
                     vida.gameObject.name = $"{nombreReal} (Clon Manual)";
-
-                    Debug.Log($"¡Modo Dios: Inyectado clon de {nombreReal} (ID #{idEspecieSeleccionada}) en {posicion}!");
                 }
-
-                // 2. Encendemos la bacteria con la energía al máximo según su adn
                 vida.EnergiaActual = vida.misStats.energiaMax;
-            }
-            else
-            {
-                Debug.LogError("No se puede inicializar la bacteria porque falta el GestorLinajes en la escena.");
+                OnBacteriaColocada?.Invoke();
             }
         }
     }
+
     public void SeleccionarPincelEspecie(int idLinaje)
     {
         idEspecieSeleccionada = idLinaje;
-        Debug.Log($" Pincel cambiado al linaje: {idLinaje}");
     }
 
-    // --- CÁMARA ---
-    public void CentrarCamara()
+    public void ConfigurarHerramientaComida(int energia)
     {
-        if (Camera.main != null)
-        {
-            Transform camTransform = Camera.main.transform;
-            camTransform.position = new Vector3(0f, 0f, camTransform.position.z);
-        }
+        energiaPincelComida = energia;
+        herramientaSeleccionada = TipoHerramienta.PincelComida;
     }
 
-    // --- Metodos publicos para los botones ---
+    public void ConfigurarHerramientaSpawner(float minEnergia, float maxEnergia, float intervalo, float radio)
+    {
+        _spawnerMinEnergia = minEnergia;
+        _spawnerMaxEnergia = maxEnergia;
+        _spawnerIntervalo = intervalo;
+        _spawnerRadio = radio;
+        herramientaSeleccionada = TipoHerramienta.PincelSpawner;
+    }
+
     public void ActivarMenu()
     {
         menuPrincipal.AlternarPausa();
@@ -216,42 +211,65 @@ public class ControladorInteraccion : MonoBehaviour
     public void ActivarModoMoverse()
     {
         modoActual = ModoRaton.Moverse;
+        herramientaSeleccionada = TipoHerramienta.Ninguna;
         ActualizarVisualBotones();
     }
 
     public void ActivarModoInspeccion()
     {
         modoActual = ModoRaton.Inspeccion;
+        herramientaSeleccionada = TipoHerramienta.Ninguna;
         ActualizarVisualBotones();
     }
 
     public void ActivarModoCreador()
     {
+        if (modoActual == ModoRaton.Creador)
+        {
+            ActivarModoMoverse();
+            return;
+        }
+
         modoActual = ModoRaton.Creador;
-        idEspecieSeleccionada = -1; // Por defecto empezamos con el pincel en "Nueva Especie"
+        idEspecieSeleccionada = -1;
+        herramientaSeleccionada = TipoHerramienta.Ninguna;
         ActualizarVisualBotones();
+
+        if (bandejaDinamica != null) bandejaDinamica.RedibujarBandeja();
+    }
+
+    public void ActivarModoHerramientas()
+    {
+        if (modoActual == ModoRaton.Herramientas)
+        {
+            ActivarModoMoverse();
+            return;
+        }
+
+        modoActual = ModoRaton.Herramientas;
+        herramientaSeleccionada = TipoHerramienta.Ninguna;
+        ActualizarVisualBotones();
+
+        if (bandejaDinamica != null) bandejaDinamica.RedibujarBandeja();
     }
 
     public void AbrirLaboratorio()
     {
-        if (panelLaboratorio != null)
-        {
-            panelLaboratorio.AbrirPanel();
-        }
+        if (panelLaboratorio != null) panelLaboratorio.AbrirPanel();
     }
 
-    // --- LÓGICA VISUAL ---
     private void ActualizarVisualBotones()
     {
         PintarBotonActivo(botonMenu, false);
         PintarBotonActivo(botonMover, modoActual == ModoRaton.Moverse);
         PintarBotonActivo(botonInspeccionar, modoActual == ModoRaton.Inspeccion);
         PintarBotonActivo(botonCrear, modoActual == ModoRaton.Creador);
+        PintarBotonActivo(botonHerramientas, modoActual == ModoRaton.Herramientas);
 
-        // Encendemos o apagamos el Scroll View de cartas
-        if (panelSelectorEspecies != null)
+        if (panelSelector != null)
         {
-            panelSelectorEspecies.SetActive(modoActual == ModoRaton.Creador);
+            bool mostrarPanel = (modoActual == ModoRaton.Creador || modoActual == ModoRaton.Herramientas);
+            panelSelector.SetActive(mostrarPanel);
         }
     }
 
@@ -263,4 +281,13 @@ public class ControladorInteraccion : MonoBehaviour
         boton.colors = colores;
     }
 
+    public void CentrarCamaraEnMapa()
+    {
+        if (Camera.main != null)
+        {
+            float z = Camera.main.transform.position.z;
+            Camera.main.transform.position = new Vector3(0f, 0f, z);
+            OnCamaraCentrada?.Invoke();
+        }
+    }
 }

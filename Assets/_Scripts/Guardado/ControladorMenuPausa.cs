@@ -11,10 +11,15 @@ public class ControladorMenuPausa : MonoBehaviour
 
     private void Awake()
     {
-        // 1. Reseteo absoluto al iniciar
+        // El estado de pausa siempre se resetea al cargar una nueva escena
+        // (es static y podría venir contaminado de la escena anterior)
+        juegoPausado = false;
+
+        // En modo tutorial el TutorialManager controla el tiempo — no tocamos timeScale
+        if (TutorialManager.TutorialActivo) return;
+
         Time.timeScale = 1f;
         velocidadAnterior = 1f;
-        juegoPausado = false;
     }
 
     private void Start()
@@ -28,6 +33,9 @@ public class ControladorMenuPausa : MonoBehaviour
 
     void Update()
     {
+        // Durante el tutorial el Escape está bloqueado
+        if (TutorialManager.TutorialActivo) return;
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Debug.Log(" MenuPausa Tecla ESC pulsada.");

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /*
 - Pool de objetos para la comida, para evitar instanciaciones y destrucciones constantes que puedan afectar al rendimiento
@@ -30,11 +31,27 @@ public class PoolComida : MonoBehaviour
         }
     }
 
+    private void OnEnable()  => SceneManager.sceneLoaded += OnSceneLoaded;
+    private void OnDisable() => SceneManager.sceneLoaded -= OnSceneLoaded;
+
+    /// <summary>Al cargar nueva escena los objetos de comida anteriores están destruidos — limpiamos y recalentamos.</summary>
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        _pool.Clear();
+        PreCalentar();
+    }
+
     public GameObject GetComida(Vector3 posicion, float tamano = 0.3f)
     {
-        GameObject obj = _pool.Count > 0
-            ? _pool.Pop()
-            : Instantiate(prefabComida);
+        // Validar que el objeto popeado no esté destruido
+        GameObject obj = null;
+        while (_pool.Count > 0)
+        {
+            obj = _pool.Pop();
+            if (obj != null) break;
+            obj = null;
+        }
+        if (obj == null) obj = Instantiate(prefabComida);
 
         obj.transform.position = posicion;
         obj.transform.localScale = Vector3.one * Mathf.Max(0.1f, tamano);

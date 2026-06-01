@@ -36,11 +36,12 @@ public class CamaraControladorPro : MonoBehaviour
     }
 
     // Usamos LateUpdate para que la camara se mueva despues que las bacterias
-    void LateUpdate() 
+    void LateUpdate()
     {
         if (ControladorMenuPausa.juegoPausado) return;
         if (PanellCreacion.LaboratorioAbierto) return;
-        if (EventSystem.current.IsPointerOverGameObject()) return;
+        // Durante el tutorial el overlay cubre la pantalla: ignoramos el bloqueo del EventSystem
+        if (!TutorialManager.TutorialActivo && EventSystem.current.IsPointerOverGameObject()) return;
         GestionarZoom();
         GestionarMovimiento();
         AplicarLimites();

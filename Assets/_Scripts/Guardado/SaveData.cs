@@ -7,6 +7,9 @@ public class SaveData
     // Datos del Gestor
     public int proximoIdLinaje;
 
+    // Datos del Entorno (NUEVO)
+    public float radioPlacaPetri;
+
     public List<DatosPlantillaEspecie> plantillasLaboratorio = new List<DatosPlantillaEspecie>();
     // Datos de las Entidades Vivas
     public List<DatosEntidad> bacteriasVivas = new List<DatosEntidad>();
@@ -16,9 +19,34 @@ public class SaveData
 
     // Datos del Mundo
     public List<DatosComidas> datosComidas = new List<DatosComidas>();
-}
-[System.Serializable]
 
+    // Datos de los Spawners de Comida (NUEVO)
+    public List<DatosSpawner> datosSpawners = new List<DatosSpawner>();
+}
+
+[System.Serializable]
+public class DatosSpawner
+{
+    public float posX;
+    public float posY;
+    public float minEnergia;
+    public float maxEnergia;
+    public float intervalo;
+    public float radioSpawn;
+
+    public DatosSpawner() { }
+    public DatosSpawner(float x, float y, float minE, float maxE, float intervalo, float radio)
+    {
+        this.posX = x;
+        this.posY = y;
+        this.minEnergia = minE;
+        this.maxEnergia = maxE;
+        this.intervalo = intervalo;
+        this.radioSpawn = radio;
+    }
+}
+
+[System.Serializable]
 public class DatosComidas
 {
     public float posX;
@@ -49,16 +77,15 @@ public class DatosContenedorEspecie
         this.rango = rango;
     }
 }
+
 [System.Serializable]
 public class DatosEntidad
 {
-    // Identidad y Linaje
     public int idLinaje;
     public int generaciones;
     public string nombreDePila;
     public Color colorLinaje;
 
-    // Genes (Estadísticas base)
     public float velocidad;
     public float radioVision;
     public float energiaMax;
@@ -68,7 +95,6 @@ public class DatosEntidad
     public float rangoMutacion;
     public float tiempreEntreReproduccion;
 
-    // Estado dinámico (Lo que cambia en tiempo real)
     public float posX;
     public float posY;
     public float quaternionZ;
@@ -76,13 +102,10 @@ public class DatosEntidad
     public float edadActual;
     public float cooldownRestante;
 
-    // Constructor vacío obligatorio para la serialización
     public DatosEntidad() { }
 
-    // Constructor de ayuda para "sacar la foto" a una bacteria viva
     public DatosEntidad(SistemaVida sv, Vector3 posicion, float giro)
     {
-        // Copiamos los genes desde misStats
         this.idLinaje = sv.misStats.idLinaje;
         this.generaciones = sv.misStats.generaciones;
         this.velocidad = sv.misStats.velocidad;
@@ -95,20 +118,18 @@ public class DatosEntidad
         this.tiempreEntreReproduccion = sv.misStats.tiempreEntreReproduccion;
         this.colorLinaje = sv.misStats.colorLinaje;
 
-        // Copiamos el estado actual
-        this.nombreDePila = sv.name; // O la variable que uses
+        this.nombreDePila = sv.name;
         this.energiaActual = sv.EnergiaActual;
         this.edadActual = sv.EdadActual;
-        this.cooldownRestante = 0; // O el valor que tenga en ese momento
+        this.cooldownRestante = 0;
 
-        // Posición
         this.posX = posicion.x;
         this.posY = posicion.y;
-        
-        this.quaternionZ = giro; // Solo guardamos la rotación en Z para 2D
+
+        this.quaternionZ = giro;
     }
-   
 }
+
 [System.Serializable]
 public class DatosPlantillaEspecie
 {

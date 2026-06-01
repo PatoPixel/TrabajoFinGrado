@@ -26,7 +26,8 @@ public class ControladorTiempo : MonoBehaviour
 
     void Start()
     {
-        // Empezamos siempre en velocidad normal
+        // En modo tutorial el TutorialManager controla el tiempo
+        if (TutorialManager.TutorialActivo) return;
         CambiarVelocidad(velocidadNormal);
     }
 
@@ -60,10 +61,13 @@ public class ControladorTiempo : MonoBehaviour
 
     void Update()
     {
-        // Comprobar si alg˙n TMP_InputField est· enfocado para evitar el atajo de teclado
+        // Comprobar si algÔøΩn TMP_InputField estÔøΩ enfocado para evitar el atajo de teclado
         if (TMP_InputField.allSelectablesArray != null && TMP_InputField.allSelectablesArray.Any(s => s is TMP_InputField input && input.isFocused))
             return;
         if (ControladorMenuPausa.juegoPausado) return;
+
+        // Bloqueado durante el tutorial excepto cuando se pide expl√≠citamente
+        if (TutorialManager.BloquearCambiarTiempo) return;
 
         // Atajo de teclado para cambiar la velocidad (T) - Alterna entre normal, rapido y parado
         if (Input.GetKeyDown(KeyCode.T))
