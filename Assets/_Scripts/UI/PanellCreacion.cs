@@ -5,19 +5,41 @@ using UnityEngine.UI;
 public class PanellCreacion : MonoBehaviour
 {
     public static bool LaboratorioAbierto = false;
+    public static event System.Action OnEspecieSintetizada;
+    public Button BtnSintetizar => btnSintetizar;
 
-    [Header("Identificación")]
+    [Header("Tutorial")]
+    [SerializeField] private Vector2 posicionTutorial = new Vector2(750f, 0f);
+    [SerializeField] private RectTransform selectorColor;
+    [SerializeField] private RectTransform panelStats;
+    [SerializeField] private RectTransform filaNombre;
+    [SerializeField] private RectTransform filaVelocidad;
+    [SerializeField] private RectTransform filaVision;
+    [SerializeField] private RectTransform filaTamano;
+    private Vector2 _posicionOriginal;
+    private bool    _posicionCapturada = false;
+
+    public RectTransform RtPanel          => GetComponent<RectTransform>();
+    public RectTransform RtInputNombre    => filaNombre    != null ? filaNombre    : inputNombre?.GetComponent<RectTransform>();
+    public RectTransform RtSelectorColor  => selectorColor;
+    public RectTransform RtSliderVelocidad => filaVelocidad != null ? filaVelocidad : sliderVelocidad?.GetComponent<RectTransform>();
+    public RectTransform RtSliderVision   => filaVision    != null ? filaVision    : sliderVision?.GetComponent<RectTransform>();
+    public RectTransform RtSliderTamano   => filaTamano    != null ? filaTamano    : sliderTamano?.GetComponent<RectTransform>();
+    public RectTransform RtPanelStats     => panelStats != null ? panelStats : txtConsumo?.transform.parent?.GetComponent<RectTransform>();
+    public string TextoNombre             => inputNombre?.text ?? "";
+
+    [Header("Identificaciï¿½n")]
     [SerializeField] private TMP_InputField inputNombre;
     [SerializeField] private Image previewBacteria;
 
     [SerializeField] private TextMeshProUGUI txtAlertaNombre;
 
-    [Header("Sliders (Límites visuales)")]
+    [Header("Sliders (Lï¿½mites visuales)")]
     [SerializeField] private Slider sliderTamano;
     [SerializeField] private Slider sliderVelocidad;
     [SerializeField] private Slider sliderVision;
 
-    [Header("Inputs Manuales (Sin límites)")]
+    [Header("Inputs Manuales (Sin lï¿½mites)")]
     [SerializeField] private TMP_InputField inputTamano;
     [SerializeField] private TMP_InputField inputVelocidad;
     [SerializeField] private TMP_InputField inputVision;
@@ -29,7 +51,7 @@ public class PanellCreacion : MonoBehaviour
     [SerializeField] private TextMeshProUGUI txtMitosis;
     [SerializeField] private TextMeshProUGUI txtCoste;
 
-    [Header("Botones de Acción")]
+    [Header("Botones de Acciï¿½n")]
     [SerializeField] private Button btnSintetizar;
     [SerializeField] private Button btnCancelar;
 
@@ -44,6 +66,7 @@ public class PanellCreacion : MonoBehaviour
 
     private void Start()
     {
+
         // 1. Conectamos los Sliders (Cuando arrastras la barra)
         if (sliderTamano != null) sliderTamano.onValueChanged.AddListener(AlMoverSliderTamano);
         if (sliderVelocidad != null) sliderVelocidad.onValueChanged.AddListener(AlMoverSliderVelocidad);
@@ -59,32 +82,32 @@ public class PanellCreacion : MonoBehaviour
 
         if (txtAlertaNombre != null) txtAlertaNombre.text = "";
 
-        // Forzamos la primera actualización
+        // Forzamos la primera actualizaciï¿½n
         SincronizarUI();
     }
 
-    // --- LÓGICA DE LOS SLIDERS ---
+    // --- Lï¿½GICA DE LOS SLIDERS ---
     private void AlMoverSliderTamano(float valor) { _tamanoActual = valor; SincronizarUI(); }
     private void AlMoverSliderVelocidad(float valor) { _velocidadActual = valor; SincronizarUI(); }
     private void AlMoverSliderVision(float valor) { _visionActual = valor; SincronizarUI(); }
 
-    // --- LÓGICA DE LOS INPUTS MANUALES (CON VALIDACIÓN) ---
+    // --- Lï¿½GICA DE LOS INPUTS MANUALES (CON VALIDACIï¿½N) ---
     private void AlEscribirInputTamano(string texto) { _tamanoActual = ValidarNumero(texto, _tamanoActual); SincronizarUI(); }
     private void AlEscribirInputVelocidad(string texto) { _velocidadActual = ValidarNumero(texto, _velocidadActual); SincronizarUI(); }
     private void AlEscribirInputVision(string texto) { _visionActual = ValidarNumero(texto, _visionActual); SincronizarUI(); }
 
-    // Comprueba que lo escrito sea un número y que sea mayor estricto que 0
+    // Comprueba que lo escrito sea un nï¿½mero y que sea mayor estricto que 0
     private float ValidarNumero(string texto, float valorAnterior)
     {
         if (float.TryParse(texto, out float resultado))
         {
-            if (resultado <= 0f) return 0.01f; // Mínimo absoluto biológico para no dividir por cero
+            if (resultado <= 0f) return 0.01f; // Mï¿½nimo absoluto biolï¿½gico para no dividir por cero
             return resultado;
         }
-        return valorAnterior; // Si escribe letras, restauramos el número anterior
+        return valorAnterior; // Si escribe letras, restauramos el nï¿½mero anterior
     }
 
-    // --- SINCRONIZACIÓN Y CÁLCULO ---
+    // --- SINCRONIZACIï¿½N Y Cï¿½LCULO ---
     private void SincronizarUI()
     {
         // 1. Actualizamos los Inputs silenciosamente (SetTextWithoutNotify evita bucles)
@@ -92,7 +115,7 @@ public class PanellCreacion : MonoBehaviour
         if (inputVelocidad != null) inputVelocidad.SetTextWithoutNotify(_velocidadActual.ToString("F2"));
         if (inputVision != null) inputVision.SetTextWithoutNotify(_visionActual.ToString("F2"));
 
-        // 2. Actualizamos los Sliders silenciosamente (Clamp para que no se rompan si el valor manual es altísimo)
+        // 2. Actualizamos los Sliders silenciosamente (Clamp para que no se rompan si el valor manual es altï¿½simo)
         if (sliderTamano != null) sliderTamano.SetValueWithoutNotify(Mathf.Clamp(_tamanoActual, sliderTamano.minValue, sliderTamano.maxValue));
         if (sliderVelocidad != null) sliderVelocidad.SetValueWithoutNotify(Mathf.Clamp(_velocidadActual, sliderVelocidad.minValue, sliderVelocidad.maxValue));
         if (sliderVision != null) sliderVision.SetValueWithoutNotify(Mathf.Clamp(_visionActual, sliderVision.minValue, sliderVision.maxValue));
@@ -133,7 +156,7 @@ public class PanellCreacion : MonoBehaviour
         if (txtCoste != null) txtCoste.text = $"Coste: {costeCalc:F0} E";
     }
 
-    // --- MÉTODOS PÚBLICOS ---
+    // --- Mï¿½TODOS Pï¿½BLICOS ---
     public void SeleccionarColorDinamico(Color nuevoColor)
     {
         _colorSeleccionado = nuevoColor;
@@ -143,6 +166,16 @@ public class PanellCreacion : MonoBehaviour
 
     public void AbrirPanel()
     {
+        RectTransform rt = GetComponent<RectTransform>();
+        if (rt != null)
+        {
+            if (!_posicionCapturada)
+            {
+                _posicionOriginal  = rt.anchoredPosition;
+                _posicionCapturada = true;
+            }
+            rt.anchoredPosition = TutorialManager.TutorialActivo ? posicionTutorial : _posicionOriginal;
+        }
         gameObject.SetActive(true);
         LaboratorioAbierto = true;
         if (txtAlertaNombre != null) txtAlertaNombre.text = "";
@@ -153,6 +186,8 @@ public class PanellCreacion : MonoBehaviour
     {
         LaboratorioAbierto = false;
         gameObject.SetActive(false);
+        RectTransform rt = GetComponent<RectTransform>();
+        if (rt != null) rt.anchoredPosition = _posicionOriginal;
     }
 
     private void SintetizarNuevaEspecie()
@@ -162,7 +197,7 @@ public class PanellCreacion : MonoBehaviour
             if (txtAlertaNombre != null)
             {
                 txtAlertaNombre.color = Color.red;
-                txtAlertaNombre.text = "¡Error: Debes bautizar la especie!";
+                txtAlertaNombre.text = "ï¿½Error: Debes bautizar la especie!";
             }
             return;
         }
@@ -174,6 +209,7 @@ public class PanellCreacion : MonoBehaviour
         {
             int nuevoID = GestorLinajes.Instance.RegistrarLinajeManual(nombreEspecie, _statsEnProgreso);
             Debug.Log($"[Laboratorio] Guardada especie: {nombreEspecie} con ID #{nuevoID}");
+            OnEspecieSintetizada?.Invoke();
 
             // AVISAMOS A LA BANDEJA QUE SE ACTUALICE
             ControladorInteraccion controlador = FindFirstObjectByType<ControladorInteraccion>();
@@ -182,7 +218,7 @@ public class PanellCreacion : MonoBehaviour
                 BandejaEspeciesUI bandeja = controlador.panelSelector.GetComponent<BandejaEspeciesUI>();
                 if (bandeja != null) bandeja.RedibujarBandeja();
 
-                // Automáticamente seleccionamos este pincel para que ya lo tengas en el ratón
+                // Automï¿½ticamente seleccionamos este pincel para que ya lo tengas en el ratï¿½n
                 controlador.SeleccionarPincelEspecie(nuevoID);
             }
         }

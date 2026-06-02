@@ -69,6 +69,8 @@
 - [ ] **Amarillo en cartas seleccionadas NO FUNCIONA** — el sistema de evento estático (BandejaEspeciesUI.OnCartaSeleccionada) está implementado pero el color no cambia visualmente. Revisar si el GetComponent<Image>() en Awake() obtiene la imagen correcta (puede que sea un hijo, no el root). Puede que necesite encontrar el hijo "FondoBlanco" en lugar del root.
 
 ### TUTORIAL — Cosas a pulir
+- [ ] **Colocar 3 bacterias en tutorial** — cambiar paso 10n para que requiera colocar exactamente 3 bacterias. Añadir contador `_bacteriasColocadasCount` en TutorialManager, incrementar en cada `OnBacteriaColocada`, no avanzar hasta llegar a 3. Actualizar mensaje: "Coloca <b>3 bacterias</b> en la placa (X/3)". Además, eliminar la BacteriaTutorial del escenario en el `onEntrar` de ese paso (buscar por tag o nombre y llamar `Purga()` o `SetActive(false)`).
+- [ ] **Highlights sección comida** — hacer lo mismo que en la sección de crear bacteria: Canvas override sorting (sortingOrder=999) en cada campo de CartaComidaUI y CartaSpawnerUI para que se vean por encima del overlay oscuro. Exponer RectTransforms necesarios desde esos scripts y conectarlos a los pasos 11b y 11c del TutorialManager con `obtenerTarget`.
 - [ ] Revisar que los pasos interactivos (10b, 11b, 11c) funcionen bien en la práctica
 - [ ] El paso de "crear bacteria" puede ser confuso — quizás mostrar primero que el laboratorio está abierto antes de pedir que coloquen una
 - [ ] Considerar añadir flechas o highlights visuales apuntando a los botones mientras se explica cada herramienta

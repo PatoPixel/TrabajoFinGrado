@@ -22,7 +22,11 @@ public class CartaSpawnerUI : MonoBehaviour
     private static readonly Color COLOR_SELECCIONADO = new Color(1f, 0.85f, 0.1f, 1f);
     private static readonly Color COLOR_NORMAL       = Color.white;
 
-    private void Awake() => _fondo = GetComponent<Image>();
+    private void Awake()
+    {
+        Transform hijo = transform.Find("Fondo");
+        _fondo = hijo != null ? hijo.GetComponent<Image>() : GetComponent<Image>();
+    }
 
     private void OnEnable()  => BandejaEspeciesUI.OnCartaSeleccionada += OnSeleccionCambio;
     private void OnDisable() => BandejaEspeciesUI.OnCartaSeleccionada -= OnSeleccionCambio;

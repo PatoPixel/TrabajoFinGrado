@@ -21,15 +21,28 @@ public class CartaEspecieUI : MonoBehaviour
     [Header("Visuales")]
     [SerializeField] private Image  iconoBacteria;
     [SerializeField] private Button botonSeleccion;
+    [SerializeField] private Image  fondoSeleccion;
 
     private int                    _idLinajeAsignado;
+    public bool EsCartaCrearNueva => _idLinajeAsignado == -1;
     private ControladorInteraccion _controladorInteraccion;
     private Image                  _fondo;
 
     private static readonly Color COLOR_SELECCIONADO = new Color(1f, 0.85f, 0.1f, 1f);
     private static readonly Color COLOR_NORMAL       = Color.white;
 
-    private void Awake() => _fondo = GetComponent<Image>();
+    private void Awake()
+    {
+        if (fondoSeleccion != null)
+        {
+            _fondo = fondoSeleccion;
+        }
+        else
+        {
+            Transform hijo = transform.Find("Fondo");
+            _fondo = hijo != null ? hijo.GetComponent<Image>() : GetComponent<Image>();
+        }
+    }
 
     private void OnEnable()  => BandejaEspeciesUI.OnCartaSeleccionada += OnSeleccionCambio;
     private void OnDisable() => BandejaEspeciesUI.OnCartaSeleccionada -= OnSeleccionCambio;

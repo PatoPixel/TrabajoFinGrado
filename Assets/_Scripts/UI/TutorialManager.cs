@@ -18,7 +18,7 @@ public class TutorialManager : MonoBehaviour
 
     [Header("Panel Tutorial UI")]
     public CanvasGroup overlay;
-    public Image overlayFondo;          // La imagen oscura hija de PanelTutorial (para controlar raycast sin quitar el overlay)
+    public Image overlayFondo;
     public TextMeshProUGUI textoTitulo;
     public TextMeshProUGUI textoMensaje;
     public Button botonSiguiente;
@@ -38,10 +38,13 @@ public class TutorialManager : MonoBehaviour
     private AccionRequerida _accionActual;
     private ControladorTiempo _controladorTiempo;
     private ControladorInteraccion _controladorInteraccion;
-    private bool _camaraCentrada   = false;
-    private bool _bacteriaColocada = false;
-    private bool _comidaColocada   = false;
-    private bool _spawnerColocado  = false;
+    private bool _camaraCentrada      = false;
+    private bool _bacteriaColocada    = false;
+    private bool _comidaColocada      = false;
+    private bool _spawnerColocado     = false;
+    private bool _especieSintetizada  = false;
+    private Canvas           _canvasHighlightTemp    = null;
+    private GraphicRaycaster _raycasterHighlightTemp = null;
 
     private const float TIEMPO_MINIMO_LECTURA = 2.5f;
     private float _timerLectura = 0f;
@@ -55,6 +58,8 @@ public class TutorialManager : MonoBehaviour
         SeleccionarBacteria,
         AbrirLaboratorio,
         ActivarHerramienta,
+        ActivarModoCreador,
+        EspecieSintetizada,
         CentrarCamara,
         ColocarBacteria,
         ColocarComida,
@@ -67,9 +72,11 @@ public class TutorialManager : MonoBehaviour
         public string mensaje;
         public bool botonVisible = true;
         public AccionRequerida accion = AccionRequerida.Ninguna;
-        /// <summary>Si true, el overlay no bloquea el raycast para que el jugador pueda interactuar con la UI del juego.</summary>
         public bool interactivo = false;
         public System.Action onEntrar;
+        public System.Func<bool> validacion = null;
+        /// <summary>Si no es null, se oculta overlayFondo para que el elemento sea visible.</summary>
+        public System.Func<RectTransform> obtenerTarget = null;
     }
 
     private List<Paso> _pasos;
@@ -93,9 +100,8 @@ public class TutorialManager : MonoBehaviour
 
         GestorEscenas.LimpiarModoTutorial();
         _activo = true;
-        // Resetear ambos valores de tiempo para evitar que fixedDeltaTime de una sesión anterior rompa la física
         Time.timeScale = 0f;
-        Time.fixedDeltaTime = 0.02f; // valor por defecto de Unity
+        Time.fixedDeltaTime = 0.02f;
 
         if (uiBotonesControles) uiBotonesControles.SetActive(false);
         if (uiBandejaEspecies)  uiBandejaEspecies.SetActive(false);
@@ -111,9 +117,10 @@ public class TutorialManager : MonoBehaviour
         _controladorInteraccion = FindFirstObjectByType<ControladorInteraccion>();
         CamaraControladorPro.OnIntervencionManual      += OnCamaraMovida;
         ControladorInteraccion.OnCamaraCentrada        += OnDetectarCamaraCentrada;
-        ControladorInteraccion.OnBacteriaColocada      += () => _bacteriaColocada = true;
-        ControladorInteraccion.OnComidaColocada        += () => _comidaColocada   = true;
-        ControladorInteraccion.OnSpawnerColocado       += () => _spawnerColocado  = true;
+        ControladorInteraccion.OnBacteriaColocada      += () => _bacteriaColocada   = true;
+        ControladorInteraccion.OnComidaColocada        += () => _comidaColocada     = true;
+        ControladorInteraccion.OnSpawnerColocado       += () => _spawnerColocado    = true;
+        PanellCreacion.OnEspecieSintetizada            += () => _especieSintetizada = true;
 
         Camera cam = Camera.main;
         if (cam != null) cam.orthographicSize = 6f;
@@ -229,29 +236,133 @@ public class TutorialManager : MonoBehaviour
             // ── 10: Herramienta Laboratorio ────────────────────────────────
             new Paso {
                 titulo   = "Herramienta: Laboratorio de Especies",
-                mensaje  = "El boton <b>+</b> abre el laboratorio de especies.\n\n" +
-                           "Ahi puedes disenar nuevas bacterias: elige su nombre, color y estadisticas geneticas, y luego sintetizalas directamente en la placa.",
+                mensaje  = "El boton <b>+</b> de la barra lateral abre el laboratorio de especies.\n\n" +
+                           "Ahi podras disenar nuevas bacterias: nombre, color y estadisticas geneticas.\n\n" +
+                           "Vamos a probarlo.",
                 botonVisible = true
             },
 
-            // ── 10b: Crear una bacteria ────────────────────────────────────
+            // ── 10a: Pulsa el boton + ──────────────────────────────────────
             new Paso {
-                titulo   = "Crea tu primera Bacteria",
-                mensaje  = "Ahora prueba a crear una especie:\n\n" +
-                           "1. Pulsa el boton <b>+</b> para abrir el laboratorio\n" +
-                           "2. Dale un nombre y ajusta las estadisticas\n" +
-                           "3. Pulsa <b>Sintetizar</b> — aparecera en la bandeja\n" +
-                           "4. Seleccionala en la bandeja y haz <b>click en la placa</b> para colocarla\n\n" +
-                           "<color=#FFD700>Coloca una bacteria para continuar.</color>",
+                titulo   = "Abre el Modo Creador",
+                mensaje  = "Pulsa el boton <b>+</b> de la barra lateral.\n\n" +
+                           "Aparecera la bandeja con la opcion de crear una nueva especie.\n\n" +
+                           "<color=#FFD700>Pulsa el boton +.</color>",
                 botonVisible = false,
-                accion   = AccionRequerida.ColocarBacteria,
+                accion      = AccionRequerida.ActivarModoCreador,
                 interactivo = true,
-                onEntrar = () => {
-                    // Activar modo Creador para que el jugador pueda colocar
-                    ControladorInteraccion inter = Object.FindFirstObjectByType<ControladorInteraccion>();
-                    if (inter != null && inter.modoActual != ControladorInteraccion.ModoRaton.Creador)
-                        inter.ActivarModoCreador();
+                onEntrar    = () => {
                     if (_instance.uiBandejaEspecies) _instance.uiBandejaEspecies.SetActive(true);
+                }
+            },
+
+            // ── 10b: Haz click en la carta ────────────────────────────────
+            new Paso {
+                titulo        = "Crear una Nueva Especie",
+                mensaje       = "Ahora haz click en la carta <b>+ CREAR NUEVA</b> de la bandeja para abrir el laboratorio.\n\n" +
+                                "<color=#FFD700>Haz click en la carta.</color>",
+                botonVisible  = false,
+                accion        = AccionRequerida.AbrirLaboratorio,
+                interactivo   = true,
+                obtenerTarget = () => Object.FindFirstObjectByType<CartaEspecieUI>()?.GetComponent<RectTransform>()
+            },
+
+            // ── 10c-10m: Lab (obtenerTarget oculta el overlay para ver el panel) ──
+            // ── 10c: Nombre ───────────────────────────────────────────────
+            new Paso {
+                titulo      = "El Nombre de la Especie",
+                mensaje     = "Escribe un <b>nombre</b> para tu especie en el campo de texto.\n\n" +
+                              "Este nombre identifica el linaje y aparecera en la bandeja y en las graficas.\n\n" +
+                              "<color=#FFD700>Escribe algo para continuar.</color>",
+                botonVisible  = true,
+                interactivo   = true,
+                obtenerTarget = () => Object.FindFirstObjectByType<PanellCreacion>()?.RtInputNombre,
+                validacion    = () => !string.IsNullOrWhiteSpace(Object.FindFirstObjectByType<PanellCreacion>()?.TextoNombre)
+            },
+
+            // ── 10d: Color ────────────────────────────────────────────────
+            new Paso {
+                titulo        = "El Color del Linaje",
+                mensaje       = "Haz click en el selector de colores para elegir el <b>color del linaje</b>.\n\n" +
+                                "Todas las bacterias de esta especie y sus descendientes tendran este color en la placa.",
+                botonVisible  = true,
+                interactivo   = true,
+                obtenerTarget = () => Object.FindFirstObjectByType<PanellCreacion>()?.RtSelectorColor
+            },
+
+            // ── 10e: Velocidad ────────────────────────────────────────────
+            new Paso {
+                titulo        = "Gen: Velocidad",
+                mensaje       = "El slider de <b>Velocidad</b> controla que tan rapido se mueve la bacteria.\n\n" +
+                                "Mayor velocidad = mas alcance para buscar comida, pero tambien <b>mayor consumo de energia</b>.",
+                botonVisible  = true,
+                interactivo   = true,
+                obtenerTarget = () => Object.FindFirstObjectByType<PanellCreacion>()?.RtSliderVelocidad
+            },
+
+            // ── 10f: Vision ───────────────────────────────────────────────
+            new Paso {
+                titulo        = "Gen: Vision",
+                mensaje       = "El slider de <b>Vision</b> define el radio de deteccion de comida y enemigos.\n\n" +
+                                "Mayor vision = detecta objetivos lejanos, pero tambien <b>sube el consumo</b>.",
+                botonVisible  = true,
+                interactivo   = true,
+                obtenerTarget = () => Object.FindFirstObjectByType<PanellCreacion>()?.RtSliderVision
+            },
+
+            // ── 10g: Tamano ───────────────────────────────────────────────
+            new Paso {
+                titulo        = "Gen: Tamano",
+                mensaje       = "El slider de <b>Tamano</b> determina el volumen fisico de la bacteria.\n\n" +
+                                "Una bacteria grande puede <b>devorar a otras mas pequenas</b>, pero necesita mucha mas energia para sobrevivir.",
+                botonVisible  = true,
+                interactivo   = true,
+                obtenerTarget = () => Object.FindFirstObjectByType<PanellCreacion>()?.RtSliderTamano
+            },
+
+            // ── 10h: Estadisticas calculadas ──────────────────────────────
+            new Paso {
+                titulo        = "Estadisticas Calculadas",
+                mensaje       = "Estos valores se calculan <b>automaticamente</b> segun tus genes:\n\n" +
+                                "<b>Consumo</b> = (Tamano³ + Velocidad² + Vision) / 4\n" +
+                                "<b>Energia Max</b> = Tamano × 100\n" +
+                                "<b>Vida Util</b> = (Tamano² × 100) / Consumo\n" +
+                                "<b>Mitosis</b> = (Energia Max / Vida Util) × 5\n" +
+                                "<b>Coste Reprod.</b> = Consumo × Mitosis × 2",
+                botonVisible  = true,
+                interactivo   = true,
+                obtenerTarget = () => Object.FindFirstObjectByType<PanellCreacion>()?.RtPanelStats
+            },
+
+            // ── 10m: Sintetizar ───────────────────────────────────────────
+            new Paso {
+                titulo        = "Sintetiza tu Especie",
+                mensaje       = "Cuando estes satisfecho con los parametros, pulsa <b>Sintetizar</b>.\n\n" +
+                                "La especie quedara registrada y aparecera como una carta en la bandeja.\n\n" +
+                                "<color=#FFD700>Pulsa Sintetizar para continuar.</color>",
+                botonVisible  = false,
+                accion        = AccionRequerida.EspecieSintetizada,
+                interactivo   = true,
+                obtenerTarget = () => Object.FindFirstObjectByType<PanellCreacion>()?.BtnSintetizar?.GetComponent<RectTransform>()
+            },
+
+            // ── 10n: Colocar bacteria ─────────────────────────────────────
+            new Paso {
+                titulo        = "Coloca tu Bacteria en la Placa",
+                mensaje       = "Tu especie ya aparece en la bandeja.\n\n" +
+                                "Seleccionala haciendo click en su carta y luego haz <b>click en la placa</b> para colocarla.\n\n" +
+                                "<color=#FFD700>Coloca una bacteria para continuar.</color>",
+                botonVisible  = false,
+                accion        = AccionRequerida.ColocarBacteria,
+                interactivo   = true,
+                obtenerTarget = () => {
+                    foreach (var c in Object.FindObjectsByType<CartaEspecieUI>(FindObjectsSortMode.None))
+                        if (!c.EsCartaCrearNueva) return c.GetComponent<RectTransform>();
+                    return null;
+                },
+                onEntrar = () => {
+                    _instance.overlay.alpha = 0f;
+                    _instance.overlay.blocksRaycasts = false;
                 }
             },
 
@@ -274,9 +385,9 @@ public class TutorialManager : MonoBehaviour
                            "3. Haz <b>click en la placa</b> para depositar nutrientes\n\n" +
                            "<color=#FFD700>Coloca comida en la placa para continuar.</color>",
                 botonVisible = false,
-                accion   = AccionRequerida.ColocarComida,
+                accion      = AccionRequerida.ColocarComida,
                 interactivo = true,
-                onEntrar = () => {
+                onEntrar    = () => {
                     ControladorInteraccion inter = Object.FindFirstObjectByType<ControladorInteraccion>();
                     if (inter != null) inter.ActivarModoHerramientas();
                 }
@@ -292,7 +403,7 @@ public class TutorialManager : MonoBehaviour
                            "Puedes modificar su radio, energia minima/maxima e intervalo pulsando el lapiz.\n\n" +
                            "<color=#FFD700>Coloca un spawner para continuar.</color>",
                 botonVisible = false,
-                accion   = AccionRequerida.ColocarSpawner,
+                accion      = AccionRequerida.ColocarSpawner,
                 interactivo = true
             },
 
@@ -315,15 +426,13 @@ public class TutorialManager : MonoBehaviour
                 }
             },
 
-            // ── 12b: Graficas movibles ─────────────────────────────────────
+            // ── 13b: Graficas movibles ─────────────────────────────────────
             new Paso {
                 titulo   = "Graficas de Evolucion Movibles",
                 mensaje  = "Los paneles de las <b>graficas de evolucion</b> son completamente movibles.\n\n" +
-                           "Puedes arrastrarlos por toda la pantalla y colocarlos donde mas te convenga para tener siempre los datos a la vista mientras observas la simulacion.",
+                           "Puedes arrastrarlos por toda la pantalla y colocarlos donde mas te convenga.",
                 botonVisible = true
             },
-
-
 
             // ── 14: Guardado ───────────────────────────────────────────────
             new Paso {
@@ -350,15 +459,22 @@ public class TutorialManager : MonoBehaviour
     {
         CamaraControladorPro.OnIntervencionManual -= OnCamaraMovida;
         ControladorInteraccion.OnCamaraCentrada   -= OnDetectarCamaraCentrada;
-        ControladorInteraccion.OnBacteriaColocada -= () => _bacteriaColocada = true;
-        ControladorInteraccion.OnComidaColocada   -= () => _comidaColocada   = true;
-        ControladorInteraccion.OnSpawnerColocado  -= () => _spawnerColocado  = true;
+        ControladorInteraccion.OnBacteriaColocada -= () => _bacteriaColocada   = true;
+        ControladorInteraccion.OnComidaColocada   -= () => _comidaColocada     = true;
+        ControladorInteraccion.OnSpawnerColocado  -= () => _spawnerColocado    = true;
+        PanellCreacion.OnEspecieSintetizada       -= () => _especieSintetizada = true;
     }
 
     // ── Logica de pasos ─────────────────────────────────────────────────────
 
     public void SiguientePaso()
     {
+        if (_pasos != null && _pasoActual >= 0 && _pasoActual < _pasos.Count)
+        {
+            Paso pasoActual = _pasos[_pasoActual];
+            if (pasoActual.validacion != null && !pasoActual.validacion()) return;
+        }
+
         _pasoActual++;
 
         if (_pasoActual >= _pasos.Count)
@@ -382,9 +498,32 @@ public class TutorialManager : MonoBehaviour
         _esperandoAccion = paso.accion != AccionRequerida.Ninguna;
         _timerLectura    = _esperandoAccion ? TIEMPO_MINIMO_LECTURA : 0f;
 
-        // Pasos interactivos: el fondo oscuro no bloquea clicks para que el jugador pueda usar la UI
         if (overlayFondo != null)
             overlayFondo.raycastTarget = !paso.interactivo;
+
+        ActualizarHighlight(paso);
+    }
+
+    private void ActualizarHighlight(Paso paso)
+    {
+        LimpiarHighlight();
+        if (paso.obtenerTarget == null) return;
+        RectTransform target = paso.obtenerTarget();
+        if (target == null) return;
+
+        if (!target.TryGetComponent(out Canvas _))
+        {
+            _canvasHighlightTemp = target.gameObject.AddComponent<Canvas>();
+            _canvasHighlightTemp.overrideSorting = true;
+            _canvasHighlightTemp.sortingOrder = 999;
+            _raycasterHighlightTemp = target.gameObject.AddComponent<GraphicRaycaster>();
+        }
+    }
+
+    private void LimpiarHighlight()
+    {
+        if (_raycasterHighlightTemp != null) { Destroy(_raycasterHighlightTemp); _raycasterHighlightTemp = null; }
+        if (_canvasHighlightTemp    != null) { Destroy(_canvasHighlightTemp);    _canvasHighlightTemp    = null; }
     }
 
     // ── Deteccion de acciones ───────────────────────────────────────────────
@@ -428,6 +567,16 @@ public class TutorialManager : MonoBehaviour
                     OnAccionCompletada();
                 break;
 
+            case AccionRequerida.ActivarModoCreador:
+                if (_controladorInteraccion != null &&
+                    _controladorInteraccion.modoActual == ControladorInteraccion.ModoRaton.Creador)
+                    OnAccionCompletada();
+                break;
+
+            case AccionRequerida.EspecieSintetizada:
+                if (_especieSintetizada) { _especieSintetizada = false; OnAccionCompletada(); }
+                break;
+
             case AccionRequerida.ActivarHerramienta:
                 if (_controladorInteraccion != null &&
                     _controladorInteraccion.modoActual == ControladorInteraccion.ModoRaton.Herramientas)
@@ -439,7 +588,13 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case AccionRequerida.ColocarBacteria:
-                if (_bacteriaColocada) { _bacteriaColocada = false; OnAccionCompletada(); }
+                if (_bacteriaColocada)
+                {
+                    _bacteriaColocada = false;
+                    overlay.alpha = 1f;
+                    overlay.blocksRaycasts = true;
+                    OnAccionCompletada();
+                }
                 break;
 
             case AccionRequerida.ColocarComida:
@@ -475,18 +630,16 @@ public class TutorialManager : MonoBehaviour
 
     // ── Secuencias especiales ───────────────────────────────────────────────
 
-    /// <summary>Fuerza una velocidad usando ControladorTiempo para que fixedDeltaTime se actualice correctamente.</summary>
     private void SetVelocidad(float velocidad)
     {
         if (_controladorTiempo != null)
             _controladorTiempo.CambiarVelocidad(velocidad);
         else
-            Time.timeScale = velocidad; // fallback
+            Time.timeScale = velocidad;
     }
 
     private IEnumerator SecuenciaBacteriaMoviendose()
     {
-        // Normalizar siempre a 1x (aunque el jugador haya puesto 5x) y quitar overlay
         SetVelocidad(1f);
         overlay.alpha = 0f;
         overlay.blocksRaycasts = false;
@@ -521,15 +674,13 @@ public class TutorialManager : MonoBehaviour
     {
         _activo = false;
         BloquearCambiarTiempo = false;
+        LimpiarHighlight();
 
         CamaraControladorPro.OnIntervencionManual -= OnCamaraMovida;
         ControladorInteraccion.OnCamaraCentrada   -= OnDetectarCamaraCentrada;
 
-        // Resetear el tiempo antes de cargar la escena
         Time.timeScale = 1f;
         GestorEscenas.LimpiarPartidaACargar();
-
-        // Abrir nueva simulacion limpia
         SceneManager.LoadScene(GestorEscenas.ESCENA_GAMEPLAY);
     }
 }
