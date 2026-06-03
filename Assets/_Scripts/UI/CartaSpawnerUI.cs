@@ -3,6 +3,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/*
+- Controla la carta de spawner dentro de la bandeja de especies.
+- Permite configurar el radio de efecto, energía mínima, máxima y intervalo de generación del spawner.
+- Cambia su apariencia cuando es seleccionada para indicar que está activa.
+- Notifica al ControladorInteraccion cuando se selecciona o modifica, para que pueda actualizar
+    su estado y comportamiento.
+*/
+
 public class CartaSpawnerUI : MonoBehaviour
 {
     [Header("UI Pincel Spawner")]

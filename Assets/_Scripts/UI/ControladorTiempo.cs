@@ -61,7 +61,7 @@ public class ControladorTiempo : MonoBehaviour
 
     void Update()
     {
-        // Comprobar si alg�n TMP_InputField est� enfocado para evitar el atajo de teclado
+        // Comprobar si algun TMP_InputField esta enfocado para evitar el atajo de teclado
         if (TMP_InputField.allSelectablesArray != null && TMP_InputField.allSelectablesArray.Any(s => s is TMP_InputField input && input.isFocused))
             return;
         if (ControladorMenuPausa.juegoPausado) return;

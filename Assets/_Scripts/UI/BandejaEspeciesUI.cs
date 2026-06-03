@@ -1,11 +1,14 @@
 using UnityEngine;
 
+/*
+- Controla la bandeja que muestra las cartas de especies o herramientas disponibles, dependiendo del modo actual.
+- Se encarga de redibujar la bandeja cada vez que se activa o cambia el modo, instanciando las cartas correspondientes.
+- Notifica a otras partes del sistema cuando se selecciona una carta, para que puedan reaccionar en consecuencia.
+*/
+
 public class BandejaEspeciesUI : MonoBehaviour
 {
-    /// <summary>
-    /// Se dispara cuando el jugador selecciona una carta.
-    /// Todas las cartas escuchan este evento para actualizar su color de fondo.
-    /// </summary>
+  
     public static event System.Action<MonoBehaviour> OnCartaSeleccionada;
     public static void NotificarSeleccion(MonoBehaviour carta) => OnCartaSeleccionada?.Invoke(carta);
 
@@ -17,7 +20,7 @@ public class BandejaEspeciesUI : MonoBehaviour
 
     [Header("Prefabs de Herramientas Separados")]
     [SerializeField] private GameObject prefabCartaComida;
-    [SerializeField] private GameObject prefabCartaSpawner; // Renombrado
+    [SerializeField] private GameObject prefabCartaSpawner;
 
     [SerializeField] private ControladorInteraccion controladorInteraccion;
 
@@ -42,7 +45,7 @@ public class BandejaEspeciesUI : MonoBehaviour
                 GameObject cartaComida = Instantiate(prefabCartaComida, contenedorContent);
                 if (cartaComida.TryGetComponent(out CartaComidaUI uiComida))
                 {
-                    uiComida.Inicializar("A�ADIR COMIDA", "50", controladorInteraccion);
+                    uiComida.Inicializar("ANNADIR COMIDA", "50", controladorInteraccion);
                 }
             }
 

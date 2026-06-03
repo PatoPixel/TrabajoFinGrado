@@ -1,10 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Adjuntar al botón "Menú Principal" del menú de pausa en GamePlay.
-/// Al pulsarlo muestra la confirmación de GestorGuardado y si acepta vuelve al menú.
-/// </summary>
+/*
+- Botón que vuelve al menú principal desde la pantalla de juego.
+*/
 [RequireComponent(typeof(Button))]
 public class BotonVolverAlMenu : MonoBehaviour
 {

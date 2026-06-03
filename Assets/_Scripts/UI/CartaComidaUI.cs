@@ -2,6 +2,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/*
+- Controla la carta de comida dentro de la bandeja de especies.
+- Permite configurar la cantidad de energía que aportará la comida al ser usada.
+- Cambia su apariencia cuando es seleccionada para indicar que está activa.
+- Notifica al ControladorInteraccion cuando se selecciona o modifica, para que pueda actualizar
+    su estado y comportamiento.
+*/
+
 public class CartaComidaUI : MonoBehaviour
 {
     [Header("UI Pincel Comida")]

@@ -3,8 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /*
-- Permite arrastrar una ventana UI desde su cabecera 
-y ponerla flotando en la pantalla
+- Permite arrastrar una ventana UI desde su cabecera y ponerla flotando en la pantalla
 */
 
 public class ArrastrarVentanaDesdeCabecera : MonoBehaviour, IBeginDragHandler, IDragHandler

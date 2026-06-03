@@ -2,6 +2,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/*
+- Controla la carta de especie dentro de la bandeja de especies.
+- Muestra el nombre, linaje y estadísticas de la especie representada.
+- Permite seleccionar la carta para usarla como pincel o abrir el laboratorio si es la carta de crear nueva.
+- Cambia su apariencia cuando es seleccionada para indicar que está activa.
+- Notifica al ControladorInteraccion cuando se selecciona, para que pueda actualizar su estado y comportamiento.
+*/
+
 public class CartaEspecieUI : MonoBehaviour
 {
     [Header("Textos Principales")]

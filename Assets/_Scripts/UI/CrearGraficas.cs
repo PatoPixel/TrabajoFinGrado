@@ -28,18 +28,18 @@ public class CrearGraficas : MonoBehaviour
         // Por cada estadistica en el enum, creamos una grafica
         foreach (GraficaIndividual.TipoEstadistica tipo in Enum.GetValues(typeof(GraficaIndividual.TipoEstadistica)))
         {
-            // 1. Clonamos el Prefab dentro del contenedor
+            // Clonamos el Prefab dentro del contenedor
             GameObject nuevoCajon = Instantiate(prefabCajonGrafica, contenedorPadre);
             nuevoCajon.transform.localScale = Vector3.one;
 
-            // 2. Le asignamos la estadistica
+            // Le asignamos la estadistica
             GraficaIndividual scriptGrafica = nuevoCajon.GetComponent<GraficaIndividual>();
             scriptGrafica.estadisticaAsignada = tipo;
 
-            // 3. Le ponemos un nombre bonito en la jerarqu�a
+            // Le ponemos un nombre bonito en la jerarquia
             nuevoCajon.name = "Panel_" + tipo.ToString();
 
-            // 4. Lo metemos al Tracker
+            // Lo metemos al Tracker
             evolutionTracker.todasLasGraficas.Add(scriptGrafica);
         }
     }
