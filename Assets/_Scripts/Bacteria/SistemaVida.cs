@@ -227,8 +227,13 @@ public class SistemaVida : MonoBehaviour
     {
         if (PoolComida.Instance == null) return;
 
+        // Escala la energía soltada según el % de energía al morir: 0% → 10% de energíaMax, 100% → 75% de energíaMax
+        float fraccionEnergia = Mathf.Clamp01(energiaActual / misStats.energiaMax);
+        float porcentajeSoltado = Mathf.Lerp(0.10f, 0.75f, fraccionEnergia);
+        float energiaTotalSoltada = misStats.energiaMax * porcentajeSoltado;
+
         int cantidad = Mathf.Max(1, Mathf.RoundToInt(misStats.tamano * 2f));
-        float tamanoChunk = misStats.tamano / cantidad;
+        float energiaPorChunk = energiaTotalSoltada / cantidad;
 
         for (int i = 0; i < cantidad; i++)
         {
@@ -237,8 +242,8 @@ public class SistemaVida : MonoBehaviour
                 UnityEngine.Random.Range(-0.2f, 0.2f),
                 0f);
 
-            GameObject obj = PoolComida.Instance.GetComida(transform.position + offset, tamanoChunk);
-            obj.GetComponent<Comida>()?.Inicializar(tamanoChunk);
+            GameObject obj = PoolComida.Instance.GetComida(transform.position + offset, misStats.tamano / cantidad);
+            obj.GetComponent<Comida>()?.EstablecerEnergiaManual(energiaPorChunk);
         }
     }
     public void OnEnable()

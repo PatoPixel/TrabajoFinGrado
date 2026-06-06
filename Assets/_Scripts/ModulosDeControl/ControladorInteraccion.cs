@@ -58,8 +58,7 @@ public class ControladorInteraccion : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            // En tutorial el overlay cubre la pantalla: ignoramos el bloqueo del EventSystem
-            if (!TutorialManager.TutorialActivo && EventSystem.current.IsPointerOverGameObject()) return;
+            if (EventSystem.current.IsPointerOverGameObject()) return;
 
             Vector2 posicionRaton = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 

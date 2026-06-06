@@ -9,12 +9,14 @@ using TMPro;
 public class TutorialManager : MonoBehaviour
 {
     public static bool TutorialActivo => _instance != null && _instance._activo;
-    public static bool BloquearCambiarTiempo { get; private set; } = true;
+    public static bool BloquearCambiarTiempo { get; private set; } = false;
 
     private static TutorialManager _instance;
 
     [Header("Configuracion")]
     public bool siempreActivo = false;
+    [Tooltip("Solo para pruebas: indice del paso desde el que empieza el tutorial (0 = normal)")]
+    [SerializeField] private int _pasoInicial = 0;
 
     [Header("Panel Tutorial UI")]
     public CanvasGroup overlay;
@@ -43,6 +45,8 @@ public class TutorialManager : MonoBehaviour
     private bool _comidaColocada      = false;
     private bool _spawnerColocado     = false;
     private bool _especieSintetizada  = false;
+    private int  _bacteriasColocadasCount = 0;
+    private const int BACTERIAS_REQUERIDAS = 3;
     private Canvas           _canvasHighlightTemp    = null;
     private GraphicRaycaster _raycasterHighlightTemp = null;
 
@@ -117,7 +121,7 @@ public class TutorialManager : MonoBehaviour
         _controladorInteraccion = FindFirstObjectByType<ControladorInteraccion>();
         CamaraControladorPro.OnIntervencionManual      += OnCamaraMovida;
         ControladorInteraccion.OnCamaraCentrada        += OnDetectarCamaraCentrada;
-        ControladorInteraccion.OnBacteriaColocada      += () => _bacteriaColocada   = true;
+        ControladorInteraccion.OnBacteriaColocada      += OnBacteriaColocadaTutorial;
         ControladorInteraccion.OnComidaColocada        += () => _comidaColocada     = true;
         ControladorInteraccion.OnSpawnerColocado       += () => _spawnerColocado    = true;
         PanellCreacion.OnEspecieSintetizada            += () => _especieSintetizada = true;
@@ -346,12 +350,12 @@ public class TutorialManager : MonoBehaviour
                 obtenerTarget = () => Object.FindFirstObjectByType<PanellCreacion>()?.BtnSintetizar?.GetComponent<RectTransform>()
             },
 
-            // ── 10n: Colocar bacteria ─────────────────────────────────────
+            // ── 10n: Colocar 3 bacterias ──────────────────────────────────
             new Paso {
-                titulo        = "Coloca tu Bacteria en la Placa",
+                titulo        = "Coloca tus Bacterias en la Placa",
                 mensaje       = "Tu especie ya aparece en la bandeja.\n\n" +
                                 "Seleccionala haciendo click en su carta y luego haz <b>click en la placa</b> para colocarla.\n\n" +
-                                "<color=#FFD700>Coloca una bacteria para continuar.</color>",
+                                $"<color=#FFD700>Coloca <b>3 bacterias</b> en la placa (0/{BACTERIAS_REQUERIDAS}).</color>",
                 botonVisible  = false,
                 accion        = AccionRequerida.ColocarBacteria,
                 interactivo   = true,
@@ -361,7 +365,15 @@ public class TutorialManager : MonoBehaviour
                     return null;
                 },
                 onEntrar = () => {
-                    _instance.overlay.alpha = 0f;
+                    _instance._bacteriasColocadasCount = 0;
+                    _instance._bacteriaColocada = false;
+                    GameObject bacteriaTutorial = GameObject.Find("BacteriaTutorial");
+                    if (bacteriaTutorial != null)
+                    {
+                        SistemaVida sv = bacteriaTutorial.GetComponent<SistemaVida>();
+                        if (sv != null) sv.Purga();
+                        else Object.Destroy(bacteriaTutorial);
+                    }
                     _instance.overlay.blocksRaycasts = false;
                 }
             },
@@ -377,34 +389,36 @@ public class TutorialManager : MonoBehaviour
 
             // ── 11b: Colocar comida ────────────────────────────────────────
             new Paso {
-                titulo   = "Dar de Comer a las Bacterias",
-                mensaje  = "Las bacterias necesitan energia para sobrevivir y reproducirse.\n\n" +
-                           "Con el pincel de <b>comida</b> puedes generar nutrientes directamente:\n\n" +
-                           "1. Asegurate de tener el modo <b>Estrella</b> activo\n" +
-                           "2. Selecciona la carta <b>Anadir Comida</b> en la bandeja\n" +
-                           "3. Haz <b>click en la placa</b> para depositar nutrientes\n\n" +
-                           "<color=#FFD700>Coloca comida en la placa para continuar.</color>",
-                botonVisible = false,
-                accion      = AccionRequerida.ColocarComida,
-                interactivo = true,
-                onEntrar    = () => {
+                titulo        = "Dar de Comer a las Bacterias",
+                mensaje       = "Las bacterias necesitan energia para sobrevivir y reproducirse.\n\n" +
+                                "Selecciona la carta <b>Anadir Comida</b> y haz <b>click en la placa</b> para depositar nutrientes.\n\n" +
+                                "Con el boton <b>Modificar</b> de la carta puedes cambiar cuanta energia aporta cada deposito.\n\n" +
+                                "<color=#FFD700>Coloca comida en la placa para continuar.</color>",
+                botonVisible  = false,
+                accion        = AccionRequerida.ColocarComida,
+                interactivo   = true,
+                obtenerTarget = () => Object.FindFirstObjectByType<CartaComidaUI>()?.GetComponent<RectTransform>(),
+                onEntrar      = () => {
                     ControladorInteraccion inter = Object.FindFirstObjectByType<ControladorInteraccion>();
                     if (inter != null) inter.ActivarModoHerramientas();
+                    _instance.overlay.blocksRaycasts = false;
                 }
             },
 
             // ── 11c: Colocar spawner ───────────────────────────────────────
             new Paso {
-                titulo   = "Spawner de Comida Automatico",
-                mensaje  = "El <b>spawner</b> genera comida de forma automatica y continua en su area.\n\n" +
-                           "Es ideal para mantener un suministro constante sin intervencion manual.\n\n" +
-                           "1. Selecciona la carta <b>Plantar Spawner</b> en la bandeja\n" +
-                           "2. Haz <b>click en la placa</b> para colocarlo\n\n" +
-                           "Puedes modificar su radio, energia minima/maxima e intervalo pulsando el lapiz.\n\n" +
-                           "<color=#FFD700>Coloca un spawner para continuar.</color>",
-                botonVisible = false,
-                accion      = AccionRequerida.ColocarSpawner,
-                interactivo = true
+                titulo        = "Spawner de Comida Automatico",
+                mensaje       = "El <b>spawner</b> genera comida de forma automatica y continua en su area.\n\n" +
+                                "Selecciona la carta <b>Plantar Spawner</b> y haz <b>click en la placa</b> para colocarlo.\n\n" +
+                                "Con el boton <b>Modificar</b> puedes ajustar el radio, la energia minima/maxima y el intervalo de generacion.\n\n" +
+                                "<color=#FFD700>Coloca un spawner para continuar.</color>",
+                botonVisible  = false,
+                accion        = AccionRequerida.ColocarSpawner,
+                interactivo   = true,
+                obtenerTarget = () => Object.FindFirstObjectByType<CartaSpawnerUI>()?.GetComponent<RectTransform>(),
+                onEntrar      = () => {
+                    _instance.overlay.blocksRaycasts = false;
+                }
             },
 
             // ── 12: Herramienta Casa ───────────────────────────────────────
@@ -452,6 +466,10 @@ public class TutorialManager : MonoBehaviour
             }
         };
 
+        int inicio = Mathf.Clamp(_pasoInicial, 0, _pasos.Count);
+        for (int i = 0; i < inicio; i++)
+            _pasos[i].onEntrar?.Invoke();
+        _pasoActual = inicio - 1;
         SiguientePaso();
     }
 
@@ -459,7 +477,7 @@ public class TutorialManager : MonoBehaviour
     {
         CamaraControladorPro.OnIntervencionManual -= OnCamaraMovida;
         ControladorInteraccion.OnCamaraCentrada   -= OnDetectarCamaraCentrada;
-        ControladorInteraccion.OnBacteriaColocada -= () => _bacteriaColocada   = true;
+        ControladorInteraccion.OnBacteriaColocada -= OnBacteriaColocadaTutorial;
         ControladorInteraccion.OnComidaColocada   -= () => _comidaColocada     = true;
         ControladorInteraccion.OnSpawnerColocado  -= () => _spawnerColocado    = true;
         PanellCreacion.OnEspecieSintetizada       -= () => _especieSintetizada = true;
@@ -591,20 +609,43 @@ public class TutorialManager : MonoBehaviour
                 if (_bacteriaColocada)
                 {
                     _bacteriaColocada = false;
-                    overlay.alpha = 1f;
                     overlay.blocksRaycasts = true;
                     OnAccionCompletada();
                 }
                 break;
 
             case AccionRequerida.ColocarComida:
-                if (_comidaColocada) { _comidaColocada = false; OnAccionCompletada(); }
+                if (_comidaColocada)
+                {
+                    _comidaColocada = false;
+                    overlay.blocksRaycasts = true;
+                    OnAccionCompletada();
+                }
                 break;
 
             case AccionRequerida.ColocarSpawner:
-                if (_spawnerColocado) { _spawnerColocado = false; OnAccionCompletada(); }
+                if (_spawnerColocado)
+                {
+                    _spawnerColocado = false;
+                    _esperandoAccion = false;
+                    StartCoroutine(SecuenciaPostSpawner());
+                }
                 break;
         }
+    }
+
+    private void OnBacteriaColocadaTutorial()
+    {
+        if (!_esperandoAccion || _accionActual != AccionRequerida.ColocarBacteria) return;
+
+        _bacteriasColocadasCount++;
+        textoMensaje.text =
+            "Tu especie ya aparece en la bandeja.\n\n" +
+            "Seleccionala haciendo click en su carta y luego haz <b>click en la placa</b> para colocarla.\n\n" +
+            $"<color=#FFD700>Coloca <b>3 bacterias</b> en la placa ({_bacteriasColocadasCount}/{BACTERIAS_REQUERIDAS}).</color>";
+
+        if (_bacteriasColocadasCount >= BACTERIAS_REQUERIDAS)
+            _bacteriaColocada = true;
     }
 
     private void OnCamaraMovida()
@@ -654,6 +695,21 @@ public class TutorialManager : MonoBehaviour
     }
 
     private IEnumerator SecuenciaInspeccion()
+    {
+        overlay.alpha = 0f;
+        overlay.blocksRaycasts = false;
+        SetVelocidad(1f);
+
+        yield return new WaitForSecondsRealtime(5f);
+
+        SetVelocidad(0f);
+        overlay.alpha = 1f;
+        overlay.blocksRaycasts = true;
+
+        SiguientePaso();
+    }
+
+    private IEnumerator SecuenciaPostSpawner()
     {
         overlay.alpha = 0f;
         overlay.blocksRaycasts = false;
