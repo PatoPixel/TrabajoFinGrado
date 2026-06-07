@@ -2,10 +2,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Gestor de música + ajustes. Persiste entre escenas (DontDestroyOnLoad).
-/// Crea su propio canvas con botón de música, botón de ajustes y panel de ajustes.
-/// </summary>
+/*
+- Gestor de música de fondo con controles de volumen y pantalla completa.
+- Crea su propia UI de controles (botón de música, botón de ajustes, panel de ajustes).
+*/
+
+
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
@@ -29,8 +31,6 @@ public class AudioManager : MonoBehaviour
     private GameObject _panelAjustes;
     private Slider     _sliderVolumen;
     private Toggle     _togglePantallaCompleta;
-
-    // ── Ciclo de vida ───────────────────────────────────────────────────────
 
     private void Awake()
     {
@@ -76,8 +76,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // ── Reproducción ────────────────────────────────────────────────────────
-
     private void ReproducirActual()
     {
         if (playlist == null || playlist.Length == 0) return;
@@ -98,8 +96,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // ── Música ──────────────────────────────────────────────────────────────
-
     public void ToggleMute()
     {
         _silenciado = !_silenciado;
@@ -116,7 +112,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // ── Ajustes ─────────────────────────────────────────────────────────────
 
     private void ToggleAjustes()
     {
@@ -145,8 +140,6 @@ public class AudioManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    // ── Construcción de UI ──────────────────────────────────────────────────
-
     private void ConstruirUI()
     {
         // Canvas persistente
@@ -160,20 +153,19 @@ public class AudioManager : MonoBehaviour
         scaler.referenceResolution = new Vector2(1920, 1080);
         canvasObj.AddComponent<GraphicRaycaster>();
 
-        // ── Botón música (esquina inferior derecha) ──────────────────────
+        // Botón música (esquina inferior derecha) 
         _imagenBoton = CrearBoton(canvasObj.transform, "BotonMusica",
             new Vector2(-18f, 18f), ToggleMute, _spriteOn);
 
-        // ── Botón ajustes (justo a la izquierda del de música) ───────────
+        // Botón ajustes (justo a la izquierda del de música)
         CrearBoton(canvasObj.transform, "BotonAjustes",
             new Vector2(-82f, 18f), ToggleAjustes, _spriteGear);
 
-        // ── Panel de ajustes ─────────────────────────────────────────────
+        // Panel de ajustes 
         _panelAjustes = ConstruirPanelAjustes(canvasObj.transform);
         _panelAjustes.SetActive(false);
     }
 
-    /// <summary>Crea un botón cuadrado oscuro con sprite en la esquina inferior derecha.</summary>
     private Image CrearBoton(Transform parent, string nombre, Vector2 pos,
                              UnityEngine.Events.UnityAction accion, Sprite icono)
     {
@@ -210,8 +202,6 @@ public class AudioManager : MonoBehaviour
         }
         return null;
     }
-
-    /// <summary>Crea un botón cuadrado oscuro con texto (para el icono de ajustes).</summary>
     private void CrearBotonTexto(Transform parent, string nombre, Vector2 pos,
                                  UnityEngine.Events.UnityAction accion, string texto)
     {
@@ -244,25 +234,21 @@ public class AudioManager : MonoBehaviour
         tmp.raycastTarget = false;
     }
 
-    /// <summary>Construye el panel de ajustes con slider de volumen y toggle de pantalla completa.</summary>
     private GameObject ConstruirPanelAjustes(Transform parent)
     {
-        // Fondo panel — ancla esquina inferior derecha, crece hacia arriba/izquierda
         GameObject panel = new GameObject("PanelAjustes");
         panel.transform.SetParent(parent, false);
         RectTransform panelRt = panel.AddComponent<RectTransform>();
         panelRt.anchorMin        = new Vector2(1f, 0f);
         panelRt.anchorMax        = new Vector2(1f, 0f);
         panelRt.pivot            = new Vector2(1f, 0f);
-        panelRt.anchoredPosition = new Vector2(-18f, 82f);   // Alineado con el borde derecho
-        panelRt.sizeDelta        = new Vector2(300f, 170f);  // Más ancho para que el slider quepa
+        panelRt.anchoredPosition = new Vector2(-18f, 82f);
+        panelRt.sizeDelta        = new Vector2(300f, 170f);
         Image panelImg = panel.AddComponent<Image>();
         panelImg.color = new Color(0.05f, 0.05f, 0.08f, 0.95f);
 
-        // ── Título ───────────────────────────────────────────────────────
         AnadirTexto(panel.transform, "Ajustes", new Vector2(0f, 65f), new Vector2(280f, 30f), 18f, true);
 
-        // ── Separador ────────────────────────────────────────────────────
         GameObject sep = new GameObject("Sep");
         sep.transform.SetParent(panel.transform, false);
         RectTransform sepRt = sep.AddComponent<RectTransform>();
@@ -270,15 +256,11 @@ public class AudioManager : MonoBehaviour
         sepRt.sizeDelta        = new Vector2(270f, 1f);
         sep.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.15f);
 
-        // ── Fila: Pantalla completa ──────────────────────────────────────
-        // Etiqueta a la izquierda, toggle a la derecha
         AnadirTexto(panel.transform, "Pantalla completa", new Vector2(-50f, 20f), new Vector2(160f, 24f), 14f, false);
         _togglePantallaCompleta = AnadirToggle(panel.transform, new Vector2(118f, 20f));
         _togglePantallaCompleta.isOn = Screen.fullScreen;
         _togglePantallaCompleta.onValueChanged.AddListener(OnCambiarPantallaCompleta);
 
-        // ── Fila: Volumen música ─────────────────────────────────────────
-        // Etiqueta a la izquierda, slider a la derecha (más corto para que quepa)
         AnadirTexto(panel.transform, "Volumen musica", new Vector2(-62f, -20f), new Vector2(130f, 24f), 14f, false);
         _sliderVolumen = AnadirSlider(panel.transform, new Vector2(80f, -20f), 120f);
         _sliderVolumen.value = _source.volume;
@@ -287,7 +269,6 @@ public class AudioManager : MonoBehaviour
         return panel;
     }
 
-    // ── Helpers de UI ───────────────────────────────────────────────────────
 
     private TextMeshProUGUI AnadirTexto(Transform parent, string texto, Vector2 pos, Vector2 size,
                                          float fontSize, bool negrita)

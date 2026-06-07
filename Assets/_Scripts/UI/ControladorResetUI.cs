@@ -15,7 +15,6 @@ public class ControladorResetUI : MonoBehaviour
     [Tooltip("El objeto que tiene el Vertical Layout Group (Area_De_Graficas)")]
     public Transform contenedorOriginal;
 
-    // Esta funcion se llama desde el boton en Unity
     public void ResetearPosiciones()
     {
         // 1. Buscamos TODAS las graficas activas en la escena, esten donde esten (incluso las que el usuario haya arrastrado fuera del contenedor)
@@ -30,16 +29,16 @@ public class ControladorResetUI : MonoBehaviour
         // 4. Las recolocamos en su sitio
         foreach (GraficaIndividual grafica in listaOrdenada)
         {
-            // A. Devolver al padre original
+            // Devolver al padre original
             grafica.transform.SetParent(contenedorOriginal);
 
-            // B. Resetear escalas por si acaso
+            // Resetear escalas por si acaso
             grafica.transform.localScale = Vector3.one;
 
-            // C. Asegurar que se ven por si acaso
+            // Asegurar que se ven por si acaso
             grafica.gameObject.SetActive(true);
             
-            // D. Asegurar que estan al frente del contenedor
+            // Asegurar que estan al frente del contenedor
             grafica.transform.SetAsLastSibling();
         }
 

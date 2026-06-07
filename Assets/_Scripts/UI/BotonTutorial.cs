@@ -2,10 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Se adjunta al botón "Tutorial" del Menú Principal.
-/// Fija el texto y conecta el onClick a GestorEscenas.IrATutorial().
-/// </summary>
+/*
+- Botón que abre el tutorial desde el menú principal.
+- Se encarga de fijar el texto del botón y conectar su evento onClick a la
+*/
 [RequireComponent(typeof(Button))]
 public class BotonTutorial : MonoBehaviour
 {

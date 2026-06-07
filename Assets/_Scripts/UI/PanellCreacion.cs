@@ -2,6 +2,15 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/*
+- Panel que permite al jugador crear una nueva especie sintética personalizada.
+- El jugador puede ajustar el tamaño, velocidad, visión y color de la bacteria usando sliders e inputs manuales.
+- El panel muestra en tiempo real las consecuencias de las elecciones del jugador, como el consumo energético, vida útil, tiempo de mitosis y coste de reproducción.
+- El jugador debe asignar un nombre a la nueva especie antes de sintetizarla.
+- Al sintetizar, el panel envía los datos al GestorLinajes para crear la nueva especie y luego se cierra automáticamente.
+- El panel también tiene una posición especial para el tutorial, donde se resalta cada elemento a medida que se explica su función.
+*/
+
 public class PanellCreacion : MonoBehaviour
 {
     public static bool LaboratorioAbierto = false;

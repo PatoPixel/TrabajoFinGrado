@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>Conecta el botón "Siguiente" del tutorial a TutorialManager.SiguientePaso()</summary>
+/*
+- Botón que avanza al siguiente paso del tutorial.
+*/
 [RequireComponent(typeof(Button))]
 public class BotonSiguienteTutorial : MonoBehaviour
 {

@@ -2,22 +2,22 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Controls the Unit Inspection Panel.
-/// Displays static gene data, a live energy bar, a live lifespan counter,
-/// a Picture-in-Picture camera and camera control buttons.
-/// </summary>
+/*
+- Panel que muestra información detallada de una bacteria seleccionada.
+- Se abre al hacer click en una bacteria
+- Muestra estadísticas como velocidad, visión, tamaño, consumo, vida útil, energía actual, tiempo para reproducción, etc.
+- Incluye una barra de energía que cambia de color según el nivel de energía.
+- Tiene un visor Picture-in-Picture que muestra una cámara enfocada en la bacteria seleccionada
+- Permite al jugador ir a la posición de la bacteria o seguirla con la cámara principal.
+- Se cierra automáticamente si la bacteria muere o es destruida.
+*/
+
 public class PanelInspectorBacteria : MonoBehaviour
 {
-    // -------------------------------------------------------------------------
-    // Constants
-    // -------------------------------------------------------------------------
+
     private const float ZOffsetCamara = -10f;
     private const float VelocidadSeguimiento = 8f;
 
-    // -------------------------------------------------------------------------
-    // Inspector — Text labels
-    // -------------------------------------------------------------------------
     [Header("Textos de estadísticas")]
     [SerializeField] private TextMeshProUGUI textoNombre;
     [SerializeField] private TextMeshProUGUI textoLinaje;
@@ -30,36 +30,22 @@ public class PanelInspectorBacteria : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textoEnergia;
     [SerializeField] private TextMeshProUGUI textoCosteReproduccion;
     [SerializeField] private TextMeshProUGUI textoTiempoReproduccion;
-    // -------------------------------------------------------------------------
-    // Inspector — Energy bar
-    // -------------------------------------------------------------------------
+
     [Header("Barra de energía")]
     [Tooltip("Image hija de FondoBarra. Se configurará como Filled en Awake.")]
     [SerializeField] private Image barraEnergia;
     [SerializeField] private Gradient gradienteEnergia;
 
-    // -------------------------------------------------------------------------
-    // Inspector — Picture-in-Picture
-    // -------------------------------------------------------------------------
     [Header("Picture-in-Picture")]
     [SerializeField] private RawImage visorPiP;
     [SerializeField] private Camera camaraPiP;
 
-    // -------------------------------------------------------------------------
-    // Inspector — Scene references
-    // -------------------------------------------------------------------------
     [Header("Escena")]
     [SerializeField] private Camera camaraPrincipal;
 
-    // -------------------------------------------------------------------------
-    // State
-    // -------------------------------------------------------------------------
     private SistemaVida _bacteriaActual;
     private bool _siguiendo;
 
-    // -------------------------------------------------------------------------
-    // Unity lifecycle
-    // -------------------------------------------------------------------------
     private void Awake()
     {
         if (barraEnergia != null)
@@ -107,9 +93,6 @@ public class PanelInspectorBacteria : MonoBehaviour
             SeguirConCamaraPrincipal();
     }
 
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
     public void Abrir(SistemaVida bacteria)
     {
         _bacteriaActual = bacteria;
@@ -125,15 +108,11 @@ public class PanelInspectorBacteria : MonoBehaviour
             Vector3 target = _bacteriaActual.transform.position;
             camaraPiP.transform.position = new Vector3(target.x, target.y, ZOffsetCamara);
         }
-        // -----------------------------------------------------------
 
         MostrarDatosEstaticos();
         gameObject.SetActive(true);
     }
 
-    // -------------------------------------------------------------------------
-    // Button callbacks
-    // -------------------------------------------------------------------------
     public void OnBotonIrA()
     {
         if (_bacteriaActual == null || camaraPrincipal == null) return;
@@ -160,9 +139,6 @@ public class PanelInspectorBacteria : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    // -------------------------------------------------------------------------
-    // Internal — static data display
-    // -------------------------------------------------------------------------
     private void MostrarDatosEstaticos()
     {
         if (_bacteriaActual == null) return;
@@ -184,9 +160,6 @@ public class PanelInspectorBacteria : MonoBehaviour
 
     }
 
-    // -------------------------------------------------------------------------
-    // Internal — per-frame updates
-    // -------------------------------------------------------------------------
     private void ActualizarBarraEnergia()
     {
         float ratio = Mathf.Clamp01(_bacteriaActual.EnergiaActual / _bacteriaActual.misStats.energiaMax);
@@ -209,7 +182,6 @@ public class PanelInspectorBacteria : MonoBehaviour
             float tiempoVivido = _bacteriaActual.EdadActual;
             float vidaMaxima = _bacteriaActual.misStats.vidaUtil;
 
-            // Mostrará algo como: "Edad: 12.5s / 40.0s"
             textoVidaUtil.text = $"Edad: {tiempoVivido:F1}s / {vidaMaxima:F1}s";
         }
     }
